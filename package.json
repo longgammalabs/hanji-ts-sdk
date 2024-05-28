@@ -1,0 +1,62 @@
+{
+  "name": "hanji-ts-sdk",
+  "version": "0.1.0",
+  "license": "MIT",
+  "engines": {
+    "node": ">=20"
+  },
+  "main": "dist/node/index.js",
+  "module": "dist/node/index.mjs",
+  "browser": "dist/browser/index.js",
+  "types": "dist/types/index.d.ts",
+  "exports": {
+    "node": {
+      "import": "./dist/node/index.mjs",
+      "require": "./dist/node/index.cjs",
+      "default": "./dist/node/index.mjs"
+    },
+    "browser": {
+      "import": "./dist/browser/index.mjs",
+      "default": "./dist/browser/index.js"
+    },
+    "types": "./dist/types/index.d.ts",
+    "default": "./dist/node/index.js"
+  },
+  "dependencies": {
+    "ethers": "^6.12.1"
+  },
+  "peerDependencies": {
+    "ws": "^8.17.0"
+  },
+  "peerDependenciesMeta": {
+    "ws": {
+      "optional": true
+    }
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.19.1",
+    "@typescript-eslint/parser": "^6.19.1",
+    "dotenv": "^16.4.5",
+    "esbuild": "^0.21.4",
+    "eslint": "^8.56.0",
+    "eslint-plugin-import": "^2.29.1",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.1.4",
+    "typescript": "^5.4.5",
+    "ws": "^8.17.0"
+  },
+  "scripts": {
+    "build": "node ./scripts/build.mjs",
+    "build:types": "tsc -p tsconfig.build.json",
+    "jest": "jest",
+    "watch": "npm run build -- -w",
+    "check:types": "tsc -p tsconfig.json",
+    "lint": "eslint . --ext .ts"
+  },
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
+}
