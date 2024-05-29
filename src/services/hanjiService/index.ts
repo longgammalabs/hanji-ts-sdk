@@ -1,4 +1,4 @@
-export { HanjiService } from './hanjiService';
+export { HanjiSpotService } from './hanjiSpotService';
 export type {
   OrderbookDto,
   OrderDto,

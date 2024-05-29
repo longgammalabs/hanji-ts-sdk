@@ -4,10 +4,10 @@ import { Contract, type Provider, type Signer, parseUnits } from 'ethers';
 import type { ApproveParams, ClaimOrderParams, DepositParams, PlaceOrderParams, WithdrawParams } from './params';
 import { erc20Abi, lobAbi } from '../abi';
 import { type Token } from '../models';
-import { HanjiService } from '../services';
+import { HanjiSpotService } from '../services';
 
-export interface HanjiMarketClientOptions {
-  hanjiService: HanjiService;
+export interface HanjiSpotClientOptions {
+  hanjiService: HanjiSpotService;
   singerOrProvider: Signer | Provider;
 
   name: string;
@@ -16,12 +16,12 @@ export interface HanjiMarketClientOptions {
   quoteToken: Token;
 }
 
-export class HanjiMarketClient {
+export class HanjiSpotClient {
   private readonly marketContract: Contract;
   private readonly baseTokenContract: Contract;
   private readonly quoteTokenContract: Contract;
 
-  constructor(private readonly options: Readonly<HanjiMarketClientOptions>) {
+  constructor(private readonly options: Readonly<HanjiSpotClientOptions>) {
     this.marketContract = new Contract(options.marketContractAddress, lobAbi, options.singerOrProvider);
     this.baseTokenContract = new Contract(options.baseToken.contractAddress, erc20Abi, options.singerOrProvider);
     this.quoteTokenContract = new Contract(options.quoteToken.contractAddress, erc20Abi, options.singerOrProvider);

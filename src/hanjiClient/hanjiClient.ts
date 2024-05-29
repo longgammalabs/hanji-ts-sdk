@@ -1,10 +1,10 @@
 import type { Provider, Signer } from 'ethers/providers';
 
-import { HanjiMarketClient } from './hanjiMarketClient';
+import { HanjiSpotClient } from './hanjiSpotClient';
 import type { ClaimOrderParams, DepositParams, PlaceOrderParams, WithdrawParams } from './params';
 import * as mappers from '../mappers';
 import { Market } from '../models';
-import { HanjiService } from '../services';
+import { HanjiSpotService } from '../services';
 
 export interface HanjiClientOptions {
   apiBaseUrl: string;
@@ -13,14 +13,14 @@ export interface HanjiClientOptions {
 }
 
 export class HanjiClient {
-  private readonly hanjiService: HanjiService;
-  private readonly marketClients: Map<string, HanjiMarketClient> = new Map();
+  private readonly hanjiService: HanjiSpotService;
+  private readonly marketClients: Map<string, HanjiSpotClient> = new Map();
 
   constructor(private readonly options: Readonly<HanjiClientOptions>) {
-    this.hanjiService = new HanjiService(options.apiBaseUrl);
+    this.hanjiService = new HanjiSpotService(options.apiBaseUrl);
   }
 
-  async getMarketClient(marketContractAddress: string): Promise<HanjiMarketClient> {
+  async getMarketClient(marketContractAddress: string): Promise<HanjiSpotClient> {
     let marketClient = this.marketClients.get(marketContractAddress);
 
     if (!marketClient) {
@@ -28,7 +28,7 @@ export class HanjiClient {
       if (!market)
         throw new Error(`Market not found by the ${marketContractAddress} address`);
 
-      marketClient = new HanjiMarketClient({
+      marketClient = new HanjiSpotClient({
         hanjiService: this.hanjiService,
         singerOrProvider: this.options.singerOrProvider,
 

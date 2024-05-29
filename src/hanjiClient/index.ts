@@ -1,5 +1,5 @@
 export { HanjiClient, type HanjiClientOptions } from './hanjiClient';
-export { HanjiMarketClient, type HanjiMarketClientOptions } from './hanjiMarketClient';
+export { HanjiSpotClient, type HanjiSpotClientOptions } from './hanjiSpotClient';
 
 export type {
   ApproveParams,

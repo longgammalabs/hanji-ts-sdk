@@ -3,7 +3,7 @@ import type { GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersPar
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
 
-export class HanjiService extends RemoteService {
+export class HanjiSpotService extends RemoteService {
   async getOrderbook(params: GetOrderbookParams): Promise<OrderbookDto> {
     const queryParams = new URLSearchParams({
       market: params.market

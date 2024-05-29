@@ -1,9 +1,9 @@
 export {
   HanjiClient,
-  HanjiMarketClient,
+  HanjiSpotClient,
 
   type HanjiClientOptions,
-  type HanjiMarketClientOptions,
+  type HanjiSpotClientOptions,
   type ApproveParams,
   type DepositParams,
   type WithdrawParams,
