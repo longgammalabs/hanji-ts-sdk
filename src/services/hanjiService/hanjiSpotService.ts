@@ -14,7 +14,7 @@ export class HanjiSpotService extends RemoteService {
       queryParams.append('aggregation', params.aggregation.toString());
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<OrderbookDto>(`/orderbook/${queryParamsString}`, 'json');
+    const response = await this.fetch<OrderbookDto>(`/orderbook?${queryParamsString}`, 'json');
 
     return response;
   }
@@ -34,7 +34,7 @@ export class HanjiSpotService extends RemoteService {
     }
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<OrderDto[]>(`/orders/${queryParamsString}`, 'json');
+    const response = await this.fetch<OrderDto[]>(`/orders?${queryParamsString}`, 'json');
 
     return response;
   }
@@ -47,7 +47,7 @@ export class HanjiSpotService extends RemoteService {
       queryParams.append('limit', params.limit.toString());
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<TradeDto[]>(`/trades/${queryParamsString}`, 'json');
+    const response = await this.fetch<TradeDto[]>(`/trades?${queryParamsString}`, 'json');
 
     return response;
   }
@@ -61,7 +61,7 @@ export class HanjiSpotService extends RemoteService {
       queryParams.append('limit', params.limit.toString());
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<FillDto[]>(`/fills/${queryParamsString}`, 'json');
+    const response = await this.fetch<FillDto[]>(`/fills?${queryParamsString}`, 'json');
 
     return response;
   }
@@ -72,7 +72,7 @@ export class HanjiSpotService extends RemoteService {
       queryParams.append('token', params.token);
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<TokenDto[]>(`/tokens/${queryParamsString}`, 'json');
+    const response = await this.fetch<TokenDto[]>(`/tokens?${queryParamsString}`, 'json');
 
     return response;
   }
@@ -83,7 +83,7 @@ export class HanjiSpotService extends RemoteService {
       queryParams.append('market', params.market);
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<MarketDto[]>(`/markets/${queryParamsString}`, 'json');
+    const response = await this.fetch<MarketDto[]>(`/markets?${queryParamsString}`, 'json');
 
     return response;
   }

@@ -20,7 +20,7 @@ export class HanjiClient {
     this.hanjiService = new HanjiSpotService(options.apiBaseUrl);
   }
 
-  async getMarketClient(marketContractAddress: string): Promise<HanjiSpotClient> {
+  async getSpotClient(marketContractAddress: string): Promise<HanjiSpotClient> {
     let marketClient = this.marketClients.get(marketContractAddress);
 
     if (!marketClient) {
@@ -44,25 +44,25 @@ export class HanjiClient {
   }
 
   async deposit(marketContractAddress: string, params: DepositParams): Promise<string> {
-    const market = await this.getMarketClient(marketContractAddress);
+    const market = await this.getSpotClient(marketContractAddress);
 
     return market.deposit(params);
   }
 
   async withdraw(marketContractAddress: string, params: WithdrawParams): Promise<string> {
-    const market = await this.getMarketClient(marketContractAddress);
+    const market = await this.getSpotClient(marketContractAddress);
 
     return market.withdraw(params);
   }
 
   async placeOrder(marketContractAddress: string, params: PlaceOrderParams): Promise<string> {
-    const market = await this.getMarketClient(marketContractAddress);
+    const market = await this.getSpotClient(marketContractAddress);
 
     return market.placeOrder(params);
   }
 
   async claimOrder(marketContractAddress: string, params: ClaimOrderParams): Promise<string> {
-    const market = await this.getMarketClient(marketContractAddress);
+    const market = await this.getSpotClient(marketContractAddress);
 
     return market.claimOrder(params);
   }
