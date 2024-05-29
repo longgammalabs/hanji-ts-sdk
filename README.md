@@ -1,1 +1,1 @@
-# Hanji Typescript SDK
+# Hanji TypeScript SDK

@@ -1,0 +1,124 @@
+name: Hanji TypeScript SDK
+on:
+  push:
+    branches:
+      - master
+      - dev
+    tags:
+      - 'v*.*.*'
+  pull_request:
+env:
+  node-version: 20
+
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node-version }}
+          cache: 'npm'
+
+      - name: Print environment info
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build the package
+        run: npm run build
+
+      - name: Upload the build as an artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hanji-ts-sdk
+          path: |
+            dist
+            package.json
+            LICENSE
+          if-no-files-found: error
+          retention-days: 1
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js ${{ env.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.node-version }}
+          cache: 'npm'
+
+      - name: Print environment info
+        run: |
+          node --version
+          npm --version
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+  publish-npm:
+    name: Publish to NPM
+    runs-on: ubuntu-latest
+    needs: [build, lint]
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Download the build from the artifacts storage
+        uses: actions/download-artifact@v4
+        with:
+          name: hanji-ts-sdk
+
+      - name: Set up Node.js ${{ env.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          registry-url: 'https://registry.npmjs.org'
+          node-version: ${{ env.node-version }}
+
+      - name: Print environment info
+        run: |
+          node --version
+          npm --version
+
+      - name: Publish
+        run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
+      
+  publish-github-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
+    needs: [publish-npm]
+    if: ${{ startsWith(github.ref, 'refs/tags/v') }}
+    steps:
+      - name: Download the build from the artifacts storage
+        uses: actions/download-artifact@v4
+        with:
+          name: hanji-ts-sdk
+          path: hanji-ts-sdk
+
+      - name: Archive the build
+        run: |
+          tar -cvf hanji-ts-sdk.tar hanji-ts-sdk
+          tar -czvf hanji-ts-sdk.tar.gz hanji-ts-sdk
+
+      - name: Create GitHub Release
+        uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            *.tar
+            *.tar.gz
