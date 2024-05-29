@@ -23,6 +23,7 @@
     "default": "./dist/node/index.js"
   },
   "dependencies": {
+    "bignumber.js": "^9.1.2",
     "ethers": "^6.12.1"
   },
   "peerDependencies": {
