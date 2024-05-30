@@ -2,38 +2,38 @@ import BigNumber from 'bignumber.js';
 
 import type { OrderType, Side } from '../models';
 
-export interface ApproveParams {
+export interface ApproveSpotParams {
   isBaseToken: boolean;
   spenderAddress: string;
   amount: BigNumber | bigint;
 }
 
-export interface DepositParams {
+export interface DepositSpotParams {
   baseTokenAmount: BigNumber | bigint;
   quoteTokenAmount: BigNumber | bigint;
 }
 
-interface WithdrawBaseParams {
+interface WithdrawBaseSpotParams {
   baseTokenAmount?: BigNumber | bigint;
   quoteTokenAmount?: BigNumber | bigint;
   withdrawAll?: boolean;
 }
 
-interface WithdrawSpecificTokenAmountsParams extends WithdrawBaseParams {
+interface WithdrawSpecificTokenAmountsSpotParams extends WithdrawBaseSpotParams {
   baseTokenAmount: BigNumber | bigint;
   quoteTokenAmount: BigNumber | bigint;
 }
 
-interface WithdrawAllParams extends WithdrawBaseParams {
+interface WithdrawAllSpotParams extends WithdrawBaseSpotParams {
   withdrawAll: true;
 }
 
-export type WithdrawParams =
-  | WithdrawSpecificTokenAmountsParams
-  | WithdrawAllParams;
+export type WithdrawSpotParams =
+  | WithdrawSpecificTokenAmountsSpotParams
+  | WithdrawAllSpotParams;
 
 
-export interface PlaceOrderParams {
+export interface PlaceOrderSpotParams {
   type: OrderType;
   side: Side;
   size: string;
@@ -41,14 +41,14 @@ export interface PlaceOrderParams {
   transferExecutedTokens?: boolean;
 }
 
-export interface ChangeOrderParams {
+export interface ChangeOrderSpotParams {
   orderId: string;
   new_size: string;
   new_price: string;
   transferExecutedTokens?: boolean;
 }
 
-export interface ClaimOrderParams {
+export interface ClaimOrderSpotParams {
   orderId: string;
   transferExecutedTokens?: boolean;
 }

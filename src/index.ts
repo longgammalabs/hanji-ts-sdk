@@ -1,16 +1,22 @@
 export {
   HanjiClient,
-  HanjiSpotClient,
 
-  type HanjiClientOptions,
-  type HanjiSpotClientOptions,
-  type ApproveParams,
-  type DepositParams,
-  type WithdrawParams,
-  type PlaceOrderParams,
-  type ChangeOrderParams,
-  type ClaimOrderParams
+  type HanjiClientOptions
 } from './hanjiClient';
+
+export {
+  HanjiSpot,
+  HanjiSpotMarket,
+
+  type HanjiSpotOptions,
+  type HanjiSpotMarketOptions,
+  type ApproveSpotParams,
+  type DepositSpotParams,
+  type WithdrawSpotParams,
+  type PlaceOrderSpotParams,
+  type ChangeOrderSpotParams,
+  type ClaimOrderSpotParams
+} from './spot';
 
 export {
   Side,

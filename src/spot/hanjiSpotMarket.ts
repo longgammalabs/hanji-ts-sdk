@@ -1,12 +1,12 @@
 import BigNumber from 'bignumber.js';
 import { Contract, type Provider, type Signer, parseUnits } from 'ethers';
 
-import type { ApproveParams, ClaimOrderParams, DepositParams, PlaceOrderParams, WithdrawParams } from './params';
+import type { ApproveSpotParams, ClaimOrderSpotParams, DepositSpotParams, PlaceOrderSpotParams, WithdrawSpotParams } from './params';
 import { erc20Abi, lobAbi } from '../abi';
 import { type Token } from '../models';
 import { HanjiSpotService } from '../services';
 
-export interface HanjiSpotClientOptions {
+export interface HanjiSpotMarketOptions {
   hanjiService: HanjiSpotService;
   singerOrProvider: Signer | Provider;
 
@@ -16,18 +16,18 @@ export interface HanjiSpotClientOptions {
   quoteToken: Token;
 }
 
-export class HanjiSpotClient {
+export class HanjiSpotMarket {
   private readonly marketContract: Contract;
   private readonly baseTokenContract: Contract;
   private readonly quoteTokenContract: Contract;
 
-  constructor(private readonly options: Readonly<HanjiSpotClientOptions>) {
+  constructor(private readonly options: Readonly<HanjiSpotMarketOptions>) {
     this.marketContract = new Contract(options.marketContractAddress, lobAbi, options.singerOrProvider);
     this.baseTokenContract = new Contract(options.baseToken.contractAddress, erc20Abi, options.singerOrProvider);
     this.quoteTokenContract = new Contract(options.quoteToken.contractAddress, erc20Abi, options.singerOrProvider);
   }
 
-  async approve(params: ApproveParams): Promise<string> {
+  async approve(params: ApproveSpotParams): Promise<string> {
     let token: Token;
     let tokenContract: Contract;
 
@@ -47,7 +47,7 @@ export class HanjiSpotClient {
     return tx.hash;
   }
 
-  async deposit(params: DepositParams): Promise<string> {
+  async deposit(params: DepositSpotParams): Promise<string> {
     const baseTokenAmount = this.prepareTokenAmount(params.baseTokenAmount, this.options.baseToken);
     const quoteTokenAmount = this.prepareTokenAmount(params.quoteTokenAmount, this.options.quoteToken);
 
@@ -59,7 +59,7 @@ export class HanjiSpotClient {
     return tx.hash;
   }
 
-  async withdraw(params: WithdrawParams): Promise<string> {
+  async withdraw(params: WithdrawSpotParams): Promise<string> {
     const contractCallParams = params.withdrawAll
       ? [true, 0, 0]
       : [
@@ -75,11 +75,11 @@ export class HanjiSpotClient {
     return tx.hash;
   }
 
-  async placeOrder(params: PlaceOrderParams): Promise<string> {
+  async placeOrder(params: PlaceOrderSpotParams): Promise<string> {
     throw new Error('Not implemented');
   }
 
-  async claimOrder(params: ClaimOrderParams): Promise<string> {
+  async claimOrder(params: ClaimOrderSpotParams): Promise<string> {
     throw new Error('Not implemented');
   }
 

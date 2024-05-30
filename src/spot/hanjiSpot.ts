@@ -1,34 +1,34 @@
 import type { Provider, Signer } from 'ethers/providers';
 
-import { HanjiSpotClient } from './hanjiSpotClient';
-import type { ClaimOrderParams, DepositParams, PlaceOrderParams, WithdrawParams } from './params';
+import { HanjiSpotMarket } from './hanjiSpotMarket';
+import type { ClaimOrderSpotParams, DepositSpotParams, PlaceOrderSpotParams, WithdrawSpotParams } from './params';
 import * as mappers from '../mappers';
 import { Market } from '../models';
 import { HanjiSpotService } from '../services';
 
-export interface HanjiClientOptions {
+export interface HanjiSpotOptions {
   apiBaseUrl: string;
   webSocketApiBaseUrl: string;
   singerOrProvider: Signer | Provider;
 }
 
-export class HanjiClient {
+export class HanjiSpot {
   private readonly hanjiService: HanjiSpotService;
-  private readonly marketClients: Map<string, HanjiSpotClient> = new Map();
+  private readonly markets: Map<string, HanjiSpotMarket> = new Map();
 
-  constructor(private readonly options: Readonly<HanjiClientOptions>) {
+  constructor(private readonly options: Readonly<HanjiSpotOptions>) {
     this.hanjiService = new HanjiSpotService(options.apiBaseUrl);
   }
 
-  async getSpotClient(marketContractAddress: string): Promise<HanjiSpotClient> {
-    let marketClient = this.marketClients.get(marketContractAddress);
+  async getMarket(marketContractAddress: string): Promise<HanjiSpotMarket> {
+    let marketClient = this.markets.get(marketContractAddress);
 
     if (!marketClient) {
       const market = await this.fetchMarket(marketContractAddress);
       if (!market)
         throw new Error(`Market not found by the ${marketContractAddress} address`);
 
-      marketClient = new HanjiSpotClient({
+      marketClient = new HanjiSpotMarket({
         hanjiService: this.hanjiService,
         singerOrProvider: this.options.singerOrProvider,
 
@@ -37,32 +37,32 @@ export class HanjiClient {
         baseToken: market.baseToken,
         quoteToken: market.quoteToken,
       });
-      this.marketClients.set(marketContractAddress, marketClient);
+      this.markets.set(marketContractAddress, marketClient);
     }
 
     return marketClient;
   }
 
-  async deposit(marketContractAddress: string, params: DepositParams): Promise<string> {
-    const market = await this.getSpotClient(marketContractAddress);
+  async deposit(marketContractAddress: string, params: DepositSpotParams): Promise<string> {
+    const market = await this.getMarket(marketContractAddress);
 
     return market.deposit(params);
   }
 
-  async withdraw(marketContractAddress: string, params: WithdrawParams): Promise<string> {
-    const market = await this.getSpotClient(marketContractAddress);
+  async withdraw(marketContractAddress: string, params: WithdrawSpotParams): Promise<string> {
+    const market = await this.getMarket(marketContractAddress);
 
     return market.withdraw(params);
   }
 
-  async placeOrder(marketContractAddress: string, params: PlaceOrderParams): Promise<string> {
-    const market = await this.getSpotClient(marketContractAddress);
+  async placeOrder(marketContractAddress: string, params: PlaceOrderSpotParams): Promise<string> {
+    const market = await this.getMarket(marketContractAddress);
 
     return market.placeOrder(params);
   }
 
-  async claimOrder(marketContractAddress: string, params: ClaimOrderParams): Promise<string> {
-    const market = await this.getSpotClient(marketContractAddress);
+  async claimOrder(marketContractAddress: string, params: ClaimOrderSpotParams): Promise<string> {
+    const market = await this.getMarket(marketContractAddress);
 
     return market.claimOrder(params);
   }

@@ -24,7 +24,7 @@ describe('Hanji Spot Client', () => {
   });
 
   test('Get spot clients', async () => {
-    const xtzUsdMarketClient = await hanjiClient.getSpotClient('0x3989e9215fc8f6b320e48156d184cccd10ad5443');
+    const xtzUsdMarketClient = await hanjiClient.spot.getMarket('0x3989e9215fc8f6b320e48156d184cccd10ad5443');
 
     expect(xtzUsdMarketClient).toMatchObject({
       options: {
