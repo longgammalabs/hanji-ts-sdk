@@ -8,7 +8,9 @@ export interface Market {
   quoteToken: Token;
   orderbookAddress: string;
   aggregations: number[];
-  lastPrice: string;
-  lowPrice24h: string;
-  highPrice24h: string;
+  lastPrice: string | null;
+  lowPrice24h: string | null;
+  highPrice24h: string | null;
 }
+
+export type MarketUpdate = Market;

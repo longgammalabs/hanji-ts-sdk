@@ -6,10 +6,8 @@ export {
 
 export {
   HanjiSpot,
-  HanjiSpotMarket,
 
   type HanjiSpotOptions,
-  type HanjiSpotMarketOptions,
   type ApproveSpotParams,
   type DepositSpotParams,
   type WithdrawSpotParams,
@@ -24,7 +22,22 @@ export {
   OrderStatus,
   OrderType,
 
+  type Orderbook,
+  type Market,
   type Order,
+  type Trade,
+  type Fill,
   type Token,
-  type Market
+
+  type MarketUpdate,
+  type OrderbookUpdate,
+  type OrderUpdate,
+  type TradeUpdate,
+  type FillUpdate,
+  type TokenUpdate,
 } from './models';
+
+export {
+  HanjiSpotService,
+  HanjiSpotWebSocketService,
+} from './services';

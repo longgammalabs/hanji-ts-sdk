@@ -1,5 +1,5 @@
 export { HanjiSpot, type HanjiSpotOptions } from './hanjiSpot';
-export { HanjiSpotMarket, type HanjiSpotMarketOptions } from './hanjiSpotMarket';
+export { HanjiSpotMarketContract, type HanjiSpotMarketContractOptions } from './hanjiSpotMarketContract';
 
 export type {
   ApproveSpotParams,

@@ -7,3 +7,5 @@ export interface Token {
   decimals: number;
   roundingDecimals: number;
 }
+
+export type TokenUpdate = Token;

@@ -16,3 +16,5 @@ export interface Order {
   txnHash: string;
   status: OrderStatus;
 }
+
+export type OrderUpdate = Order;

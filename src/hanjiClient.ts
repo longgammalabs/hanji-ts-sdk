@@ -6,6 +6,7 @@ export interface HanjiClientOptions {
   apiBaseUrl: string;
   webSocketApiBaseUrl: string;
   singerOrProvider: Signer | Provider;
+  webSocketConnectImmediately?: boolean;
 }
 
 export class HanjiClient {
