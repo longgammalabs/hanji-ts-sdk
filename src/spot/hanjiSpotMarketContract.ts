@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { Contract, type Provider, type Signer, parseUnits } from 'ethers';
+import { Contract, parseUnits, type Provider, type Signer, type ContractTransactionResponse } from 'ethers';
 
 import type {
   ApproveSpotParams,
@@ -23,16 +23,19 @@ export interface HanjiSpotMarketContractOptions {
   quoteToken: Token;
   signerOrProvider: Signer | Provider;
   transferExecutedTokensEnabled?: boolean;
+  autoWaitTransaction?: boolean;
 }
 
 export class HanjiSpotMarketContract {
   static readonly defaultTransferExecutedTokensEnabled = true;
+  static readonly defaultAutoWaitTransaction = true;
 
   readonly name: string;
   readonly contractAddress: string;
   readonly baseToken: Token;
   readonly quoteToken: Token;
-  readonly transferExecutedTokensEnabled: boolean;
+  transferExecutedTokensEnabled: boolean;
+  autoWaitTransaction: boolean;
 
   protected readonly singerOrProvider: Signer | Provider;
   protected readonly marketContract: Contract;
@@ -45,14 +48,15 @@ export class HanjiSpotMarketContract {
     this.baseToken = options.baseToken;
     this.quoteToken = options.quoteToken;
     this.singerOrProvider = options.signerOrProvider;
-    this.transferExecutedTokensEnabled = HanjiSpotMarketContract.defaultTransferExecutedTokensEnabled;
+    this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled ?? HanjiSpotMarketContract.defaultTransferExecutedTokensEnabled;
+    this.autoWaitTransaction = options.autoWaitTransaction ?? HanjiSpotMarketContract.defaultAutoWaitTransaction;
 
     this.marketContract = new Contract(options.marketContractAddress, lobAbi, options.signerOrProvider);
     this.baseTokenContract = new Contract(options.baseToken.contractAddress, erc20Abi, options.signerOrProvider);
     this.quoteTokenContract = new Contract(options.quoteToken.contractAddress, erc20Abi, options.signerOrProvider);
   }
 
-  async approveTokens(params: ApproveSpotParams): Promise<string> {
+  async approveTokens(params: ApproveSpotParams): Promise<ContractTransactionResponse> {
     let token: Token;
     let tokenContract: Contract;
 
@@ -66,26 +70,28 @@ export class HanjiSpotMarketContract {
     }
 
     const amount = this.prepareTokenAmount(params.amount, token, true);
-    const tx = await tokenContract.approve!(params.market, amount);
-    await tx.wait();
+    const tx: ContractTransactionResponse = await tokenContract.approve!(params.market, amount);
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async depositTokens(params: DepositSpotParams): Promise<string> {
+  async depositTokens(params: DepositSpotParams): Promise<ContractTransactionResponse> {
     const baseTokenAmount = this.prepareTokenAmount(params.baseTokenAmount, this.baseToken);
     const quoteTokenAmount = this.prepareTokenAmount(params.quoteTokenAmount, this.quoteToken);
 
-    const tx = await this.marketContract.depositTokens!(
+    const tx: ContractTransactionResponse = await this.marketContract.depositTokens!(
       baseTokenAmount,
       quoteTokenAmount
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async withdrawTokens(params: WithdrawSpotParams): Promise<string> {
+  async withdrawTokens(params: WithdrawSpotParams): Promise<ContractTransactionResponse> {
     const withdrawAll = !!params.withdrawAll;
     let baseTokenAmount: bigint;
     let quoteTokenAmount: bigint;
@@ -99,30 +105,32 @@ export class HanjiSpotMarketContract {
       quoteTokenAmount = this.prepareTokenAmount(params.quoteTokenAmount, this.quoteToken);
     }
 
-    const tx = await this.marketContract.withdrawTokens!(
+    const tx: ContractTransactionResponse = await this.marketContract.withdrawTokens!(
       withdrawAll,
       baseTokenAmount,
       quoteTokenAmount
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async setClaimableStatus(params: SetClaimableStatusParams): Promise<string> {
+  async setClaimableStatus(params: SetClaimableStatusParams): Promise<ContractTransactionResponse> {
     const tx = await this.marketContract.setClaimableStatus!(
       params.status
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async placeOrder(params: PlaceOrderSpotParams): Promise<string> {
+  async placeOrder(params: PlaceOrderSpotParams): Promise<ContractTransactionResponse> {
     const sizeAmount = this.prepareTokenAmount(params.size, this.baseToken);
     const priceAmount = this.prepareTokenAmount(params.price, this.quoteToken);
 
-    const tx = await this.marketContract.placeOrder!(
+    const tx: ContractTransactionResponse = await this.marketContract.placeOrder!(
       params.side === Side.ASK,
       sizeAmount,
       priceAmount,
@@ -130,12 +138,13 @@ export class HanjiSpotMarketContract {
       params.type === OrderType.LIMIT_POST_ONLY,
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async batchPlaceOrder(params: BatchPlaceOrderSpotParams): Promise<string> {
+  async batchPlaceOrder(params: BatchPlaceOrderSpotParams): Promise<ContractTransactionResponse> {
     const directions: boolean[] = [];
     const sizeAmounts: bigint[] = [];
     const priceAmounts: bigint[] = [];
@@ -146,29 +155,31 @@ export class HanjiSpotMarketContract {
       priceAmounts.push(this.prepareTokenAmount(orderParams.price, this.quoteToken));
     }
 
-    const tx = await this.marketContract.batchPlaceOrder!(
+    const tx: ContractTransactionResponse = await this.marketContract.batchPlaceOrder!(
       directions,
       sizeAmounts,
       priceAmounts,
       params.type === OrderType.LIMIT_POST_ONLY,
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async claimOrder(params: ClaimOrderSpotParams): Promise<string> {
-    const tx = await this.marketContract.claimOrder!(
+  async claimOrder(params: ClaimOrderSpotParams): Promise<ContractTransactionResponse> {
+    const tx: ContractTransactionResponse = await this.marketContract.claimOrder!(
       params.orderId,
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async batchClaim(params: BatchClaimOrderSpotParams): Promise<string> {
+  async batchClaim(params: BatchClaimOrderSpotParams): Promise<ContractTransactionResponse> {
     const addresses: string[] = [];
     const orderIds: string[] = [];
 
@@ -177,32 +188,34 @@ export class HanjiSpotMarketContract {
       orderIds.push(claimParams.orderId);
     }
 
-    const tx = await this.marketContract.batchClaim!(
+    const tx: ContractTransactionResponse = await this.marketContract.batchClaim!(
       addresses,
       orderIds
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async changeOrder(params: ChangeOrderSpotParams): Promise<string> {
+  async changeOrder(params: ChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const sizeAmount = this.prepareTokenAmount(params.newSize, this.baseToken);
     const priceAmount = this.prepareTokenAmount(params.newPrice, this.quoteToken);
 
-    const tx = await this.marketContract.changeOrder!(
+    const tx: ContractTransactionResponse = await this.marketContract.changeOrder!(
       params.orderId,
       sizeAmount,
       priceAmount,
       params.type === OrderType.LIMIT_POST_ONLY,
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
-  async batchChangeOrder(params: BatchChangeOrderSpotParams): Promise<string> {
+  async batchChangeOrder(params: BatchChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const orderIds: string[] = [];
     const newSizes: bigint[] = [];
     const newPrices: bigint[] = [];
@@ -213,16 +226,17 @@ export class HanjiSpotMarketContract {
       newPrices.push(this.prepareTokenAmount(orderParams.newPrice, this.quoteToken));
     }
 
-    const tx = await this.marketContract.batchChangeOrder!(
+    const tx: ContractTransactionResponse = await this.marketContract.batchChangeOrder!(
       orderIds,
       newSizes,
       newPrices,
       params.type === OrderType.LIMIT_POST_ONLY,
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
-    await tx.wait();
+    if (this.autoWaitTransaction)
+      await tx.wait();
 
-    return tx.hash;
+    return tx;
   }
 
   private prepareTokenAmount(amount: BigNumber | bigint, token: Token, isActualAmount = false): bigint {

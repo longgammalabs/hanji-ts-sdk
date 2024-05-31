@@ -1,3 +1,4 @@
+import type { ContractTransactionResponse } from 'ethers';
 import type { Provider, Signer } from 'ethers/providers';
 
 import { HanjiSpotMarketContract } from './hanjiSpotMarketContract';
@@ -65,61 +66,61 @@ export class HanjiSpot {
     this.events = this.hanjiWebSocketService.events;
   }
 
-  async approveTokens(params: ApproveSpotParams): Promise<string> {
+  async approveTokens(params: ApproveSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.approveTokens(params);
   }
 
-  async depositTokens(params: DepositSpotParams): Promise<string> {
+  async depositTokens(params: DepositSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.depositTokens(params);
   }
 
-  async withdrawTokens(params: WithdrawSpotParams): Promise<string> {
+  async withdrawTokens(params: WithdrawSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.withdrawTokens(params);
   }
 
-  async setClaimableStatus(params: SetClaimableStatusParams): Promise<string> {
+  async setClaimableStatus(params: SetClaimableStatusParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.setClaimableStatus(params);
   }
 
-  async placeOrder(params: PlaceOrderSpotParams): Promise<string> {
+  async placeOrder(params: PlaceOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.placeOrder(params);
   }
 
-  async batchPlaceOrder(params: BatchPlaceOrderSpotParams): Promise<string> {
+  async batchPlaceOrder(params: BatchPlaceOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.batchPlaceOrder(params);
   }
 
-  async claimOrder(params: ClaimOrderSpotParams): Promise<string> {
+  async claimOrder(params: ClaimOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.claimOrder(params);
   }
 
-  async batchClaim(params: BatchClaimOrderSpotParams): Promise<string> {
+  async batchClaim(params: BatchClaimOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.batchClaim(params);
   }
 
-  async changeOrder(params: ChangeOrderSpotParams): Promise<string> {
+  async changeOrder(params: ChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.changeOrder(params);
   }
 
-  async batchChangeOrder(params: BatchChangeOrderSpotParams): Promise<string> {
+  async batchChangeOrder(params: BatchChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.batchChangeOrder(params);
