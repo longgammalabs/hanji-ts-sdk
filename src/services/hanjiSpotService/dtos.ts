@@ -1,16 +1,15 @@
 import type { Direction, OrderStatus, OrderType, Side } from '../../models';
 
+export interface OrderbookLevelDto {
+  price: string;
+  size: string;
+}
+
 export interface OrderbookDto {
   timestamp: number;
   levels: {
-    asks: Array<{
-      price: string;
-      size: string;
-    }>;
-    bids: Array<{
-      price: string;
-      size: string;
-    }>;
+    asks: OrderbookLevelDto[];
+    bids: OrderbookLevelDto[];
   };
 }
 
