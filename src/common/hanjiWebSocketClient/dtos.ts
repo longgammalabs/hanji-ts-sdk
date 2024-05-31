@@ -10,5 +10,6 @@ export interface UnsubscribeFromSubscriptionWebSocketRequestDto<TSubscription = 
 
 export interface HanjiWebSocketResponseDto {
   channel: string;
+  id: string;
   data: unknown;
 }

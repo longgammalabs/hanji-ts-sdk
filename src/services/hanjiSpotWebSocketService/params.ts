@@ -9,24 +9,19 @@ export interface SubscribeToOrderbookParams {
 }
 export type UnsubscribeFromOrderbookParams = SubscribeToOrderbookParams;
 
-export interface SubscribeToOrdersParams {
-  market?: string;
-}
-export type UnsubscribeFromOrdersParams = SubscribeToOrdersParams;
-
 export interface SubscribeToTradesParams {
-  market?: string;
+  market: string;
 }
 export type UnsubscribeFromTradesParams = SubscribeToTradesParams;
 
 export interface SubscribeToUserOrdersParams {
   user: string;
-  market?: string;
+  market: string;
 }
 export type UnsubscribeFromUserOrdersParams = SubscribeToUserOrdersParams;
 
 export interface SubscribeToUserFillsParams {
   user: string;
-  market?: string;
+  market: string;
 }
 export type UnsubscribeFromUserFillsParams = SubscribeToUserFillsParams;

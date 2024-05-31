@@ -41,13 +41,11 @@ export interface HanjiSpotOptions {
 }
 
 interface HanjiSpotEvents {
-  allMarketsUpdated: PublicEventEmitter<readonly [data: MarketUpdate[]]>;
-  marketUpdated: PublicEventEmitter<readonly [data: MarketUpdate]>;
-  orderbookUpdated: PublicEventEmitter<readonly [data: OrderbookUpdate]>;
-  ordersUpdated: PublicEventEmitter<readonly [data: OrderUpdate[]]>;
-  tradesUpdated: PublicEventEmitter<readonly [data: TradeUpdate[]]>;
-  userOrdersUpdated: PublicEventEmitter<readonly [data: OrderUpdate[]]>;
-  userFillsUpdated: PublicEventEmitter<readonly [data: FillUpdate[]]>;
+  marketUpdated: PublicEventEmitter<readonly [market: string, data: MarketUpdate]>;
+  orderbookUpdated: PublicEventEmitter<readonly [market: string, data: OrderbookUpdate]>;
+  tradesUpdated: PublicEventEmitter<readonly [market: string, data: TradeUpdate[]]>;
+  userOrdersUpdated: PublicEventEmitter<readonly [market: string, data: OrderUpdate[]]>;
+  userFillsUpdated: PublicEventEmitter<readonly [market: string, data: FillUpdate[]]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
@@ -156,14 +154,6 @@ export class HanjiSpot {
   async getFills(params: GetFillsParams): Promise<Fill[]> {
     const fillDtos = await this.hanjiService.getFills(params);
     return fillDtos;
-  }
-
-  subscribeToAllMarkets(): void {
-    this.hanjiWebSocketService.subscribeToAllMarkets();
-  }
-
-  unsubscribeFromAllMarkets(): void {
-    this.hanjiWebSocketService.unsubscribeFromAllMarkets();
   }
 
   subscribeToMarket(params: SubscribeToMarketParams): void {

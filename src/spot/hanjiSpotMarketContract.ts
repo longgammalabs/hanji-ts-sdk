@@ -1,7 +1,18 @@
 import BigNumber from 'bignumber.js';
 import { Contract, type Provider, type Signer, parseUnits } from 'ethers';
 
-import type { ApproveSpotParams, BatchChangeOrderSpotParams, BatchClaimOrderSpotParams, BatchPlaceOrderSpotParams, ChangeOrderSpotParams, ClaimOrderSpotParams, DepositSpotParams, PlaceOrderSpotParams, SetClaimableStatusParams, WithdrawSpotParams } from './params';
+import type {
+  ApproveSpotParams,
+  BatchChangeOrderSpotParams,
+  BatchClaimOrderSpotParams,
+  BatchPlaceOrderSpotParams,
+  ChangeOrderSpotParams,
+  ClaimOrderSpotParams,
+  DepositSpotParams,
+  PlaceOrderSpotParams,
+  SetClaimableStatusParams,
+  WithdrawSpotParams
+} from './params';
 import { erc20Abi, lobAbi } from '../abi';
 import { OrderType, Side, type Token } from '../models';
 

@@ -8,7 +8,6 @@ import type {
 import type {
   SubscribeToMarketParams, UnsubscribeFromMarketParams,
   SubscribeToOrderbookParams, UnsubscribeFromOrderbookParams,
-  SubscribeToOrdersParams, UnsubscribeFromOrdersParams,
   SubscribeToTradesParams, UnsubscribeFromTradesParams,
   SubscribeToUserOrdersParams, UnsubscribeFromUserOrdersParams,
   SubscribeToUserFillsParams, UnsubscribeFromUserFillsParams
@@ -20,23 +19,19 @@ import {
 import { getErrorLogMessage } from '../../logging';
 
 interface HanjiSpotWebSocketServiceEvents {
-  allMarketsUpdated: PublicEventEmitter<readonly [data: MarketUpdateDto[]]>;
-  marketUpdated: PublicEventEmitter<readonly [data: MarketUpdateDto]>;
-  orderbookUpdated: PublicEventEmitter<readonly [data: OrderbookUpdateDto]>;
-  ordersUpdated: PublicEventEmitter<readonly [data: OrderUpdateDto[]]>;
-  tradesUpdated: PublicEventEmitter<readonly [data: TradeUpdateDto[]]>;
-  userOrdersUpdated: PublicEventEmitter<readonly [data: OrderUpdateDto[]]>;
-  userFillsUpdated: PublicEventEmitter<readonly [data: FillUpdateDto[]]>;
+  marketUpdated: PublicEventEmitter<readonly [market: string, data: MarketUpdateDto]>;
+  orderbookUpdated: PublicEventEmitter<readonly [market: string, data: OrderbookUpdateDto]>;
+  tradesUpdated: PublicEventEmitter<readonly [market: string, data: TradeUpdateDto[]]>;
+  userOrdersUpdated: PublicEventEmitter<readonly [market: string, data: OrderUpdateDto[]]>;
+  userFillsUpdated: PublicEventEmitter<readonly [market: string, data: FillUpdateDto[]]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
 export class HanjiSpotWebSocketService implements Disposable {
   readonly events: HanjiSpotWebSocketServiceEvents = {
     subscriptionError: new EventEmitter(),
-    allMarketsUpdated: new EventEmitter(),
     marketUpdated: new EventEmitter(),
     orderbookUpdated: new EventEmitter(),
-    ordersUpdated: new EventEmitter(),
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
     userFillsUpdated: new EventEmitter()
@@ -54,21 +49,6 @@ export class HanjiSpotWebSocketService implements Disposable {
   [Symbol.dispose]() {
     this.hanjiWebSocketClient.events.messageReceived.removeListener(this.onSocketMessageReceived);
     this.hanjiWebSocketClient.stop();
-  }
-
-  subscribeToAllMarkets() {
-    this.startHanjiWebSocketClientIfNeeded();
-    this.hanjiWebSocketClient.subscribe({
-      channel: 'market',
-      market: 'allMarkets'
-    });
-  }
-
-  unsubscribeFromAllMarkets() {
-    this.hanjiWebSocketClient.unsubscribe({
-      channel: 'market',
-      market: 'allMarkets'
-    });
   }
 
   subscribeToMarket(params: SubscribeToMarketParams) {
@@ -102,22 +82,6 @@ export class HanjiSpotWebSocketService implements Disposable {
       channel: 'orderbook',
       market: params.market,
       aggregation: params.aggregation
-    });
-  }
-
-  subscribeToOrders(params: SubscribeToOrdersParams) {
-    this.startHanjiWebSocketClientIfNeeded();
-
-    this.hanjiWebSocketClient.subscribe({
-      channel: 'orders',
-      market: params.market
-    });
-  }
-
-  unsubscribeFromOrders(params: UnsubscribeFromOrdersParams) {
-    this.hanjiWebSocketClient.unsubscribe({
-      channel: 'orders',
-      market: params.market
     });
   }
 
@@ -184,29 +148,25 @@ export class HanjiSpotWebSocketService implements Disposable {
         return;
 
       switch (message.channel) {
-        case 'allMarkets':
-          (this.events.allMarketsUpdated as ToEventEmitter<typeof this.events.allMarketsUpdated>).emit(message.data as MarketUpdateDto[]);
-          break;
         case 'market':
-          (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(message.data as MarketUpdateDto);
+          (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(message.id, message.data as MarketUpdateDto);
           break;
         case 'orderbook':
-          (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(message.data as OrderbookUpdateDto);
-          break;
-        case 'orders':
-          (this.events.ordersUpdated as ToEventEmitter<typeof this.events.ordersUpdated>).emit(message.data as OrderUpdateDto[]);
+          (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(message.id, message.data as OrderbookUpdateDto);
           break;
         case 'trades':
-          (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(message.data as TradeUpdateDto[]);
+          (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(message.id, message.data as TradeUpdateDto[]);
           break;
         case 'userOrders':
-          (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(message.data as OrderUpdateDto[]);
+          (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(message.id, message.data as OrderUpdateDto[]);
           break;
         case 'userFills':
-          (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.data as FillUpdateDto[]);
+          (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.id, message.data as FillUpdateDto[]);
           break;
         case 'error':
           (this.events.subscriptionError as ToEventEmitter<typeof this.events.subscriptionError>).emit(message.data as string);
+          break;
+        case 'subscriptionResponse':
           break;
         default:
           console.warn('Unknown channel in the socket message handler.', message.channel);
