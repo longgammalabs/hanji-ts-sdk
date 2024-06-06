@@ -50,7 +50,7 @@ export interface PlaceOrderSpotParams {
 
 export type BatchPlaceOrderSpotParams = {
   market: string;
-  type: OrderType.LIMIT | OrderType.LIMIT_POST_ONLY;
+  type: 'limit' | 'limit_post_only';
   orderParams: Array<{
     side: Side;
     size: BigNumber | bigint;
@@ -78,7 +78,7 @@ export interface ChangeOrderSpotParams {
   orderId: string;
   newSize: BigNumber | bigint;
   newPrice: BigNumber | bigint;
-  type: OrderType.LIMIT | OrderType.LIMIT_POST_ONLY;
+  type: 'limit' | 'limit_post_only';
   transferExecutedTokens?: boolean;
 }
 
@@ -89,7 +89,7 @@ export interface BatchChangeOrderSpotParams {
     newSize: BigNumber | bigint;
     newPrice: BigNumber | bigint;
   }>;
-  type: OrderType.LIMIT | OrderType.LIMIT_POST_ONLY;
+  type: 'limit' | 'limit_post_only';
   transferExecutedTokens?: boolean;
 }
 

@@ -14,7 +14,7 @@ import type {
   WithdrawSpotParams
 } from './params';
 import { erc20Abi, lobAbi } from '../abi';
-import { OrderType, Side, type Token } from '../models';
+import type { Token } from '../models';
 
 export interface HanjiSpotMarketContractOptions {
   name: string;
@@ -131,11 +131,11 @@ export class HanjiSpotMarketContract {
     const priceAmount = this.prepareTokenAmount(params.price, this.quoteToken);
 
     const tx: ContractTransactionResponse = await this.marketContract.placeOrder!(
-      params.side === Side.ASK,
+      params.side === 'ask',
       sizeAmount,
       priceAmount,
-      params.type === OrderType.MARKET,
-      params.type === OrderType.LIMIT_POST_ONLY,
+      params.type === 'market',
+      params.type === 'limit_post_only',
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
     if (this.autoWaitTransaction)
@@ -150,7 +150,7 @@ export class HanjiSpotMarketContract {
     const priceAmounts: bigint[] = [];
 
     for (const orderParams of params.orderParams) {
-      directions.push(orderParams.side === Side.ASK);
+      directions.push(orderParams.side === 'ask');
       sizeAmounts.push(this.prepareTokenAmount(orderParams.size, this.baseToken));
       priceAmounts.push(this.prepareTokenAmount(orderParams.price, this.quoteToken));
     }
@@ -159,7 +159,7 @@ export class HanjiSpotMarketContract {
       directions,
       sizeAmounts,
       priceAmounts,
-      params.type === OrderType.LIMIT_POST_ONLY,
+      params.type === 'limit_post_only',
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
     if (this.autoWaitTransaction)
@@ -206,7 +206,7 @@ export class HanjiSpotMarketContract {
       params.orderId,
       sizeAmount,
       priceAmount,
-      params.type === OrderType.LIMIT_POST_ONLY,
+      params.type === 'limit_post_only',
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
     if (this.autoWaitTransaction)
@@ -230,7 +230,7 @@ export class HanjiSpotMarketContract {
       orderIds,
       newSizes,
       newPrices,
-      params.type === OrderType.LIMIT_POST_ONLY,
+      params.type === 'limit_post_only',
       params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
     );
     if (this.autoWaitTransaction)
@@ -242,6 +242,6 @@ export class HanjiSpotMarketContract {
   private prepareTokenAmount(amount: BigNumber | bigint, token: Token, isActualAmount = false): bigint {
     return typeof amount === 'bigint'
       ? amount
-      : parseUnits(amount.toString(10), isActualAmount ? token.decimals : token.scalingFactor);
+      : parseUnits(amount.toFixed(), isActualAmount ? token.decimals : token.scalingFactor);
   }
 }
