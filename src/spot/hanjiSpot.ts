@@ -42,6 +42,8 @@ export interface HanjiSpotOptions {
   webSocketApiBaseUrl: string;
   singerOrProvider: Signer | Provider;
   webSocketConnectImmediately?: boolean;
+  transferExecutedTokensEnabled?: boolean;
+  autoWaitTransaction?: boolean;
 }
 
 interface HanjiSpotEvents {
@@ -63,6 +65,9 @@ export class HanjiSpot implements Disposable {
     userFillsUpdated: new EventEmitter()
   };
 
+  transferExecutedTokensEnabled: boolean | undefined;
+  autoWaitTransaction: boolean | undefined;
+
   protected readonly signerOrProvider: Signer | Provider;
   protected readonly hanjiService: HanjiSpotService;
   protected readonly hanjiWebSocketService: HanjiSpotWebSocketService;
@@ -73,6 +78,8 @@ export class HanjiSpot implements Disposable {
 
   constructor(options: Readonly<HanjiSpotOptions>) {
     this.signerOrProvider = options.singerOrProvider;
+    this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled;
+    this.autoWaitTransaction = options.autoWaitTransaction;
     this.hanjiService = new HanjiSpotService(options.apiBaseUrl);
     this.hanjiWebSocketService = new HanjiSpotWebSocketService(options.webSocketApiBaseUrl, options.webSocketConnectImmediately);
     this.mappers = mappers;
@@ -298,6 +305,8 @@ export class HanjiSpot implements Disposable {
       marketContract = new HanjiSpotMarketContract({
         marketInfo,
         signerOrProvider: this.signerOrProvider,
+        transferExecutedTokensEnabled: this.transferExecutedTokensEnabled,
+        autoWaitTransaction: this.autoWaitTransaction
       });
       this.marketContracts.set(params.market, marketContract);
     }
