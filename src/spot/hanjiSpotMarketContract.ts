@@ -14,26 +14,24 @@ import type {
   WithdrawSpotParams
 } from './params';
 import { erc20Abi, lobAbi } from '../abi';
-import type { Token } from '../models';
+import type { MarketInfo, Token } from '../models';
+import { tokenUtils } from '../utils';
 
 export interface HanjiSpotMarketContractOptions {
-  name: string;
-  marketContractAddress: string;
-  baseToken: Token;
-  quoteToken: Token;
+  marketInfo: MarketInfo;
   signerOrProvider: Signer | Provider;
   transferExecutedTokensEnabled?: boolean;
   autoWaitTransaction?: boolean;
 }
 
+type ReadonlyMarketInfo = Readonly<Omit<MarketInfo, 'baseToken' | 'quoteToken' | 'scalingFactors'>>
+  & Readonly<{ baseToken: Readonly<Token>; quoteToken: Readonly<Token>; scalingFactors: Readonly<MarketInfo['scalingFactors']> }>;
+
 export class HanjiSpotMarketContract {
   static readonly defaultTransferExecutedTokensEnabled = true;
   static readonly defaultAutoWaitTransaction = true;
 
-  readonly name: string;
-  readonly contractAddress: string;
-  readonly baseToken: Token;
-  readonly quoteToken: Token;
+  readonly marketInfo: ReadonlyMarketInfo;
   transferExecutedTokensEnabled: boolean;
   autoWaitTransaction: boolean;
 
@@ -43,17 +41,14 @@ export class HanjiSpotMarketContract {
   protected readonly quoteTokenContract: Contract;
 
   constructor(options: Readonly<HanjiSpotMarketContractOptions>) {
-    this.name = options.name;
-    this.contractAddress = options.marketContractAddress;
-    this.baseToken = options.baseToken;
-    this.quoteToken = options.quoteToken;
+    this.marketInfo = options.marketInfo;
     this.singerOrProvider = options.signerOrProvider;
     this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled ?? HanjiSpotMarketContract.defaultTransferExecutedTokensEnabled;
     this.autoWaitTransaction = options.autoWaitTransaction ?? HanjiSpotMarketContract.defaultAutoWaitTransaction;
 
-    this.marketContract = new Contract(options.marketContractAddress, lobAbi, options.signerOrProvider);
-    this.baseTokenContract = new Contract(options.baseToken.contractAddress, erc20Abi, options.signerOrProvider);
-    this.quoteTokenContract = new Contract(options.quoteToken.contractAddress, erc20Abi, options.signerOrProvider);
+    this.marketContract = new Contract(this.marketInfo.orderbookAddress, lobAbi, options.signerOrProvider);
+    this.baseTokenContract = new Contract(this.marketInfo.baseToken.contractAddress, erc20Abi, options.signerOrProvider);
+    this.quoteTokenContract = new Contract(this.marketInfo.quoteToken.contractAddress, erc20Abi, options.signerOrProvider);
   }
 
   async approveTokens(params: ApproveSpotParams): Promise<ContractTransactionResponse> {
@@ -61,15 +56,15 @@ export class HanjiSpotMarketContract {
     let tokenContract: Contract;
 
     if (params.isBaseToken) {
-      token = this.baseToken;
+      token = this.marketInfo.baseToken;
       tokenContract = this.baseTokenContract;
     }
     else {
-      token = this.quoteToken;
+      token = this.marketInfo.quoteToken;
       tokenContract = this.quoteTokenContract;
     }
 
-    const amount = this.prepareTokenAmount(params.amount, token, true);
+    const amount = this.convertTokensAmountToRawAmountIfNeeded(params.amount, token.decimals);
     const tx: ContractTransactionResponse = await tokenContract.approve!(params.market, amount);
     if (this.autoWaitTransaction)
       await tx.wait();
@@ -78,8 +73,8 @@ export class HanjiSpotMarketContract {
   }
 
   async depositTokens(params: DepositSpotParams): Promise<ContractTransactionResponse> {
-    const baseTokenAmount = this.prepareTokenAmount(params.baseTokenAmount, this.baseToken);
-    const quoteTokenAmount = this.prepareTokenAmount(params.quoteTokenAmount, this.quoteToken);
+    const baseTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.baseTokenAmount, this.marketInfo.scalingFactors.baseToken);
+    const quoteTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.quoteTokenAmount, this.marketInfo.scalingFactors.quoteToken);
 
     const tx: ContractTransactionResponse = await this.marketContract.depositTokens!(
       baseTokenAmount,
@@ -101,8 +96,8 @@ export class HanjiSpotMarketContract {
       quoteTokenAmount = 0n;
     }
     else {
-      baseTokenAmount = this.prepareTokenAmount(params.baseTokenAmount, this.baseToken);
-      quoteTokenAmount = this.prepareTokenAmount(params.quoteTokenAmount, this.quoteToken);
+      baseTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.baseTokenAmount, this.marketInfo.scalingFactors.baseToken);
+      quoteTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.quoteTokenAmount, this.marketInfo.scalingFactors.quoteToken);
     }
 
     const tx: ContractTransactionResponse = await this.marketContract.withdrawTokens!(
@@ -127,8 +122,8 @@ export class HanjiSpotMarketContract {
   }
 
   async placeOrder(params: PlaceOrderSpotParams): Promise<ContractTransactionResponse> {
-    const sizeAmount = this.prepareTokenAmount(params.size, this.baseToken);
-    const priceAmount = this.prepareTokenAmount(params.price, this.quoteToken);
+    const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.marketInfo.scalingFactors.baseToken);
+    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.marketInfo.scalingFactors.price);
 
     const tx: ContractTransactionResponse = await this.marketContract.placeOrder!(
       params.side === 'ask',
@@ -151,8 +146,8 @@ export class HanjiSpotMarketContract {
 
     for (const orderParams of params.orderParams) {
       directions.push(orderParams.side === 'ask');
-      sizeAmounts.push(this.prepareTokenAmount(orderParams.size, this.baseToken));
-      priceAmounts.push(this.prepareTokenAmount(orderParams.price, this.quoteToken));
+      sizeAmounts.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.size, this.marketInfo.scalingFactors.baseToken));
+      priceAmounts.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.price, this.marketInfo.scalingFactors.price));
     }
 
     const tx: ContractTransactionResponse = await this.marketContract.batchPlaceOrder!(
@@ -199,8 +194,8 @@ export class HanjiSpotMarketContract {
   }
 
   async changeOrder(params: ChangeOrderSpotParams): Promise<ContractTransactionResponse> {
-    const sizeAmount = this.prepareTokenAmount(params.newSize, this.baseToken);
-    const priceAmount = this.prepareTokenAmount(params.newPrice, this.quoteToken);
+    const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newSize, this.marketInfo.scalingFactors.baseToken);
+    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newPrice, this.marketInfo.scalingFactors.price);
 
     const tx: ContractTransactionResponse = await this.marketContract.changeOrder!(
       params.orderId,
@@ -222,8 +217,8 @@ export class HanjiSpotMarketContract {
 
     for (const orderParams of params.orderParams) {
       orderIds.push(orderParams.orderId);
-      newSizes.push(this.prepareTokenAmount(orderParams.newSize, this.baseToken));
-      newPrices.push(this.prepareTokenAmount(orderParams.newPrice, this.quoteToken));
+      newSizes.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.newSize, this.marketInfo.scalingFactors.baseToken));
+      newPrices.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.newPrice, this.marketInfo.scalingFactors.price));
     }
 
     const tx: ContractTransactionResponse = await this.marketContract.batchChangeOrder!(
@@ -239,9 +234,9 @@ export class HanjiSpotMarketContract {
     return tx;
   }
 
-  private prepareTokenAmount(amount: BigNumber | bigint, token: Token, isActualAmount = false): bigint {
+  private convertTokensAmountToRawAmountIfNeeded(amount: BigNumber | bigint, decimals: number): bigint {
     return typeof amount === 'bigint'
       ? amount
-      : parseUnits(amount.toFixed(), isActualAmount ? token.decimals : token.scalingFactor);
+      : tokenUtils.convertTokensAmountToRawAmount(amount, decimals);
   }
 }

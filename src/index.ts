@@ -16,25 +16,25 @@ export {
   type ClaimOrderSpotParams
 } from './spot';
 
-export {
+export type {
   Side,
   Direction,
   OrderStatus,
   OrderType,
 
-  type Orderbook,
-  type Market,
-  type Order,
-  type Trade,
-  type Fill,
-  type Token,
+  Orderbook,
+  Market,
+  Order,
+  Trade,
+  Fill,
+  Token,
 
-  type MarketUpdate,
-  type OrderbookUpdate,
-  type OrderUpdate,
-  type TradeUpdate,
-  type FillUpdate,
-  type TokenUpdate,
+  MarketUpdate,
+  OrderbookUpdate,
+  OrderUpdate,
+  TradeUpdate,
+  FillUpdate,
+  TokenUpdate,
 } from './models';
 
 export {

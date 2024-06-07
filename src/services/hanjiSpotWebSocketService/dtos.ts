@@ -16,6 +16,9 @@ export interface OrderbookUpdateDto {
 
 export interface OrderUpdateDto {
   orderId: string;
+  market: {
+    id: string;
+  };
   type: OrderType;
   owner: string;
   side: Side;
@@ -31,6 +34,9 @@ export interface OrderUpdateDto {
 
 export interface FillUpdateDto {
   tradeId: string;
+  market: {
+    id: string;
+  };
   orderId: string;
   timestamp: number;
   owner: string;

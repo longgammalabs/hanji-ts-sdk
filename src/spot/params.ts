@@ -121,6 +121,10 @@ export interface GetTokensParams {
   token?: string;
 }
 
+export interface GetMarketInfoParams {
+  market: string;
+}
+
 export interface GetMarketsParams {
   market?: string;
 }

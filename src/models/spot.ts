@@ -1,3 +1,5 @@
+import BigNumber from 'bignumber.js';
+
 import type { Token } from './common';
 
 export type Side = 'ask' | 'bid';
@@ -16,16 +18,21 @@ export interface Market {
   quoteToken: Token;
   orderbookAddress: string;
   aggregations: number[];
-  lastPrice: string | null;
-  lowPrice24h: string | null;
-  highPrice24h: string | null;
+  rawLastPrice: bigint | null;
+  lastPrice: BigNumber | null;
+  rawLowPrice24h: bigint | null;
+  lowPrice24h: BigNumber | null;
+  rawHighPrice24h: bigint | null;
+  highPrice24h: BigNumber | null;
 }
 
 export type MarketUpdate = Market;
 
-interface OrderbookLevel {
-  price: string;
-  size: string;
+export interface OrderbookLevel {
+  rawPrice: bigint;
+  price: BigNumber;
+  rawSize: bigint;
+  size: BigNumber;
 }
 
 export interface Orderbook {
@@ -40,13 +47,20 @@ export type OrderbookUpdate = Orderbook;
 
 export interface Order {
   orderId: string;
+  market: {
+    id: string;
+  };
   type: OrderType;
   owner: string;
   side: Side;
-  price: string;
-  size: string;
-  origSize: string;
-  claimed: string;
+  rawPrice: bigint;
+  price: BigNumber;
+  rawSize: bigint;
+  size: BigNumber;
+  rawOrigSize: bigint;
+  origSize: BigNumber;
+  rawClaimed: bigint;
+  claimed: BigNumber;
   createdAt: number;
   lastTouched: number;
   txnHash: string;
@@ -58,8 +72,10 @@ export type OrderUpdate = Order;
 export interface Trade {
   tradeId: string;
   direction: Direction;
-  price: string;
-  size: string;
+  rawPrice: bigint;
+  price: BigNumber;
+  rawSize: bigint;
+  size: BigNumber;
   timestamp: number;
   txnHash: string;
 }
@@ -69,14 +85,33 @@ export type TradeUpdate = Trade;
 export interface Fill {
   orderId: string;
   tradeId: string;
+  market: {
+    id: string;
+  };
   timestamp: number;
   owner: string;
   dir: Direction;
   type: OrderType;
   side: Side;
   txnHash: string;
-  price: string;
-  size: string;
+  rawPrice: bigint;
+  price: BigNumber;
+  rawSize: bigint;
+  size: BigNumber;
 }
 
 export type FillUpdate = Fill;
+
+export interface MarketInfo {
+  id: string;
+  name: string;
+  symbol: string;
+  baseToken: Token;
+  quoteToken: Token;
+  orderbookAddress: string;
+  scalingFactors: {
+    baseToken: number;
+    quoteToken: number;
+    price: number;
+  };
+}

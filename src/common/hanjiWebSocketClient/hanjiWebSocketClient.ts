@@ -12,7 +12,7 @@ interface HanjiWebSocketClientEvents {
   messageReceived: PublicEventEmitter<readonly [message: HanjiWebSocketResponseDto]>;
 }
 
-export class HanjiWebSocketClient {
+export class HanjiWebSocketClient implements Disposable {
   readonly baseUrl: string;
   readonly events: HanjiWebSocketClientEvents = {
     messageReceived: new EventEmitter()
@@ -120,6 +120,10 @@ export class HanjiWebSocketClient {
     this.subscriptions.clear();
 
     return true;
+  }
+
+  [Symbol.dispose](): void {
+    this.stop();
   }
 
   protected async connect(): Promise<void> {

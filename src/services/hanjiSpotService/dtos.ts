@@ -15,6 +15,9 @@ export interface OrderbookDto {
 
 export interface OrderDto {
   orderId: string;
+  market: {
+    id: string;
+  };
   type: OrderType;
   owner: string;
   side: Side;
@@ -40,6 +43,9 @@ export interface TradeDto {
 export interface FillDto {
   orderId: string;
   tradeId: string;
+  market: {
+    id: string;
+  };
   timestamp: number;
   owner: string;
   dir: Direction;
@@ -68,7 +74,7 @@ export interface MarketDto {
   quoteToken: TokenDto;
   orderbookAddress: string;
   aggregations: number[];
-  lastPrice: string;
-  lowPrice24h: string;
-  highPrice24h: string;
+  lastPrice: string | null;
+  lowPrice24h: string | null;
+  highPrice24h: string | null;
 }

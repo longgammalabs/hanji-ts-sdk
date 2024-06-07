@@ -19,11 +19,11 @@ import {
 import { getErrorLogMessage } from '../../logging';
 
 interface HanjiSpotWebSocketServiceEvents {
-  marketUpdated: PublicEventEmitter<readonly [market: string, data: MarketUpdateDto]>;
-  orderbookUpdated: PublicEventEmitter<readonly [market: string, data: OrderbookUpdateDto]>;
-  tradesUpdated: PublicEventEmitter<readonly [market: string, data: TradeUpdateDto[]]>;
-  userOrdersUpdated: PublicEventEmitter<readonly [market: string, data: OrderUpdateDto[]]>;
-  userFillsUpdated: PublicEventEmitter<readonly [market: string, data: FillUpdateDto[]]>;
+  marketUpdated: PublicEventEmitter<readonly [marketId: string, data: MarketUpdateDto]>;
+  orderbookUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdateDto]>;
+  tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdateDto[]]>;
+  userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdateDto[]]>;
+  userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdateDto[]]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
@@ -44,11 +44,6 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.events.messageReceived.addListener(this.onSocketMessageReceived);
     if (startImmediately)
       this.startHanjiWebSocketClientIfNeeded();
-  }
-
-  [Symbol.dispose]() {
-    this.hanjiWebSocketClient.events.messageReceived.removeListener(this.onSocketMessageReceived);
-    this.hanjiWebSocketClient.stop();
   }
 
   subscribeToMarket(params: SubscribeToMarketParams) {
@@ -135,6 +130,11 @@ export class HanjiSpotWebSocketService implements Disposable {
       user: params.user,
       market: params.market,
     });
+  }
+
+  [Symbol.dispose]() {
+    this.hanjiWebSocketClient.events.messageReceived.removeListener(this.onSocketMessageReceived);
+    this.hanjiWebSocketClient.stop();
   }
 
   protected startHanjiWebSocketClientIfNeeded() {
