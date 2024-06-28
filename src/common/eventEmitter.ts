@@ -34,12 +34,14 @@ export class EventEmitter<T extends readonly unknown[]> implements PublicEventEm
       catch (error) {
         console.error(error);
       }
-    } else {
-      // We copy listeners to prevent an unbounded loop if there is the adding of a new event handler inside the handler; 
+    }
+    else {
+      // We copy listeners to prevent an unbounded loop if there is the adding of a new event handler inside the handler;
       [...this.listeners].forEach(listener => {
         try {
           listener(...args);
-        } catch (error) {
+        }
+        catch (error) {
           console.error(error);
         }
       });

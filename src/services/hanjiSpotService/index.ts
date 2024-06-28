@@ -6,5 +6,5 @@ export type {
   TradeDto,
   FillDto,
   TokenDto,
-  MarketDto,
+  MarketDto
 } from './dtos';

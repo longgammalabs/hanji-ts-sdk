@@ -9,7 +9,7 @@ import type {
   TradeUpdate,
   OrderUpdate,
   FillUpdate,
-  Fill,
+  Fill
 } from '../models';
 import type {
   TokenDto,
@@ -17,7 +17,7 @@ import type {
   OrderbookLevelDto,
   OrderbookDto,
   TradeDto,
-  FillDto,
+  FillDto
 } from '../services/hanjiSpotService';
 import type {
   FillUpdateDto,
@@ -40,7 +40,7 @@ export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number): Marke
     rawLowPrice24h: dto.lowPrice24h ? BigInt(dto.lowPrice24h) : null,
     lowPrice24h: dto.lowPrice24h ? tokenUtils.convertTokensRawAmountToAmount(dto.lowPrice24h, priceFactor) : null,
     rawHighPrice24h: dto.highPrice24h ? BigInt(dto.highPrice24h) : null,
-    highPrice24h: dto.highPrice24h ? tokenUtils.convertTokensRawAmountToAmount(dto.highPrice24h, priceFactor) : null
+    highPrice24h: dto.highPrice24h ? tokenUtils.convertTokensRawAmountToAmount(dto.highPrice24h, priceFactor) : null,
   };
 };
 
@@ -61,8 +61,8 @@ export const mapOrderbookDtoToOrderbook = (dto: OrderbookDto, priceFactor: numbe
     ...dto,
     levels: {
       asks,
-      bids
-    }
+      bids,
+    },
   };
 };
 
@@ -72,7 +72,7 @@ export const mapTradeDtoToTrade = (dto: TradeDto, priceFactor: number, sizeFacto
     rawPrice: BigInt(dto.price),
     price: tokenUtils.convertTokensRawAmountToAmount(dto.price, priceFactor),
     rawSize: BigInt(dto.size),
-    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, sizeFactor)
+    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, sizeFactor),
   };
 };
 
@@ -96,7 +96,7 @@ export const mapFillDtoToFill = (dto: FillDto, priceFactor: number, sizeFactor: 
     rawPrice: BigInt(dto.price),
     price: tokenUtils.convertTokensRawAmountToAmount(dto.price, priceFactor),
     rawSize: BigInt(dto.size),
-    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, sizeFactor)
+    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, sizeFactor),
   };
 };
 

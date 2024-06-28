@@ -34,7 +34,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     orderbookUpdated: new EventEmitter(),
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
-    userFillsUpdated: new EventEmitter()
+    userFillsUpdated: new EventEmitter(),
   };
 
   protected readonly hanjiWebSocketClient: HanjiWebSocketClient;
@@ -51,14 +51,14 @@ export class HanjiSpotWebSocketService implements Disposable {
 
     this.hanjiWebSocketClient.subscribe({
       channel: 'market',
-      market: params.market
+      market: params.market,
     });
   }
 
   unsubscribeFromMarket(params: UnsubscribeFromMarketParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'market',
-      market: params.market
+      market: params.market,
     });
   }
 
@@ -68,7 +68,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.subscribe({
       channel: 'orderbook',
       market: params.market,
-      aggregation: params.aggregation
+      aggregation: params.aggregation,
     });
   }
 
@@ -76,7 +76,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'orderbook',
       market: params.market,
-      aggregation: params.aggregation
+      aggregation: params.aggregation,
     });
   }
 
@@ -85,14 +85,14 @@ export class HanjiSpotWebSocketService implements Disposable {
 
     this.hanjiWebSocketClient.subscribe({
       channel: 'trades',
-      market: params.market
+      market: params.market,
     });
   }
 
   unsubscribeFromTrades(params: UnsubscribeFromTradesParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'trades',
-      market: params.market
+      market: params.market,
     });
   }
 

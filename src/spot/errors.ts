@@ -3,7 +3,6 @@ import type { ErrorDescription } from 'ethers';
 import { HanjiError } from '../common';
 
 export class TransactionFailedError extends HanjiError {
-
   constructor(
     readonly encodedError: string,
     readonly error: ErrorDescription | null,

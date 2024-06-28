@@ -12,7 +12,7 @@ export interface WebSocketClient<TSocket, TOpenEvent, TCloseEvent> {
     messageReceived: PublicEventEmitter<readonly [message: unknown]>;
     opened: PublicEventEmitter<readonly [socket: TSocket, event: TOpenEvent]>;
     closed: PublicEventEmitter<readonly [socket: TSocket, event: TCloseEvent]>;
-  }
+  };
 
   get readyState(): ReadyState;
 

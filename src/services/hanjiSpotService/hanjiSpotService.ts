@@ -6,7 +6,7 @@ import { RemoteService } from '../remoteService';
 export class HanjiSpotService extends RemoteService {
   async getOrderbook(params: GetOrderbookParams): Promise<OrderbookDto> {
     const queryParams = new URLSearchParams({
-      market: params.market
+      market: params.market,
     });
     if (params.limit)
       queryParams.append('limit', params.limit.toString());
@@ -22,7 +22,7 @@ export class HanjiSpotService extends RemoteService {
   async getOrders(params: GetOrdersParams): Promise<OrderDto[]> {
     const queryParams = new URLSearchParams({
       market: params.market,
-      user: params.user
+      user: params.user,
     });
     if (params.limit)
       queryParams.append('limit', params.limit.toString());
@@ -41,7 +41,7 @@ export class HanjiSpotService extends RemoteService {
 
   async getTrades(params: GetTradesParams): Promise<TradeDto[]> {
     const queryParams = new URLSearchParams({
-      market: params.market
+      market: params.market,
     });
     if (params.limit)
       queryParams.append('limit', params.limit.toString());
@@ -55,7 +55,7 @@ export class HanjiSpotService extends RemoteService {
   async getFills(params: GetFillsParams): Promise<FillDto[]> {
     const queryParams = new URLSearchParams({
       market: params.market,
-      user: params.user
+      user: params.user,
     });
     if (params.limit)
       queryParams.append('limit', params.limit.toString());

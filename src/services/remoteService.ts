@@ -50,8 +50,8 @@ export abstract class RemoteService {
     await this.ensureResponseOk(response);
 
     return responseFormat === 'none'
-      ? undefined :
-      (await (responseFormat === 'json' ? (response.json() as any) : response.text()));
+      ? undefined
+      : (await (responseFormat === 'json' ? (response.json() as any) : response.text()));
   }
 
   protected async ensureResponseOk(response: Response) {

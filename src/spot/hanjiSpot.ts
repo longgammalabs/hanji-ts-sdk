@@ -62,7 +62,7 @@ export class HanjiSpot implements Disposable {
     orderbookUpdated: new EventEmitter(),
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
-    userFillsUpdated: new EventEmitter()
+    userFillsUpdated: new EventEmitter(),
   };
 
   transferExecutedTokensEnabled: boolean | undefined;
@@ -205,7 +205,7 @@ export class HanjiSpot implements Disposable {
   async getOrderbook(params: GetOrderbookParams): Promise<Orderbook> {
     const [marketInfo, orderbookDto] = await Promise.all([
       this.ensureMarketInfo(params),
-      this.hanjiService.getOrderbook(params)
+      this.hanjiService.getOrderbook(params),
     ]);
     const orderbook = this.mappers.mapOrderbookDtoToOrderbook(orderbookDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken);
 
@@ -215,7 +215,7 @@ export class HanjiSpot implements Disposable {
   async getOrders(params: GetOrdersParams): Promise<Order[]> {
     const [marketInfo, orderDtos] = await Promise.all([
       this.ensureMarketInfo(params),
-      this.hanjiService.getOrders(params)
+      this.hanjiService.getOrders(params),
     ]);
     const orders = orderDtos.map(orderDto => this.mappers.mapOrderDtoToOrder(orderDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
 
@@ -225,7 +225,7 @@ export class HanjiSpot implements Disposable {
   async getTrades(params: GetTradesParams): Promise<Trade[]> {
     const [marketInfo, tradeDtos] = await Promise.all([
       this.ensureMarketInfo(params),
-      this.hanjiService.getTrades(params)
+      this.hanjiService.getTrades(params),
     ]);
     const trades = tradeDtos.map(tradeDto => this.mappers.mapTradeDtoToTrade(tradeDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
 
@@ -235,7 +235,7 @@ export class HanjiSpot implements Disposable {
   async getFills(params: GetFillsParams): Promise<Fill[]> {
     const [marketInfo, fillDtos] = await Promise.all([
       this.ensureMarketInfo(params),
-      this.hanjiService.getFills(params)
+      this.hanjiService.getFills(params),
     ]);
     const fills = fillDtos.map(fillDto => this.mappers.mapFillDtoToFill(fillDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
 
@@ -305,7 +305,7 @@ export class HanjiSpot implements Disposable {
         marketInfo,
         signerOrProvider: this.signerOrProvider,
         transferExecutedTokensEnabled: this.transferExecutedTokensEnabled,
-        autoWaitTransaction: this.autoWaitTransaction
+        autoWaitTransaction: this.autoWaitTransaction,
       });
       this.marketContracts.set(params.market, marketContract);
     }
@@ -335,7 +335,7 @@ export class HanjiSpot implements Disposable {
     return {
       baseToken: baseToken.scalingFactor,
       quoteToken: quoteToken.scalingFactor,
-      price: quoteToken.scalingFactor - baseToken.scalingFactor
+      price: quoteToken.scalingFactor - baseToken.scalingFactor,
     };
   }
 
@@ -347,7 +347,8 @@ export class HanjiSpot implements Disposable {
       const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, marketInfo.scalingFactors.price);
 
       (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(marketId, marketUpdate);
-    } catch (error) {
+    }
+    catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };

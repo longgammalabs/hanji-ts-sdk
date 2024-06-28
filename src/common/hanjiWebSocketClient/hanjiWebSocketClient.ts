@@ -15,7 +15,7 @@ interface HanjiWebSocketClientEvents {
 export class HanjiWebSocketClient implements Disposable {
   readonly baseUrl: string;
   readonly events: HanjiWebSocketClientEvents = {
-    messageReceived: new EventEmitter()
+    messageReceived: new EventEmitter(),
   };
 
   protected socket: WebSocketClient;
@@ -146,7 +146,7 @@ export class HanjiWebSocketClient implements Disposable {
 
     const message: SubscribeToSubscriptionWebSocketRequestDto = {
       method: 'subscribe',
-      subscription: subscription.data
+      subscription: subscription.data,
     };
     this.socket.send(message);
   }
@@ -157,7 +157,7 @@ export class HanjiWebSocketClient implements Disposable {
 
     const message: UnsubscribeFromSubscriptionWebSocketRequestDto = {
       method: 'unsubscribe',
-      subscription: subscription.data
+      subscription: subscription.data,
     };
     this.socket.send(message);
   }
@@ -169,10 +169,13 @@ export class HanjiWebSocketClient implements Disposable {
 
   protected onSocketClosed = (_socket: WebSocketClient, event: WebSocketCloseEvent) => {
     console.warn('Hanji websocket is closed. Reason:', event.reason);
-    this.reconnectScheduler.setTimeout(() => {
-      console.log('Hanji websocket reconnection...');
-      this.connect();
-    });
+    this.reconnectScheduler
+      .setTimeout(() => {
+        console.log('Hanji websocket reconnection...');
+        this.connect()
+          .catch(error => console.error('Reconnection error:', error));
+      })
+      .catch(error => console.error('Reconnect Scheduler error:', error));
   };
 
   protected onSocketMessageReceived = (message: unknown) => {

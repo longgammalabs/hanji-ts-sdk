@@ -10,7 +10,7 @@ export class WebSocketClient implements WebSocketClientInterface<WebSocketClient
   readonly events: WebSocketClientInterface<WebSocketClient, WebSocketOpenEvent, WebSocketCloseEvent>['events'] = {
     messageReceived: new EventEmitter(),
     opened: new EventEmitter(),
-    closed: new EventEmitter()
+    closed: new EventEmitter(),
   };
 
   get readyState() {

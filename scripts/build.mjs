@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-env node */
 const startTime = process.hrtime.bigint();
 import { spawnSync } from 'child_process';
 import path from 'node:path';
@@ -15,7 +13,7 @@ const makeAllPackagesExternalPlugin = {
   setup: build => build.onResolve(
     { filter: /^[^./]|^\.[^./]|^\.\.[^/]/ },
     args => ({ external: true, path: args.path })
-  )
+  ),
 };
 
 /**
@@ -34,7 +32,7 @@ const applyPlatformModulesPlugin = {
         return { path: path.join(args.resolveDir, updatedPath) };
       }
     );
-  }
+  },
 };
 
 /**
@@ -49,8 +47,8 @@ const baseOptions = {
   minify: false,
   plugins: [
     makeAllPackagesExternalPlugin,
-    applyPlatformModulesPlugin
-  ]
+    applyPlatformModulesPlugin,
+  ],
 };
 
 /**
@@ -98,20 +96,21 @@ try {
     .map(([format, outExtension]) => build({
       ...getNodeJsOptions(),
       format,
-      outExtension: { '.js': outExtension }
+      outExtension: { '.js': outExtension },
     }));
   // Browser
   buildPromises.concat([['esm', '.js'], ['esm', '.mjs']]
     .map(([format, outExtension]) => build({
       ...getBrowserJsOptions(),
       format,
-      outExtension: { '.js': outExtension }
+      outExtension: { '.js': outExtension },
     })));
 
   await Promise.all(buildPromises);
 
   console.info(`Building is completed (${getElapsedTimeMs()}ms)`);
   console.info(`\n\x1b[32mDone in ${getElapsedTimeMs(false)}ms\x1b[0m`);
-} catch (error) {
+}
+catch (error) {
   fail(error);
 }

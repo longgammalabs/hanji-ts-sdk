@@ -8,7 +8,7 @@ export class WebSocketClient implements WebSocketClientInterface<WebSocketClient
   readonly events: WebSocketClientInterface<WebSocketClient, WebSocketOpenEvent, WebSocketCloseEvent>['events'] = {
     messageReceived: new EventEmitter(),
     opened: new EventEmitter(),
-    closed: new EventEmitter()
+    closed: new EventEmitter(),
   };
 
   get readyState() {
@@ -68,7 +68,7 @@ export class WebSocketClient implements WebSocketClientInterface<WebSocketClient
 
   protected onMessageReceived = (event: MessageEvent<string>) => {
     try {
-      const data = JSON.parse(event.data as string);
+      const data = JSON.parse(event.data);
 
       (this.events.messageReceived as ToEventEmitter<typeof this.events.messageReceived>).emit(data);
     }

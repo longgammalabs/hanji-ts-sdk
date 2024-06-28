@@ -34,10 +34,10 @@ export type {
   OrderUpdate,
   TradeUpdate,
   FillUpdate,
-  TokenUpdate,
+  TokenUpdate
 } from './models';
 
 export {
   HanjiSpotService,
-  HanjiSpotWebSocketService,
+  HanjiSpotWebSocketService
 } from './services';

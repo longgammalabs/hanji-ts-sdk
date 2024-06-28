@@ -1,10 +1,10 @@
 export interface SubscribeToSubscriptionWebSocketRequestDto<TSubscription = unknown> {
-  method: 'subscribe',
+  method: 'subscribe';
   subscription: TSubscription;
 }
 
 export interface UnsubscribeFromSubscriptionWebSocketRequestDto<TSubscription = unknown> {
-  method: 'unsubscribe',
+  method: 'unsubscribe';
   subscription: TSubscription;
 }
 
