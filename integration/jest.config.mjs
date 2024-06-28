@@ -17,4 +17,12 @@ export default {
   clearMocks: true,
   testEnvironment: 'node',
   testTimeout: Number.parseInt(process.env.JEST_TIMEOUT),
+  transform: {
+    '^.+\\.m?[tj]sx?$': [
+      'ts-jest',
+      {
+        tsconfig: 'tsconfig.jest.json',
+      },
+    ],
+  },
 };

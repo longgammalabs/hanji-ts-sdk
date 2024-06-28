@@ -53,6 +53,7 @@
     "build": "node ./scripts/build.mjs",
     "build:types": "tsc -p tsconfig.build.json",
     "jest": "jest",
+    "test:integration": "jest ./integration/ --config ./integration/jest.config.mjs --bail",
     "watch": "npm run build -- -w",
     "check:types": "tsc -p tsconfig.json",
     "lint": "eslint ."
