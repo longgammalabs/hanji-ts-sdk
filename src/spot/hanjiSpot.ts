@@ -177,11 +177,7 @@ export class HanjiSpot implements Disposable {
         baseToken: market.baseToken,
         quoteToken: market.quoteToken,
         orderbookAddress: market.orderbookAddress,
-        scalingFactors: {
-          baseToken: market.baseToken.scalingFactor,
-          quoteToken: market.quoteToken.scalingFactor,
-          price: market.quoteToken.scalingFactor - market.baseToken.scalingFactor
-        }
+        scalingFactors: this.getScalingFactors(market.baseToken, market.quoteToken),
       };
       this.marketInfos.set(params.market, marketInfo);
     }
@@ -191,7 +187,10 @@ export class HanjiSpot implements Disposable {
 
   async getMarkets(params: GetMarketsParams): Promise<Market[]> {
     const marketDtos = await this.hanjiService.getMarkets(params);
-    const markets = marketDtos.map(this.mappers.mapMarketDtoToMarket);
+    const markets = marketDtos.map(marketDto => this.mappers.mapMarketDtoToMarket(
+      marketDto,
+      this.getScalingFactors(marketDto.baseToken, marketDto.quoteToken).price
+    ));
 
     return markets;
   }
@@ -330,6 +329,14 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.userOrdersUpdated.removeListener(this.onUserOrdersUpdated);
     this.hanjiWebSocketService.events.userFillsUpdated.removeListener(this.onUserFillsUpdated);
     this.hanjiWebSocketService.events.subscriptionError.removeListener(this.onSubscriptionError);
+  }
+
+  protected getScalingFactors(baseToken: Token, quoteToken: Token): MarketInfo['scalingFactors'] {
+    return {
+      baseToken: baseToken.scalingFactor,
+      quoteToken: quoteToken.scalingFactor,
+      price: quoteToken.scalingFactor - baseToken.scalingFactor
+    };
   }
 
   protected onMarketUpdated: Parameters<typeof this.hanjiWebSocketService.events.marketUpdated['addListener']>[0] = async (marketId, data) => {

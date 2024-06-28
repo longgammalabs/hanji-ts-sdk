@@ -1,6 +1,7 @@
 import BigNumber from 'bignumber.js';
-import { Contract, parseUnits, type Provider, type Signer, type ContractTransactionResponse } from 'ethers';
+import { Contract, type Provider, type Signer, type ContractTransactionResponse } from 'ethers';
 
+import { TransactionFailedError } from './errors';
 import type {
   ApproveSpotParams,
   BatchChangeOrderSpotParams,
@@ -65,9 +66,7 @@ export class HanjiSpotMarketContract {
     }
 
     const amount = this.convertTokensAmountToRawAmountIfNeeded(params.amount, token.decimals);
-    const tx: ContractTransactionResponse = await tokenContract.approve!(params.market, amount);
-    if (this.autoWaitTransaction)
-      await tx.wait();
+    const tx = await this.processContractMethodCall(tokenContract, tokenContract.approve!(params.market, amount));
 
     return tx;
   }
@@ -76,12 +75,10 @@ export class HanjiSpotMarketContract {
     const baseTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.baseTokenAmount, this.marketInfo.scalingFactors.baseToken);
     const quoteTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.quoteTokenAmount, this.marketInfo.scalingFactors.quoteToken);
 
-    const tx: ContractTransactionResponse = await this.marketContract.depositTokens!(
-      baseTokenAmount,
-      quoteTokenAmount
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.depositTokens!(baseTokenAmount, quoteTokenAmount)
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
@@ -100,23 +97,19 @@ export class HanjiSpotMarketContract {
       quoteTokenAmount = this.convertTokensAmountToRawAmountIfNeeded(params.quoteTokenAmount, this.marketInfo.scalingFactors.quoteToken);
     }
 
-    const tx: ContractTransactionResponse = await this.marketContract.withdrawTokens!(
-      withdrawAll,
-      baseTokenAmount,
-      quoteTokenAmount
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.withdrawTokens!(withdrawAll, baseTokenAmount, quoteTokenAmount)
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
 
   async setClaimableStatus(params: SetClaimableStatusParams): Promise<ContractTransactionResponse> {
-    const tx = await this.marketContract.setClaimableStatus!(
-      params.status
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.setClaimableStatus!(params.status)
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
@@ -125,16 +118,17 @@ export class HanjiSpotMarketContract {
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.marketInfo.scalingFactors.baseToken);
     const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.marketInfo.scalingFactors.price);
 
-    const tx: ContractTransactionResponse = await this.marketContract.placeOrder!(
-      params.side === 'ask',
-      sizeAmount,
-      priceAmount,
-      params.type === 'market',
-      params.type === 'limit_post_only',
-      params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.placeOrder!(
+        params.side === 'ask',
+        sizeAmount,
+        priceAmount,
+        params.type === 'market',
+        params.type === 'limit_post_only',
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+      )
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
@@ -150,26 +144,25 @@ export class HanjiSpotMarketContract {
       priceAmounts.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.price, this.marketInfo.scalingFactors.price));
     }
 
-    const tx: ContractTransactionResponse = await this.marketContract.batchPlaceOrder!(
-      directions,
-      sizeAmounts,
-      priceAmounts,
-      params.type === 'limit_post_only',
-      params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.batchPlaceOrder!(
+        directions,
+        sizeAmounts,
+        priceAmounts,
+        params.type === 'limit_post_only',
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+      )
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
 
   async claimOrder(params: ClaimOrderSpotParams): Promise<ContractTransactionResponse> {
-    const tx: ContractTransactionResponse = await this.marketContract.claimOrder!(
-      params.orderId,
-      params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.claimOrder!(params.orderId, params.transferExecutedTokens ?? this.transferExecutedTokensEnabled)
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
@@ -183,12 +176,10 @@ export class HanjiSpotMarketContract {
       orderIds.push(claimParams.orderId);
     }
 
-    const tx: ContractTransactionResponse = await this.marketContract.batchClaim!(
-      addresses,
-      orderIds
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.batchClaim!(addresses, orderIds)
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
@@ -197,15 +188,16 @@ export class HanjiSpotMarketContract {
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newSize, this.marketInfo.scalingFactors.baseToken);
     const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newPrice, this.marketInfo.scalingFactors.price);
 
-    const tx: ContractTransactionResponse = await this.marketContract.changeOrder!(
-      params.orderId,
-      sizeAmount,
-      priceAmount,
-      params.type === 'limit_post_only',
-      params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.changeOrder!(
+        params.orderId,
+        sizeAmount,
+        priceAmount,
+        params.type === 'limit_post_only',
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+      )
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
   }
@@ -221,17 +213,38 @@ export class HanjiSpotMarketContract {
       newPrices.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.newPrice, this.marketInfo.scalingFactors.price));
     }
 
-    const tx: ContractTransactionResponse = await this.marketContract.batchChangeOrder!(
-      orderIds,
-      newSizes,
-      newPrices,
-      params.type === 'limit_post_only',
-      params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.batchChangeOrder!(
+        orderIds,
+        newSizes,
+        newPrices,
+        params.type === 'limit_post_only',
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled
+      )
     );
-    if (this.autoWaitTransaction)
-      await tx.wait();
 
     return tx;
+  }
+
+  protected async processContractMethodCall(contract: Contract, methodCall: Promise<ContractTransactionResponse>): Promise<ContractTransactionResponse> {
+    try {
+      const tx = await methodCall;
+
+      if (this.autoWaitTransaction)
+        await tx.wait();
+
+      return tx;
+    }
+    catch (error) {
+      if ((error as any).data) {
+        const decodedError = contract.interface.parseError((error as any).data);
+
+        throw new TransactionFailedError((error as any).data, decodedError, { cause: error });
+      }
+
+      throw error;
+    }
   }
 
   private convertTokensAmountToRawAmountIfNeeded(amount: BigNumber | bigint, decimals: number): bigint {
