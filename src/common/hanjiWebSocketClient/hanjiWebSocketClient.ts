@@ -179,9 +179,6 @@ export class HanjiWebSocketClient implements Disposable {
     switch ((message as HanjiWebSocketResponseDto).channel) {
       case 'connection':
         break;
-      case 'pong':
-        // TODO: send ping every 20 seconds
-        break;
 
       default:
         (this.events.messageReceived as ToEventEmitter<typeof this.events.messageReceived>).emit(message as HanjiWebSocketResponseDto);
