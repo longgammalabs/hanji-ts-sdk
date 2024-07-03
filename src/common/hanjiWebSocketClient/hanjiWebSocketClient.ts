@@ -12,6 +12,8 @@ interface HanjiWebSocketClientEvents {
   messageReceived: PublicEventEmitter<readonly [message: HanjiWebSocketResponseDto]>;
 }
 
+export type SubscriptionData = boolean | string | number | Record<string, unknown>;
+
 export class HanjiWebSocketClient implements Disposable {
   readonly baseUrl: string;
   readonly events: HanjiWebSocketClientEvents = {
@@ -71,7 +73,7 @@ export class HanjiWebSocketClient implements Disposable {
     this._isStarting = false;
   }
 
-  subscribe<TData>(subscriptionData: TData): number {
+  subscribe(subscriptionData: SubscriptionData): number {
     const serializedSubscriptionData = this.serializeSubscriptionData(subscriptionData);
 
     let subscription = this.subscriptions.get(serializedSubscriptionData);
@@ -94,7 +96,7 @@ export class HanjiWebSocketClient implements Disposable {
     return subscription.id;
   }
 
-  unsubscribe<TData>(subscriptionData: TData): boolean {
+  unsubscribe(subscriptionData: SubscriptionData): boolean {
     const serializedSubscriptionData = this.serializeSubscriptionData(subscriptionData);
 
     const subscription = this.subscriptions.get(serializedSubscriptionData);
@@ -188,7 +190,7 @@ export class HanjiWebSocketClient implements Disposable {
     }
   };
 
-  protected serializeSubscriptionData(data: unknown) {
-    return JSON.stringify(data);
+  protected serializeSubscriptionData(data: SubscriptionData) {
+    return JSON.stringify(data, Object.keys(data));
   }
 }

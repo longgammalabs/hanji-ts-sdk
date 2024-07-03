@@ -8,6 +8,6 @@ export class TransactionFailedError extends HanjiError {
     readonly error: ErrorDescription | null,
     options?: ErrorOptions
   ) {
-    super(`Error: ${error ? `${error.name} [${error.selector}]` : `Unknown error: [${encodedError}]`}`, options);
+    super(`${error ? `${error.name} [${error.selector}]` : `Unknown error: [${encodedError}]`}`, options);
   }
 }
