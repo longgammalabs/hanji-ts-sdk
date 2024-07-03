@@ -46,16 +46,65 @@ export interface HanjiSpotOptions {
   autoWaitTransaction?: boolean;
 }
 
+/**
+ * Events are emitted when data related to subscriptions is updated.
+ */
 interface HanjiSpotEvents {
+  /**
+   * Emitted when a market's data is updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, data: MarketUpdate]>}
+   */
   marketUpdated: PublicEventEmitter<readonly [marketId: string, data: MarketUpdate]>;
+
+  /**
+   * Emitted when a market's orderbook is updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdate]>}
+   */
   orderbookUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdate]>;
+
+  /**
+   * Emitted when a market's trades are updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, data: TradeUpdate[]]>}
+   */
   tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdate[]]>;
+
+  /**
+   * Emitted when a user's orders are updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, data: OrderUpdate[]]>}
+   */
   userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdate[]]>;
+
+  /**
+   * Emitted when a user's fills are updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, data: FillUpdate[]]>}
+   */
   userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdate[]]>;
+
+  /**
+   * Emitted when there is an error related to a subscription.
+   * @event
+   * @type {PublicEventEmitter<readonly [error: string]>}
+   */
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
+/**
+ * The HanjiSpot is a class for interacting with the Hanji Spot API.
+ * It provides methods for retrieving market information, subscribing to market updates,
+ * placing orders, managing user orders and fills, and and more.
+ * Use the {@link HanjiClient#events} property to handle subscription events.
+ */
 export class HanjiSpot implements Disposable {
+  /**
+   * The events related to user subscriptions.
+   *
+   * These events are emitted when data is updated related to subscriptions.
+   */
   readonly events: HanjiSpotEvents = {
     subscriptionError: new EventEmitter(),
     marketUpdated: new EventEmitter(),
@@ -65,7 +114,22 @@ export class HanjiSpot implements Disposable {
     userFillsUpdated: new EventEmitter(),
   };
 
+  /**
+   * Indicates whether executed tokens should be transferred to the wallet or credited to the balance.
+   * When true, executed tokens will be transferred to the wallet. When false, executed tokens will be credited to the balance.
+   * If not set, the default value will be used.
+   * This flag is used by the Hanji Spot contract.
+   */
   transferExecutedTokensEnabled: boolean | undefined;
+  /**
+   * Indicates whether transactions should be automatically waited for by the client.
+   * When true, transactions will be automatically waited for by the client until confirmation is received.
+   * When false, transactions will not be waited for by the client.
+   * If not set, the default value will be used.
+   * This flag is used by the Hanji Spot contract.
+   *
+   * Note: "Wait" means that the client will wait until the transaction confirmation is received.
+   */
   autoWaitTransaction: boolean | undefined;
 
   protected readonly signerOrProvider: Signer | Provider;
@@ -87,66 +151,136 @@ export class HanjiSpot implements Disposable {
     this.attachEvents();
   }
 
+  /**
+  * Approves the specified amount of tokens for the corresponding market contract.
+  * You need to approve the tokens before you can deposit or place an order.
+  *
+  * @param {ApproveSpotParams} params - The parameters for approving tokens.
+  * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+  */
   async approveTokens(params: ApproveSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.approveTokens(params);
   }
 
+  /**
+  * Deposits the specified amount of tokens to the corresponding market contract.
+  * You need to approve the tokens before you can deposit them.
+  * Use the {@link HanjiSpot#approveTokens} method for that.
+  *
+  * @param {DepositSpotParams} params - The parameters for depositing tokens.
+  * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+  */
   async depositTokens(params: DepositSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.depositTokens(params);
   }
 
+  /**
+   * Withdraws the specified amount of tokens from the corresponding market contract.
+   * If withdrawAll is true, the entire balance of tokens will be withdrawn.
+   *
+   * @param {WithdrawSpotParams} params - The parameters for withdrawing tokens.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async withdrawTokens(params: WithdrawSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.withdrawTokens(params);
   }
 
+  /**
+   * Sets the claimable status for corresponding market contract.
+   *
+   * @param {SetClaimableStatusParams} params - The parameters for setting the claimable status.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async setClaimableStatus(params: SetClaimableStatusParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.setClaimableStatus(params);
   }
 
+  /**
+   * Places a new order in the corresponding market contract.
+   *
+   * @param {PlaceOrderSpotParams} params - The parameters for placing a new order.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async placeOrder(params: PlaceOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.placeOrder(params);
   }
 
+  /**
+   * Places multiple orders in the corresponding market contract.
+   *
+   * @param {BatchPlaceOrderSpotParams} params - The parameters for placing multiple orders.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async batchPlaceOrder(params: BatchPlaceOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.batchPlaceOrder(params);
   }
 
+  /**
+   * Claims an order or fully cancel it in the corresponding market contract.
+   *
+   * @param {ClaimOrderSpotParams} params - The parameters for claiming an order.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async claimOrder(params: ClaimOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.claimOrder(params);
   }
 
+  /**
+   * Claims multiple orders or fully cancels them in the corresponding market contract.
+   *
+   * @param {BatchClaimOrderSpotParams} params - The parameters for claiming multiple orders.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async batchClaim(params: BatchClaimOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.batchClaim(params);
   }
 
+  /**
+   * Change an existing order in the corresponding market contract.
+   *
+   * @param {ChangeOrderSpotParams} params - The parameters for changing an existing order.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async changeOrder(params: ChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.changeOrder(params);
   }
 
+  /**
+   * Change multiple existing orders in the corresponding market contract.
+   *
+   * @param {BatchChangeOrderSpotParams} params - The parameters for changing multiple existing orders.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async batchChangeOrder(params: BatchChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.batchChangeOrder(params);
   }
 
+  /**
+   * Retrieves the market information for the specified market.
+   *
+   * @param {GetMarketInfoParams} params - The parameters for retrieving the market information.
+   * @returns {Promise<MarketInfo | undefined>} A Promise that resolves to the market information or undefined if the market is not found.
+   */
   async getMarketInfo(params: GetMarketInfoParams): Promise<MarketInfo | undefined> {
     let marketInfo = this.marketInfos.get(params.market);
 
@@ -185,6 +319,12 @@ export class HanjiSpot implements Disposable {
     return marketInfo;
   }
 
+  /**
+   * Retrieves the markets.
+   *
+   * @param {GetMarketsParams} params - The parameters for retrieving the markets.
+   * @returns {Promise<Market[]>} A Promise that resolves to an array of markets.
+   */
   async getMarkets(params: GetMarketsParams): Promise<Market[]> {
     const marketDtos = await this.hanjiService.getMarkets(params);
     const markets = marketDtos.map(marketDto => this.mappers.mapMarketDtoToMarket(
@@ -195,6 +335,12 @@ export class HanjiSpot implements Disposable {
     return markets;
   }
 
+  /**
+   * Retrieves the tokens.
+   *
+   * @param {GetTokensParams} params - The parameters for retrieving the tokens.
+   * @returns {Promise<Token[]>} A Promise that resolves to an array of tokens.
+   */
   async getTokens(params: GetTokensParams): Promise<Token[]> {
     const tokenDtos = await this.hanjiService.getTokens(params);
     const tokens = tokenDtos.map(this.mappers.mapTokenDtoToToken);
@@ -202,6 +348,12 @@ export class HanjiSpot implements Disposable {
     return tokens;
   }
 
+  /**
+   * Retrieves the orderbook for the specified market.
+   *
+   * @param {GetOrderbookParams} params - The parameters for retrieving the orderbook.
+   * @returns {Promise<Orderbook>} A Promise that resolves to the orderbook.
+   */
   async getOrderbook(params: GetOrderbookParams): Promise<Orderbook> {
     const [marketInfo, orderbookDto] = await Promise.all([
       this.ensureMarketInfo(params),
@@ -212,6 +364,12 @@ export class HanjiSpot implements Disposable {
     return orderbook;
   }
 
+  /**
+   * Retrieves the orders for the specified market.
+   *
+   * @param {GetOrdersParams} params - The parameters for retrieving the orders.
+   * @returns {Promise<Order[]>} A Promise that resolves to an array of orders.
+   */
   async getOrders(params: GetOrdersParams): Promise<Order[]> {
     const [marketInfo, orderDtos] = await Promise.all([
       this.ensureMarketInfo(params),
@@ -222,6 +380,12 @@ export class HanjiSpot implements Disposable {
     return orders;
   }
 
+  /**
+   * Retrieves the trades for the specified market.
+   *
+   * @param {GetTradesParams} params - The parameters for retrieving the trades.
+   * @returns {Promise<Trade[]>} A Promise that resolves to an array of trades.
+   */
   async getTrades(params: GetTradesParams): Promise<Trade[]> {
     const [marketInfo, tradeDtos] = await Promise.all([
       this.ensureMarketInfo(params),
@@ -232,6 +396,12 @@ export class HanjiSpot implements Disposable {
     return trades;
   }
 
+  /**
+   * Retrieves the fills for the specified market.
+   *
+   * @param {GetFillsParams} params - The parameters for retrieving the fills.
+   * @returns {Promise<Fill[]>} A Promise that resolves to an array of fills.
+   */
   async getFills(params: GetFillsParams): Promise<Fill[]> {
     const [marketInfo, fillDtos] = await Promise.all([
       this.ensureMarketInfo(params),
@@ -242,42 +412,99 @@ export class HanjiSpot implements Disposable {
     return fills;
   }
 
+  /**
+   * Subscribes to the market updates for the specified market.
+   *
+   * @param {SubscribeToMarketParams} params - The parameters for subscribing to the market updates.
+   * @emits HanjiSpot#events#marketUpdated
+   */
   subscribeToMarket(params: SubscribeToMarketParams): void {
     this.hanjiWebSocketService.subscribeToMarket(params);
   }
 
+  /**
+   * Unsubscribes from the market updates for the specified market.
+   *
+   * @param {UnsubscribeFromMarketParams} params - The parameters for unsubscribing from the market updates.
+   */
   unsubscribeFromMarket(params: UnsubscribeFromMarketParams): void {
     this.hanjiWebSocketService.unsubscribeFromMarket(params);
   }
 
+  /**
+   * Subscribes to the orderbook updates for the specified market and aggregation level.
+   *
+   * @param {SubscribeToOrderbookParams} params - The parameters for subscribing to the orderbook updates.
+   * @emits HanjiSpot#events#orderbookUpdated
+   */
   subscribeToOrderbook(params: SubscribeToOrderbookParams): void {
     this.hanjiWebSocketService.subscribeToOrderbook(params);
   }
 
+  /**
+   * Unsubscribes from the orderbook updates for the specified market and aggregation level.
+   *
+   * @param {UnsubscribeFromOrderbookParams} params - The parameters for unsubscribing from the orderbook updates.
+   */
   unsubscribeFromOrderbook(params: UnsubscribeFromOrderbookParams): void {
     this.hanjiWebSocketService.unsubscribeFromOrderbook(params);
   }
 
+  /**
+   * Subscribes to the trade updates for the specified market.
+   *
+   * @param {SubscribeToTradesParams} params - The parameters for subscribing to the trade updates.
+   * @emits HanjiSpot#events#tradesUpdated
+   */
   subscribeToTrades(params: SubscribeToTradesParams): void {
     this.hanjiWebSocketService.subscribeToTrades(params);
   }
 
+  /**
+   * Unsubscribes from the trade updates for the specified market.
+   *
+   * @param {UnsubscribeFromTradesParams} params - The parameters for unsubscribing from the trade updates.
+   */
   unsubscribeFromTrades(params: UnsubscribeFromTradesParams): void {
     this.hanjiWebSocketService.unsubscribeFromTrades(params);
   }
 
+  /**
+   * Subscribes to the user orders updates for the specified market and user.
+   *
+   * @param {SubscribeToUserOrdersParams} params - The parameters for subscribing to the user orders updates.
+   * @emits HanjiSpot#events#ordersUpdated
+   */
   subscribeToUserOrders(params: SubscribeToUserOrdersParams): void {
     this.hanjiWebSocketService.subscribeToUserOrders(params);
   }
 
+  /**
+   * Unsubscribes from the user orders updates for the specified market and user.
+   *
+   * @param {UnsubscribeFromUserOrdersParams} params - The parameters for unsubscribing from the user orders updates.
+   * @emits HanjiSpot#events#ordersUpdated
+   */
   unsubscribeFromUserOrders(params: UnsubscribeFromUserOrdersParams): void {
     this.hanjiWebSocketService.unsubscribeFromUserOrders(params);
   }
 
+  /**
+   * Subscribes to the user fills updates for the specified market and user.
+   *
+   * @param {SubscribeToUserFillsParams} params - The parameters for subscribing to the user fills updates.
+   * @emits HanjiSpot#events#userFillsUpdated
+   */
   subscribeToUserFills(params: SubscribeToUserFillsParams): void {
     this.hanjiWebSocketService.subscribeToUserFills(params);
   }
 
+  /**
+   * Unsubscribes from the user fills updates for the specified market and user.
+   *
+   * @param {UnsubscribeFromUserFillsParams} params - The parameters for unsubscribing from the user fills updates.
+   * @emits HanjiSpot#events#userFillsUpdated
+   */
   unsubscribeFromUserFills(params: UnsubscribeFromUserFillsParams): void {
     this.hanjiWebSocketService.unsubscribeFromUserFills(params);
   }

@@ -2,16 +2,62 @@ import type { Provider, Signer } from 'ethers/providers';
 
 import { HanjiSpot } from './spot';
 
+/**
+ * The options for the HanjiClient.
+ *
+ * @interface HanjiClientOptions
+ */
 export interface HanjiClientOptions {
+  /**
+   * The base URL for the Hanji API.
+   *
+   * @type {string}
+   */
   apiBaseUrl: string;
+
+  /**
+   * The base URL for the Hanji WebSocket API.
+   *
+   * @type {string}
+   */
   webSocketApiBaseUrl: string;
+
+  /**
+   * The ethers signer or provider used for signing transactions.
+   *
+   * @type {Signer | Provider}
+   */
   singerOrProvider: Signer | Provider;
+
+  /**
+   * Whether to connect to the WebSocket immediately after creating the HanjiClient (true)
+   * or when will be called the first subscription (false).
+   * By default, the WebSocket is connected immediately.
+   *
+   * @type {boolean}
+   */
   webSocketConnectImmediately?: boolean;
 }
 
+/**
+ * The client for interacting with the {@link https://hanji.io/|Hanji.io} exchange.
+ *
+ * @class HanjiClient
+ */
 export class HanjiClient {
+  /**
+   * The HanjiSpot instance that provides the API functions to interact with the Hanji Spot contracts.
+   *
+   * @type {HanjiSpot}
+   * @readonly
+   */
   readonly spot: HanjiSpot;
 
+  /**
+   * Creates a new HanjiClient instance.
+   *
+   * @param {HanjiClientOptions} options - The options for the HanjiClient.
+   */
   constructor(options: Readonly<HanjiClientOptions>) {
     this.spot = new HanjiSpot(options);
   }

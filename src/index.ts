@@ -1,4 +1,11 @@
 export {
+  TimeoutScheduler,
+  HanjiError,
+
+  type PublicEventEmitter
+} from './common';
+
+export {
   HanjiClient,
 
   type HanjiClientOptions
