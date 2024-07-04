@@ -93,27 +93,107 @@ export interface BatchChangeOrderSpotParams {
   transferExecutedTokens?: boolean;
 }
 
+/**
+ * Parameters for retrieving the order book.
+ *
+ * @interface GetOrderbookParams
+ */
 export interface GetOrderbookParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Number of rounding decimals
+   *
+   * @type {number}
+   * @optional
+   */
   aggregation?: number;
+  /**
+   * Levels for each side
+   *
+   * @type {number}
+   * @optional
+   * @default 20
+   */
   limit?: number;
 }
 
+/**
+ * Parameters for retrieving the orders.
+ *
+ * @interface GetOrdersParams
+ */
 export interface GetOrdersParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Address in 42-character hexadecimal format
+   *
+   * @type {string}
+   */
   user: string;
+  /**
+   * Number of orders to retrieve
+   *
+   * @type {number}
+   * @optional
+   * @default 100
+   */
   limit?: number;
+  /**
+   * Order statuses to filter by
+   *
+   * @type {OrderStatus | OrderStatus[]}
+   * @optional
+   */
   status?: OrderStatus | OrderStatus[];
 }
 
 export interface GetTradesParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Number of trades to retrieve
+   *
+   * @type {number}
+   * @optional
+   * @default 100
+   */
   limit?: number;
 }
 
 export interface GetFillsParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Address in 42-character hexadecimal format
+   *
+   * @type {string}
+   */
   user: string;
+  /**
+   * Number of fills to retrieve
+   *
+   * @type {number}
+   * @optional
+   * @default 100
+   */
   limit?: number;
 }
 
@@ -122,10 +202,22 @@ export interface GetTokensParams {
 }
 
 export interface GetMarketInfoParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
 }
 
 export interface GetMarketsParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   * @optional
+   * @note If not provided, all markets will be returned
+   */
   market?: string;
 }
 
