@@ -27,7 +27,15 @@ interface HanjiSpotWebSocketServiceEvents {
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
+/**
+ * HanjiSpotWebSocketService provides methods to interact with the Hanji spot market via WebSocket.
+ * It allows subscribing and unsubscribing to various market events such as market updates, orderbook updates,
+ * trades, user orders, and user fills.
+ */
 export class HanjiSpotWebSocketService implements Disposable {
+  /**
+   * Event emitters for various WebSocket events.
+   */
   readonly events: HanjiSpotWebSocketServiceEvents = {
     subscriptionError: new EventEmitter(),
     marketUpdated: new EventEmitter(),
@@ -37,8 +45,16 @@ export class HanjiSpotWebSocketService implements Disposable {
     userFillsUpdated: new EventEmitter(),
   };
 
+  /**
+   * The WebSocket client used to communicate with the Hanji spot market.
+   */
   protected readonly hanjiWebSocketClient: HanjiWebSocketClient;
 
+  /**
+   * Creates an instance of HanjiSpotWebSocketService.
+   * @param baseUrl - The base URL for the WebSocket connection.
+   * @param startImmediately - Whether to start the WebSocket client immediately.
+   */
   constructor(readonly baseUrl: string, startImmediately = true) {
     this.hanjiWebSocketClient = new HanjiWebSocketClient(baseUrl);
     this.hanjiWebSocketClient.events.messageReceived.addListener(this.onSocketMessageReceived);
@@ -46,6 +62,10 @@ export class HanjiSpotWebSocketService implements Disposable {
       this.startHanjiWebSocketClientIfNeeded();
   }
 
+  /**
+   * Subscribes to market updates for a given market.
+   * @param params - The parameters for the market subscription.
+   */
   subscribeToMarket(params: SubscribeToMarketParams) {
     this.startHanjiWebSocketClientIfNeeded();
 
@@ -55,6 +75,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Unsubscribes from market updates for a given market.
+   * @param params - The parameters for the market unsubscription.
+   */
   unsubscribeFromMarket(params: UnsubscribeFromMarketParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'market',
@@ -62,6 +86,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Subscribes to orderbook updates for a given market.
+   * @param params - The parameters for the orderbook subscription.
+   */
   subscribeToOrderbook(params: SubscribeToOrderbookParams) {
     this.startHanjiWebSocketClientIfNeeded();
 
@@ -72,6 +100,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Unsubscribes from orderbook updates for a given market.
+   * @param params - The parameters for the orderbook unsubscription.
+   */
   unsubscribeFromOrderbook(params: UnsubscribeFromOrderbookParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'orderbook',
@@ -80,6 +112,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Subscribes to trade updates for a given market.
+   * @param params - The parameters for the trade subscription.
+   */
   subscribeToTrades(params: SubscribeToTradesParams) {
     this.startHanjiWebSocketClientIfNeeded();
 
@@ -89,6 +125,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Unsubscribes from trade updates for a given market.
+   * @param params - The parameters for the trade unsubscription.
+   */
   unsubscribeFromTrades(params: UnsubscribeFromTradesParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'trades',
@@ -96,6 +136,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Subscribes to user order updates for a given market and user.
+   * @param params - The parameters for the user order subscription.
+   */
   subscribeToUserOrders(params: SubscribeToUserOrdersParams) {
     this.startHanjiWebSocketClientIfNeeded();
 
@@ -106,6 +150,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Unsubscribes from user order updates for a given market and user.
+   * @param params - The parameters for the user order unsubscription.
+   */
   unsubscribeFromUserOrders(params: UnsubscribeFromUserOrdersParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'userOrders',
@@ -114,6 +162,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Subscribes to user fill updates for a given market and user.
+   * @param params - The parameters for the user fill subscription.
+   */
   subscribeToUserFills(params: SubscribeToUserFillsParams) {
     this.startHanjiWebSocketClientIfNeeded();
 
@@ -124,6 +176,10 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Unsubscribes from user fill updates for a given market and user.
+   * @param params - The parameters for the user fill unsubscription.
+   */
   unsubscribeFromUserFills(params: UnsubscribeFromUserFillsParams) {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'userFills',
@@ -132,16 +188,26 @@ export class HanjiSpotWebSocketService implements Disposable {
     });
   }
 
+  /**
+   * Disposes the WebSocket client and removes the message listener.
+   */
   [Symbol.dispose]() {
     this.hanjiWebSocketClient.events.messageReceived.removeListener(this.onSocketMessageReceived);
     this.hanjiWebSocketClient.stop();
   }
 
+  /**
+   * Starts the WebSocket client if it is not already started.
+   */
   protected startHanjiWebSocketClientIfNeeded() {
     this.hanjiWebSocketClient.start()
-      .catch(error => console.error(`Hanji Web Socket has not bee started. Error = ${getErrorLogMessage(error)}`));
+      .catch(error => console.error(`Hanji Web Socket has not been started. Error = ${getErrorLogMessage(error)}`));
   }
 
+  /**
+   * Handles incoming WebSocket messages and emits the appropriate events.
+   * @param message - The WebSocket message received.
+   */
   protected readonly onSocketMessageReceived = (message: HanjiWebSocketResponseDto) => {
     try {
       if (!message.data)

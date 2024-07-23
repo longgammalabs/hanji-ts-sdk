@@ -37,12 +37,57 @@ import { getErrorLogMessage } from '../logging';
 import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, MarketInfo } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 
+/**
+ * Options for configuring the HanjiSpot instance.
+ *
+ * @interface HanjiSpotOptions
+ */
 export interface HanjiSpotOptions {
+  /**
+   * The base URL for the Hanji API.
+   *
+   * @type {string}
+   */
   apiBaseUrl: string;
+
+  /**
+   * The base URL for the Hanji WebSocket API.
+   *
+   * @type {string}
+   */
   webSocketApiBaseUrl: string;
+
+  /**
+   * The ethers signer or provider used for signing transactions.
+   *
+   * @type {Signer | Provider}
+   */
   singerOrProvider: Signer | Provider;
+
+  /**
+   * Whether to connect to the WebSocket immediately after creating the HanjiSpot (true)
+   * or when the first subscription is called (false).
+   * By default, the WebSocket is connected immediately.
+   *
+   * @type {boolean}
+   * @optional
+   */
   webSocketConnectImmediately?: boolean;
+
+  /**
+   * Whether to enable the transfer of executed tokens.
+   *
+   * @type {boolean}
+   * @optional
+   */
   transferExecutedTokensEnabled?: boolean;
+
+  /**
+   * Whether to automatically wait for transactions to be confirmed.
+   *
+   * @type {boolean}
+   * @optional
+   */
   autoWaitTransaction?: boolean;
 }
 

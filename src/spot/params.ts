@@ -8,16 +8,62 @@ export interface ApproveSpotParams {
   amount: BigNumber | bigint;
 }
 
+/**
+ * Parameters for depositing tokens into the spot market.
+ */
 export interface DepositSpotParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Amount of base tokens to deposit.
+   * Actual amount divided by base token scaling factor.
+   *
+   * @type {BigNumber | bigint}
+   */
   baseTokenAmount: BigNumber | bigint;
+  /**
+   * Amount of quote tokens to deposit.
+   * Actual amount divided by quote token scaling factor.
+   *
+   * @type {BigNumber | bigint}
+   */
   quoteTokenAmount: BigNumber | bigint;
 }
 
+/**
+ * Base parameters for withdrawing tokens from the spot market.
+ */
 interface WithdrawBaseSpotParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Amount of base tokens to withdraw
+   *
+   * @type {BigNumber | bigint}
+   * @optional
+   */
   baseTokenAmount?: BigNumber | bigint;
+  /**
+   * Amount of quote tokens to withdraw
+   *
+   * @type {BigNumber | bigint}
+   * @optional
+   */
   quoteTokenAmount?: BigNumber | bigint;
+  /**
+   * Flag to withdraw all tokens
+   *
+   * @type {boolean}
+   * @optional
+   */
   withdrawAll?: boolean;
 }
 
@@ -39,12 +85,56 @@ export interface SetClaimableStatusParams {
   status: boolean;
 }
 
+/**
+ * Parameters for placing an order on the spot market.
+ *
+ * @interface PlaceOrderSpotParams
+ */
 export interface PlaceOrderSpotParams {
+  /**
+   * The ID of the market where the order will be placed.
+   *
+   * @type {string}
+   */
   market: string;
+
+  /**
+   * The type of the order (e.g., limit, market).
+   *
+   * @type {OrderType}
+   */
   type: OrderType;
+
+  /**
+   * The side of the order (buy or sell).
+   *
+   * @type {Side}
+   */
   side: Side;
+
+  /**
+   * The size of the order. The amount of tokens to order divided by the scaling factor.
+   * This amount would be multiplied by the scaling factor inside the function
+   *
+   * @type {BigNumber | bigint}
+   */
   size: BigNumber | bigint;
+
+  /**
+   * The price at which the order will be placed.
+   * No more than 6 significant digits.
+   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`
+   *
+   * @type {BigNumber | bigint}
+   */
   price: BigNumber | bigint;
+
+  /**
+   * Whether to transfer executed tokens automatically.
+   *
+   * @type {boolean}
+   * @optional
+   */
   transferExecutedTokens?: boolean;
 }
 
@@ -59,9 +149,32 @@ export type BatchPlaceOrderSpotParams = {
   transferExecutedTokens?: boolean;
 };
 
+/**
+ * Parameters for claiming an order on the Hanji Spot market.
+ *
+ * @interface ClaimOrderSpotParams
+ */
 export interface ClaimOrderSpotParams {
+  /**
+   * The market identifier where the order exists.
+   *
+   * @type {string}
+   */
   market: string;
+
+  /**
+   * The unique identifier of the order to be claimed.
+   *
+   * @type {string}
+   */
   orderId: string;
+
+  /**
+   * Whether to transfer tokens to user automatically.
+   *
+   * @type {boolean}
+   * @optional
+   */
   transferExecutedTokens?: boolean;
 }
 
@@ -73,12 +186,56 @@ export interface BatchClaimOrderSpotParams {
   }>;
 }
 
+/**
+ * Parameters for changing an existing order on the Hanji Spot market.
+ *
+ * @interface ChangeOrderSpotParams
+ */
 export interface ChangeOrderSpotParams {
+  /**
+   * The market identifier where the order exists.
+   *
+   * @type {string}
+   */
   market: string;
+
+  /**
+   * The unique identifier of the order to be changed.
+   *
+   * @type {string}
+   */
   orderId: string;
+
+  /**
+   * The new size of the order. The amount of tokens to order divided by the scaling factor.
+   * This amount would be multiplied by the scaling factor inside the function.
+   *
+   * @type {BigNumber | bigint}
+   */
   newSize: BigNumber | bigint;
+
+  /**
+   * The new price at which the order will be placed.
+   * No more than 6 significant digits.
+   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`.
+   *
+   * @type {BigNumber | bigint}
+   */
   newPrice: BigNumber | bigint;
+
+  /**
+   * The type of the order, either 'limit' or 'limit_post_only'.
+   *
+   * @type {'limit' | 'limit_post_only'}
+   */
   type: 'limit' | 'limit_post_only';
+
+  /**
+   * Whether to transfer executed tokens automatically.
+   *
+   * @type {boolean}
+   * @optional
+   */
   transferExecutedTokens?: boolean;
 }
 
