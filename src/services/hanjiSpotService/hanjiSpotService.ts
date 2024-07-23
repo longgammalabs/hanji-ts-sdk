@@ -3,7 +3,16 @@ import type { GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersPar
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
 
+/**
+ * HanjiSpotService provides methods to interact with the Hanji spot market API.
+ * It extends the RemoteService class to leverage common remote service functionalities.
+ */
 export class HanjiSpotService extends RemoteService {
+  /**
+   * Retrieves the orderbook for a given market.
+   * @param params - The parameters for the orderbook request.
+   * @returns The orderbook data.
+   */
   async getOrderbook(params: GetOrderbookParams): Promise<OrderbookDto> {
     const queryParams = new URLSearchParams({
       market: params.market,
@@ -19,6 +28,11 @@ export class HanjiSpotService extends RemoteService {
     return response;
   }
 
+  /**
+   * Retrieves the orders for a given market.
+   * @param params - The parameters for the orders request.
+   * @returns The orders data.
+   */
   async getOrders(params: GetOrdersParams): Promise<OrderDto[]> {
     const queryParams = new URLSearchParams({
       market: params.market,
@@ -39,6 +53,11 @@ export class HanjiSpotService extends RemoteService {
     return response;
   }
 
+  /**
+   * Retrieves the trades for a given market.
+   * @param params - The parameters for the trades request.
+   * @returns The trades data.
+   */
   async getTrades(params: GetTradesParams): Promise<TradeDto[]> {
     const queryParams = new URLSearchParams({
       market: params.market,
@@ -52,6 +71,11 @@ export class HanjiSpotService extends RemoteService {
     return response;
   }
 
+  /**
+   * Retrieves the fills for a given market.
+   * @param params - The parameters for the fills request.
+   * @returns The fills data.
+   */
   async getFills(params: GetFillsParams): Promise<FillDto[]> {
     const queryParams = new URLSearchParams({
       market: params.market,
@@ -66,6 +90,11 @@ export class HanjiSpotService extends RemoteService {
     return response;
   }
 
+  /**
+   * Retrieves the tokens for a given market.
+   * @param params - The parameters for the tokens request.
+   * @returns The tokens data.
+   */
   async getTokens(params: GetTokensParams): Promise<TokenDto[]> {
     const queryParams = new URLSearchParams();
     if (params.token)
@@ -77,6 +106,11 @@ export class HanjiSpotService extends RemoteService {
     return response;
   }
 
+  /**
+   * Retrieves the markets for a given market.
+   * @param params - The parameters for the markets request.
+   * @returns The markets data.
+   */
   async getMarkets(params: GetMarketsParams): Promise<MarketDto[]> {
     const queryParams = new URLSearchParams();
     if (params.market)
