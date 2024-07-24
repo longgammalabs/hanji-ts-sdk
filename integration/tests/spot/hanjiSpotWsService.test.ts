@@ -15,7 +15,7 @@ describe('Hanji Spot WebSocket Client', () => {
     hanjiClient = new HanjiClient({
       apiBaseUrl: testConfig.hanjiApiBaseUrl,
       webSocketApiBaseUrl: testConfig.hanjiWebsocketBaseUrl,
-      singerOrProvider: signer,
+      signerOrProvider: signer,
       webSocketConnectImmediately: false,
     });
   });
