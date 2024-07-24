@@ -35,7 +35,7 @@ import { HanjiClient } from 'hanji-ts-sdk';
 const client = new HanjiClient({
   apiBaseUrl: 'https://api.hanji.io',
   webSocketApiBaseUrl: 'wss://api.hanji.io',
-  singerOrProvider: wallet,
+  signerOrProvider: wallet,
 });
 
 const market = '<orderbookAddress>';
@@ -80,7 +80,7 @@ import { HanjiClient } from 'hanji-ts-sdk';
 const client = new HanjiClient({
   apiBaseUrl: 'https://api.hanji.io',
   webSocketApiBaseUrl: 'wss://api.hanji.io',
-  singerOrProvider: wallet,
+  signerOrProvider: wallet,
 });
 
 const market = '<orderbookAddress>';

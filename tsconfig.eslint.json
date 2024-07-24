@@ -4,6 +4,7 @@
     "src",
     "tests",
     "integration",
+    "example",
     "eslint.config.mjs"
   ],
   "exclude": [

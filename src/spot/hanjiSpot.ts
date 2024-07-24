@@ -62,10 +62,11 @@ export interface HanjiSpotOptions {
 
   /**
    * The ethers signer or provider used for signing transactions.
+   * For only http/ws operations, you can set this to null.
    *
-   * @type {Signer | Provider}
+   * @type {Signer | Provider | null}
    */
-  singerOrProvider: Signer | Provider;
+  signerOrProvider: Signer | Provider | null;
 
   /**
    * Whether to connect to the WebSocket immediately after creating the HanjiSpot (true)
@@ -188,7 +189,7 @@ export class HanjiSpot implements Disposable {
    */
   autoWaitTransaction: boolean | undefined;
 
-  protected readonly signerOrProvider: Signer | Provider;
+  protected signerOrProvider: Signer | Provider | null;
   protected readonly hanjiService: HanjiSpotService;
   protected readonly hanjiWebSocketService: HanjiSpotWebSocketService;
   protected readonly marketContracts: Map<string, HanjiSpotMarketContract> = new Map();
@@ -197,7 +198,7 @@ export class HanjiSpot implements Disposable {
   private readonly marketInfoPromises: Map<string, Promise<Market[]>> = new Map();
 
   constructor(options: Readonly<HanjiSpotOptions>) {
-    this.signerOrProvider = options.singerOrProvider;
+    this.signerOrProvider = options.signerOrProvider;
     this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled;
     this.autoWaitTransaction = options.autoWaitTransaction;
     this.hanjiService = new HanjiSpotService(options.apiBaseUrl);
@@ -205,6 +206,17 @@ export class HanjiSpot implements Disposable {
     this.mappers = mappers;
 
     this.attachEvents();
+  }
+
+  /**
+   * Sets a new signer or provider for the HanjiSpot instance.
+   *
+   * @param {Signer | Provider} signerOrProvider - The new signer or provider to be set.
+   * @returns {HanjiSpot} Returns the HanjiSpot instance for method chaining.
+   */
+  setSignerOrProvider(signerOrProvider: Signer | Provider): HanjiSpot {
+    this.signerOrProvider = signerOrProvider;
+    return this;
   }
 
   /**
@@ -609,6 +621,9 @@ export class HanjiSpot implements Disposable {
   }
 
   protected async getSpotMarketContract(params: { market: string }): Promise<HanjiSpotMarketContract> {
+    if (this.signerOrProvider === null) {
+      throw new Error('Signer or provider is not set');
+    }
     let marketContract = this.marketContracts.get(params.market);
 
     if (!marketContract) {

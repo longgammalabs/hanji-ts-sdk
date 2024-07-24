@@ -3,6 +3,7 @@ import type { Direction, OrderStatus, OrderType, Side } from '../../models';
 export interface OrderBookLevelUpdateDto {
   price: string;
   size: string;
+  lastTouched: number;
 }
 
 export interface OrderbookUpdateDto {

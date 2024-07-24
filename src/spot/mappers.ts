@@ -1,3 +1,4 @@
+import BigNumber from 'bignumber.js';
 import type {
   Token,
   Market,
@@ -45,11 +46,13 @@ export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number): Marke
 };
 
 const mapOrderbookLevelDtoToOrderbookLevel = (dto: OrderbookLevelDto, priceFactor: number, sizeFactor: number): OrderbookLevel => {
+  const price = BigNumber(dto.price);
+  const size = BigNumber(dto.size);
   return {
-    rawPrice: BigInt(dto.price),
-    price: tokenUtils.convertTokensRawAmountToAmount(dto.price, priceFactor),
-    rawSize: BigInt(dto.size),
-    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, sizeFactor),
+    rawPrice: tokenUtils.convertTokensAmountToRawAmount(price, priceFactor),
+    price,
+    rawSize: tokenUtils.convertTokensAmountToRawAmount(size, sizeFactor),
+    size: size,
   };
 };
 
