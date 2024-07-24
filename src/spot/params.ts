@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-import { OrderType, type OrderStatus, type Side } from '../models';
+import { CandleResolution, OrderType, type OrderStatus, type Side } from '../models';
 
 export interface ApproveSpotParams {
   market: string;
@@ -378,6 +378,41 @@ export interface GetMarketsParams {
   market?: string;
 }
 
+/**
+ * Parameters for retrieving candle data for a specific market.
+ */
+export interface GetCandlesParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
+  market: string;
+
+  /**
+   * Resolution of the candles to retrieve
+   *
+   * @type {CandleResolution}
+   */
+  resolution: CandleResolution;
+
+  /**
+   * Start time for the candle data in Unix timestamp format
+   *
+   * @type {number}
+   * @optional
+   */
+  fromTime?: number;
+
+  /**
+   * End time for the candle data in Unix timestamp format
+   *
+   * @type {number}
+   * @optional
+   */
+  toTime?: number;
+}
+
 export interface SubscribeToMarketParams {
   market: string;
 }
@@ -410,3 +445,9 @@ export interface SubscribeToUserFillsParams {
   market: string;
 }
 export type UnsubscribeFromUserFillsParams = SubscribeToUserFillsParams;
+
+export interface SubscribeToCandlesParams {
+  market: string;
+  resolution: CandleResolution;
+}
+export type UnsubscribeFromCandlesParams = SubscribeToCandlesParams;

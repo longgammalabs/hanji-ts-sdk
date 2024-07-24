@@ -1,5 +1,5 @@
-import type { FillDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto } from './dtos';
-import type { GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams } from './params';
+import type { CandleDto, FillDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto } from './dtos';
+import type { GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams } from './params';
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
 
@@ -118,6 +118,26 @@ export class HanjiSpotService extends RemoteService {
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
     const response = await this.fetch<MarketDto[]>(`/markets?${queryParamsString}`, 'json');
+
+    return response;
+  }
+
+  /**
+   * Retrieves the candle data for a given market.
+   * @param params - The parameters for the candles request.
+   * @returns The candle data.
+   */
+  async getCandles(params: GetCandlesParams): Promise<CandleDto[]> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('market', params.market);
+    queryParams.append('resolution', params.resolution);
+    if (params.fromTime)
+      queryParams.append('fromTime', params.fromTime.toString());
+    if (params.toTime)
+      queryParams.append('toTime', params.toTime.toString());
+
+    const queryParamsString = decodeURIComponent(queryParams.toString());
+    const response = await this.fetch<CandleDto[]>(`/candles?${queryParamsString}`, 'json');
 
     return response;
   }

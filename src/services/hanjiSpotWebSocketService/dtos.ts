@@ -56,6 +56,7 @@ export interface CandleUpdateDto {
   low: string;
   close: string;
   volume: string;
+  lastTouched: number;
 }
 
 export interface TradeUpdateDto {

@@ -1,4 +1,5 @@
 import type {
+  CandleUpdateDto,
   FillUpdateDto,
   MarketUpdateDto,
   OrderUpdateDto,
@@ -10,7 +11,9 @@ import type {
   SubscribeToOrderbookParams, UnsubscribeFromOrderbookParams,
   SubscribeToTradesParams, UnsubscribeFromTradesParams,
   SubscribeToUserOrdersParams, UnsubscribeFromUserOrdersParams,
-  SubscribeToUserFillsParams, UnsubscribeFromUserFillsParams
+  SubscribeToUserFillsParams, UnsubscribeFromUserFillsParams,
+  SubscribeToCandlesParams,
+  UnsubscribeFromCandlesParams
 } from './params';
 import {
   HanjiWebSocketClient, EventEmitter,
@@ -24,6 +27,7 @@ interface HanjiSpotWebSocketServiceEvents {
   tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdateDto[]]>;
   userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdateDto[]]>;
   userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdateDto[]]>;
+  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdateDto[]]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
@@ -43,6 +47,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
     userFillsUpdated: new EventEmitter(),
+    candlesUpdated: new EventEmitter(),
   };
 
   /**
@@ -189,6 +194,32 @@ export class HanjiSpotWebSocketService implements Disposable {
   }
 
   /**
+   * Subscribes to candle updates for a given market and resolution.
+   * @param params - The parameters for the candle subscription.
+   */
+  subscribeToCandles(params: SubscribeToCandlesParams) {
+    this.startHanjiWebSocketClientIfNeeded();
+
+    this.hanjiWebSocketClient.subscribe({
+      channel: 'candles',
+      resolution: params.resolution,
+      market: params.market,
+    });
+  }
+
+  /**
+   * Unsubscribes from candle updates for a given market and resolution.
+   * @param params - The parameters for the candle unsubscription.
+   */
+  unsubscribeFromCandles(params: UnsubscribeFromCandlesParams) {
+    this.hanjiWebSocketClient.unsubscribe({
+      channel: 'candles',
+      resolution: params.resolution,
+      market: params.market,
+    });
+  }
+
+  /**
    * Disposes the WebSocket client and removes the message listener.
    */
   [Symbol.dispose]() {
@@ -228,6 +259,9 @@ export class HanjiSpotWebSocketService implements Disposable {
           break;
         case 'userFills':
           (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.id, message.data as FillUpdateDto[]);
+          break;
+        case 'candles':
+          (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(message.id, message.data as CandleUpdateDto[]);
           break;
         case 'error':
           (this.events.subscriptionError as ToEventEmitter<typeof this.events.subscriptionError>).emit(message.data as string);

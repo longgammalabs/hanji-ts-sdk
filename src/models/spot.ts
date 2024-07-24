@@ -30,6 +30,15 @@ export type OrderType = 'limit' | 'limit_post_only' | 'market';
 export type OrderStatus = 'open' | 'filled' | 'claimed' | 'cancelled';
 
 /**
+ * Represents the resolution of a candle in the market.
+ * '15' indicates a 15-minute resolution,
+ * '60' indicates a 1-hour resolution,
+ * '240' indicates a 4-hour resolution,
+ * '1D' indicates a 1-day resolution.
+ */
+export type CandleResolution = '15' | '60' | '240' | '1D';
+
+/**
  * Represents a market in the trading system.
  */
 export interface Market {
@@ -528,3 +537,60 @@ export interface MarketInfo {
     price: number;
   };
 }
+
+/**
+ * Represents a candle in the trading system.
+ *
+ * @interface Candle
+ */
+export interface Candle {
+  /**
+   * The time of the candle.
+   *
+   * @type {number}
+   */
+  time: number;
+
+  /**
+   * The opening price of the candle.
+   *
+   * @type {string}
+   */
+  open: string;
+
+  /**
+   * The highest price of the candle.
+   *
+   * @type {string}
+   */
+  high: string;
+
+  /**
+   * The lowest price of the candle.
+   *
+   * @type {string}
+   */
+  low: string;
+
+  /**
+   * The closing price of the candle.
+   *
+   * @type {string}
+   */
+  close: string;
+
+  /**
+   * The volume of the candle.
+   *
+   * @type {string}
+   */
+  volume: string;
+
+  /**
+   * The last time the candle was updated.
+   *
+   * @type {number}
+   */
+  lastTouched: number;
+}
+export type CandleUpdate = Candle;

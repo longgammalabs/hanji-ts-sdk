@@ -78,3 +78,13 @@ export interface MarketDto {
   lowPrice24h: string | null;
   highPrice24h: string | null;
 }
+
+export interface CandleDto {
+  time: number;
+  open: string;
+  high: string;
+  low: string;
+  close: string;
+  volume: string;
+  lastTouched: number;
+}

@@ -7,5 +7,14 @@ export type {
   WithdrawSpotParams,
   PlaceOrderSpotParams,
   ChangeOrderSpotParams,
-  ClaimOrderSpotParams
+  ClaimOrderSpotParams,
+
+  GetOrderbookParams,
+  GetOrdersParams,
+  GetTradesParams,
+  GetFillsParams,
+  GetTokensParams,
+  GetMarketInfoParams,
+  GetMarketsParams,
+  GetCandlesParams
 } from './params';
