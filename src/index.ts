@@ -20,7 +20,17 @@ export {
   type WithdrawSpotParams,
   type PlaceOrderSpotParams,
   type ChangeOrderSpotParams,
-  type ClaimOrderSpotParams
+  type ClaimOrderSpotParams,
+
+  type GetOrderbookParams,
+  type GetOrdersParams,
+  type GetTradesParams,
+  type GetFillsParams,
+  type GetTokensParams,
+  type GetMarketInfoParams,
+  type GetMarketsParams,
+  type GetCandlesParams
+
 } from './spot';
 
 export type {
@@ -28,6 +38,7 @@ export type {
   Direction,
   OrderStatus,
   OrderType,
+  CandleResolution,
 
   Orderbook,
   Market,
@@ -35,13 +46,15 @@ export type {
   Trade,
   Fill,
   Token,
+  Candle,
 
   MarketUpdate,
   OrderbookUpdate,
   OrderUpdate,
   TradeUpdate,
   FillUpdate,
-  TokenUpdate
+  TokenUpdate,
+  CandleUpdate
 } from './models';
 
 export {

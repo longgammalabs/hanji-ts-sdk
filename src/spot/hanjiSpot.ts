@@ -18,6 +18,7 @@ import type {
   GetOrdersParams,
   GetTokensParams,
   GetTradesParams,
+  GetCandlesParams,
   PlaceOrderSpotParams,
   SetClaimableStatusParams,
   SubscribeToMarketParams,
@@ -30,11 +31,13 @@ import type {
   UnsubscribeFromTradesParams,
   UnsubscribeFromUserFillsParams,
   UnsubscribeFromUserOrdersParams,
-  WithdrawSpotParams
+  WithdrawSpotParams,
+  SubscribeToCandlesParams,
+  UnsubscribeFromCandlesParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
-import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, MarketInfo } from '../models';
+import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, MarketInfo, Candle, CandleUpdate } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 
 /**
@@ -131,6 +134,13 @@ interface HanjiSpotEvents {
   userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdate[]]>;
 
   /**
+   * Emitted when a market's candle is updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, data: CandleUpdate[]]>}
+   */
+  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdate[]]>;
+
+  /**
    * Emitted when there is an error related to a subscription.
    * @event
    * @type {PublicEventEmitter<readonly [error: string]>}
@@ -157,6 +167,7 @@ export class HanjiSpot implements Disposable {
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
     userFillsUpdated: new EventEmitter(),
+    candlesUpdated: new EventEmitter(),
   };
 
   /**
@@ -458,6 +469,18 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
+   * Retrieves the candles for the specified market and resolution.
+   *
+   * @param {GetCandlesParams} params - The parameters for retrieving the candles.
+   * @returns {Promise<Candle[]>} A Promise that resolves to an array of candles.
+   */
+  async getCandles(params: GetCandlesParams): Promise<Candle[]> {
+    const candles = await this.hanjiService.getCandles(params);
+
+    return candles;
+  }
+
+  /**
    * Subscribes to the market updates for the specified market.
    *
    * @param {SubscribeToMarketParams} params - The parameters for subscribing to the market updates.
@@ -554,6 +577,24 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.unsubscribeFromUserFills(params);
   }
 
+  /**
+   * Subscribes to candle updates for the specified market and resolution.
+   *
+   * @param {SubscribeToCandlesParams} params - The parameters for subscribing to the candle updates.
+   */
+  subscribeToCandles(params: SubscribeToCandlesParams): void {
+    this.hanjiWebSocketService.subscribeToCandles(params);
+  }
+
+  /**
+   * Unsubscribes from candle updates for the specified market and resolution.
+   *
+   * @param {UnsubscribeFromCandlesParams} params - The parameters for unsubscribing from the candle updates.
+   */
+  unsubscribeFromCandles(params: UnsubscribeFromCandlesParams): void {
+    this.hanjiWebSocketService.unsubscribeFromCandles(params);
+  }
+
   [Symbol.dispose](): void {
     this.detachEvents();
     this.hanjiWebSocketService[Symbol.dispose]();
@@ -591,6 +632,7 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.tradesUpdated.addListener(this.onTradesUpdated);
     this.hanjiWebSocketService.events.userOrdersUpdated.addListener(this.onUserOrdersUpdated);
     this.hanjiWebSocketService.events.userFillsUpdated.addListener(this.onUserFillsUpdated);
+    this.hanjiWebSocketService.events.candlesUpdated.addListener(this.onCandlesUpdated);
     this.hanjiWebSocketService.events.subscriptionError.addListener(this.onSubscriptionError);
   }
 
@@ -600,6 +642,7 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.tradesUpdated.removeListener(this.onTradesUpdated);
     this.hanjiWebSocketService.events.userOrdersUpdated.removeListener(this.onUserOrdersUpdated);
     this.hanjiWebSocketService.events.userFillsUpdated.removeListener(this.onUserFillsUpdated);
+    this.hanjiWebSocketService.events.candlesUpdated.removeListener(this.onCandlesUpdated);
     this.hanjiWebSocketService.events.subscriptionError.removeListener(this.onSubscriptionError);
   }
 
@@ -679,6 +722,10 @@ export class HanjiSpot implements Disposable {
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
+  };
+
+  protected onCandlesUpdated: Parameters<typeof this.hanjiWebSocketService.events.candlesUpdated['addListener']>[0] = (marketId, data) => {
+    (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(marketId, data);
   };
 
   protected onSubscriptionError: Parameters<typeof this.hanjiWebSocketService.events.subscriptionError['addListener']>[0] = error => {

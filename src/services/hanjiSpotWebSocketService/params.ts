@@ -1,3 +1,5 @@
+import { CandleResolution } from '../../models';
+
 export interface SubscribeToMarketParams {
   market: string;
 }
@@ -25,3 +27,9 @@ export interface SubscribeToUserFillsParams {
   market: string;
 }
 export type UnsubscribeFromUserFillsParams = SubscribeToUserFillsParams;
+
+export interface SubscribeToCandlesParams {
+  market: string;
+  resolution: CandleResolution;
+}
+export type UnsubscribeFromCandlesParams = SubscribeToCandlesParams;

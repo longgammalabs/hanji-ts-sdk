@@ -31,7 +31,7 @@ describe('Hanji Spot Client', () => {
     [true, new BigNumber(1), new BigNumber(1), new BigNumber(0)],
     [false, new BigNumber(1), new BigNumber(0), new BigNumber(1)],
     [true, 1_000n * (10n ** 15n), 1_000n, 0n],
-    [false, 1_000n * (10n ** 13n), 0n, 1_000n],
+    [false, 1_000n * (10n ** 11n), 0n, 1_000n],
   ])('Deposit and Withdraw [isBase: %p, base: %i, quote: %i]', async (isBaseToken, approveTokensAmount, baseTokenAmount, quoteTokenAmount) => {
     const market = testConfig.testMarkets.xtzUsd.id;
     let tx: ContractTransactionResponse;

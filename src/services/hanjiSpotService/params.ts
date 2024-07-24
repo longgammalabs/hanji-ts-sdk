@@ -1,4 +1,4 @@
-import { OrderStatus } from '../../models';
+import { CandleResolution, OrderStatus } from '../../models';
 
 export interface GetOrderbookParams {
   market: string;
@@ -30,4 +30,11 @@ export interface GetTokensParams {
 
 export interface GetMarketsParams {
   market?: string;
+}
+
+export interface GetCandlesParams {
+  market: string;
+  resolution: CandleResolution;
+  fromTime?: number;
+  toTime?: number;
 }
