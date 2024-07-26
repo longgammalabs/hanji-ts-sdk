@@ -78,6 +78,24 @@ export interface Market {
   aggregations: number[];
 
   /**
+   * Scaling factor for the base token (token X) in the market.
+   * This factor is used to adjust the base token's value for market operations.
+   */
+  tokenXScalingFactor: number;
+
+  /**
+   * Scaling factor for the quote token (token Y) in the market.
+   * This factor is used to adjust the quote token's value for market operations.
+   */
+  tokenYScalingFactor: number;
+
+  /**
+   * Scaling factor for the price in the market.
+   * This factor is used to adjust the price value for market operations.
+   */
+  priceScalingFactor: number;
+
+  /**
    * The raw last price of the market as a bigint, or null if not available.
    */
   rawLastPrice: bigint | null;
@@ -106,6 +124,51 @@ export interface Market {
    * The highest price in the last 24 hours as a BigNumber, or null if not available.
    */
   highPrice24h: BigNumber | null;
+
+  /**
+   * The raw price one day ago as a bigint, or null if not available.
+   */
+  rawPrice24h: bigint | null;
+
+  /**
+   * The price one day ago as a BigNumber, or null if not available.
+   */
+  price24h: BigNumber | null;
+
+  /**
+   * The raw best ask price as a bigint, or null if not available.
+   */
+  rawBestAsk: bigint | null;
+
+  /**
+   * The best ask price as a BigNumber, or null if not available.
+   */
+  bestAsk: BigNumber | null;
+
+  /**
+   * The raw best bid price as a bigint, or null if not available.
+   */
+  rawBestBid: bigint | null;
+
+  /**
+   * The best bid price as a BigNumber, or null if not available.
+   */
+  bestBid: BigNumber | null;
+
+  /**
+   * The raw trading volume in the last 24 hours as a bigint, or null if not available.
+   */
+  rawTradingVolume24h: bigint | null;
+
+  /**
+   * The trading volume in the last 24 hours as a BigNumber, or null if not available.
+   */
+  tradingVolume24h: BigNumber | null;
+
+  /**
+   * The timestamp of the last update as a number.
+   */
+  lastTouched: number;
 }
 
 export type MarketUpdate = Market;
@@ -536,6 +599,46 @@ export interface MarketInfo {
      */
     price: number;
   };
+
+  /**
+   * The last price of the market as a BigNumber, or null if not available.
+   */
+  lastPrice: BigNumber | null;
+
+  /**
+   * The lowest price in the last 24 hours as a BigNumber, or null if not available.
+   */
+  lowPrice24h: BigNumber | null;
+
+  /**
+   * The highest price in the last 24 hours as a BigNumber, or null if not available.
+   */
+  highPrice24h: BigNumber | null;
+
+  /**
+   * The price one day ago as a BigNumber, or null if not available.
+   */
+  price24h: BigNumber | null;
+
+  /**
+   * The best ask price as a BigNumber, or null if not available.
+   */
+  bestAsk: BigNumber | null;
+
+  /**
+   * The best bid price as a BigNumber, or null if not available.
+   */
+  bestBid: BigNumber | null;
+
+  /**
+   * The trading volume in the last 24 hours as a BigNumber, or null if not available.
+   */
+  tradingVolume24h: BigNumber | null;
+
+  /**
+   * The timestamp of the last update as a number.
+   */
+  lastTouched: number;
 }
 
 /**

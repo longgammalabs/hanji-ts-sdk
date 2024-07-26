@@ -24,8 +24,16 @@ describe('Hanji Spot HTTP Client', () => {
     const marketInfo = await hanjiClient.spot.getMarketInfo({ market });
     if (marketInfo) {
       expect(marketInfo.orderbookAddress).toBe(market);
-      expect(marketInfo.baseToken).toBeDefined();
-      expect(marketInfo.quoteToken).toBeDefined();
+      expect(marketInfo.scalingFactors.baseToken).toBe(testConfig.testMarkets.xtzUsd.tokenXScalingFactor);
+      expect(marketInfo.scalingFactors.quoteToken).toBe(testConfig.testMarkets.xtzUsd.tokenYScalingFactor);
+      expect(marketInfo.scalingFactors.price).toBe(testConfig.testMarkets.xtzUsd.priceScalingFactor);
+      expect(marketInfo.lastPrice).toEqual(testConfig.testMarkets.xtzUsd.lastPrice);
+      expect(marketInfo.lowPrice24h).toEqual(testConfig.testMarkets.xtzUsd.lowPrice24h);
+      expect(marketInfo.highPrice24h).toEqual(testConfig.testMarkets.xtzUsd.highPrice24h);
+      expect(marketInfo.bestAsk).toEqual(testConfig.testMarkets.xtzUsd.bestAsk);
+      expect(marketInfo.bestBid).toEqual(testConfig.testMarkets.xtzUsd.bestBid);
+      expect(marketInfo.tradingVolume24h).toEqual(testConfig.testMarkets.xtzUsd.tradingVolume24h);
+      expect(marketInfo.lastTouched).toEqual(testConfig.testMarkets.xtzUsd.lastTouched);
     }
     else {
       throw new Error('marketInfo is undefined');
@@ -35,17 +43,15 @@ describe('Hanji Spot HTTP Client', () => {
   test('get candles data', async () => {
     const candles = await hanjiClient.spot.getCandles({
       market: testConfig.testMarkets.xtzUsd.id,
-      resolution: '1D',
-      toTime: 1721260800000,
-      fromTime: 1720828800000,
+      resolution: '60',
+      toTime: 1721966400000,
+      fromTime: 1721955600000,
     });
     expect(candles).toEqual([
-      { resolution: '1D', time: 1720828800000, open: '7697', high: '8000', low: '7240', close: '7847', volume: '133260' },
-      { resolution: '1D', time: 1720915200000, open: '7847', high: '8100', low: '7240', close: '7930', volume: '136892' },
-      { resolution: '1D', time: 1721001600000, open: '7930', high: '8600', low: '7230', close: '7950', volume: '94439' },
-      { resolution: '1D', time: 1721088000000, open: '7950', high: '8600', low: '7950', close: '8233', volume: '75979' },
-      { resolution: '1D', time: 1721174400000, open: '8233', high: '8371', low: '8036', close: '8053', volume: '146712' },
-      { resolution: '1D', time: 1721260800000, open: '8053', high: '8241', low: '8026', close: '8073', volume: '66186' },
+      { resolution: '60', time: 1721955600000, open: '7560', high: '7560', low: '7560', close: '7560', volume: '0' },
+      { resolution: '60', time: 1721959200000, open: '7560', high: '7560', low: '7560', close: '7560', volume: '0' },
+      { resolution: '60', time: 1721962800000, open: '7560', high: '7560', low: '7560', close: '7560', volume: '0' },
+      { resolution: '60', time: 1721966400000, open: '7560', high: '7560', low: '7560', close: '7560', volume: '0' },
     ]);
   });
 });

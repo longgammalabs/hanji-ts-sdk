@@ -379,7 +379,15 @@ export class HanjiSpot implements Disposable {
         baseToken: market.baseToken,
         quoteToken: market.quoteToken,
         orderbookAddress: market.orderbookAddress,
-        scalingFactors: this.getScalingFactors(market.baseToken, market.quoteToken),
+        scalingFactors: this.getScalingFactors(market),
+        lastPrice: market.lastPrice,
+        lowPrice24h: market.lowPrice24h,
+        highPrice24h: market.highPrice24h,
+        price24h: market.price24h,
+        bestAsk: market.bestAsk,
+        bestBid: market.bestBid,
+        tradingVolume24h: market.tradingVolume24h,
+        lastTouched: market.lastTouched,
       };
       this.marketInfos.set(params.market, marketInfo);
     }
@@ -397,7 +405,7 @@ export class HanjiSpot implements Disposable {
     const marketDtos = await this.hanjiService.getMarkets(params);
     const markets = marketDtos.map(marketDto => this.mappers.mapMarketDtoToMarket(
       marketDto,
-      this.getScalingFactors(marketDto.baseToken, marketDto.quoteToken).price
+      this.getScalingFactors(marketDto).price
     ));
 
     return markets;
@@ -661,11 +669,11 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.subscriptionError.removeListener(this.onSubscriptionError);
   }
 
-  protected getScalingFactors(baseToken: Token, quoteToken: Token): MarketInfo['scalingFactors'] {
+  protected getScalingFactors(market: { tokenXScalingFactor: number; tokenYScalingFactor: number; priceScalingFactor: number }): MarketInfo['scalingFactors'] {
     return {
-      baseToken: baseToken.scalingFactor,
-      quoteToken: quoteToken.scalingFactor,
-      price: quoteToken.scalingFactor - baseToken.scalingFactor,
+      baseToken: market.tokenXScalingFactor,
+      quoteToken: market.tokenYScalingFactor,
+      price: market.priceScalingFactor,
     };
   }
 

@@ -135,6 +135,11 @@ export const lobAbi = [
         internalType: 'uint56[]',
       },
       {
+        name: 'max_commission_per_order',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
         name: 'post_only',
         type: 'bool',
         internalType: 'bool',
@@ -202,6 +207,11 @@ export const lobAbi = [
         internalType: 'uint56[]',
       },
       {
+        name: 'max_commission_per_order',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
         name: 'post_only',
         type: 'bool',
         internalType: 'bool',
@@ -235,6 +245,11 @@ export const lobAbi = [
         type: 'address',
         internalType: 'address',
       },
+      {
+        name: '_should_invoke_on_trade',
+        type: 'bool',
+        internalType: 'bool',
+      },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
@@ -257,6 +272,11 @@ export const lobAbi = [
         name: 'new_price',
         type: 'uint56',
         internalType: 'uint56',
+      },
+      {
+        name: 'max_commission',
+        type: 'uint128',
+        internalType: 'uint128',
       },
       {
         name: 'post_only',
@@ -641,6 +661,11 @@ export const lobAbi = [
         name: 'price',
         type: 'uint56',
         internalType: 'uint56',
+      },
+      {
+        name: 'max_commission',
+        type: 'uint128',
+        internalType: 'uint128',
       },
       {
         name: 'market_only',
@@ -1099,12 +1124,27 @@ export const lobAbi = [
   },
   {
     type: 'error',
+    name: 'InvalidMarketMaker',
+    inputs: [],
+  },
+  {
+    type: 'error',
     name: 'InvalidPriceRange',
     inputs: [],
   },
   {
     type: 'error',
+    name: 'InvalidTransfer',
+    inputs: [],
+  },
+  {
+    type: 'error',
     name: 'MarketOnlyAndPostOnlyFlagsConflict',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'MaxCommissionFailure',
     inputs: [],
   },
   {
