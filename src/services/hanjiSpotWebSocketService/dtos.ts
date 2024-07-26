@@ -75,9 +75,19 @@ export interface MarketUpdateDto {
   symbol: string;
   orderbookAddress: string;
   aggregations: number[];
+  tokenXScalingFactor: number;
+  tokenYScalingFactor: number;
+  priceScalingFactor: number;
+  bestAsk: string | null;
+  bestBid: string | null;
+  tradingVolume24h: string;
   lastPrice: string | null;
   lowPrice24h: string | null;
   highPrice24h: string | null;
+  price24h: string | null;
+  coinMarketCapId: string;
+  totalSupply: string;
+  lastTouched: number;
   baseToken: TokenUpdateDto;
   quoteToken: TokenUpdateDto;
 }
@@ -87,7 +97,6 @@ export interface TokenUpdateDto {
   name: string;
   symbol: string;
   contractAddress: string;
-  scalingFactor: number;
   decimals: number;
   roundingDecimals: number;
 }

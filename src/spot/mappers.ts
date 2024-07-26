@@ -42,6 +42,15 @@ export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number): Marke
     lowPrice24h: dto.lowPrice24h ? tokenUtils.convertTokensRawAmountToAmount(dto.lowPrice24h, priceFactor) : null,
     rawHighPrice24h: dto.highPrice24h ? BigInt(dto.highPrice24h) : null,
     highPrice24h: dto.highPrice24h ? tokenUtils.convertTokensRawAmountToAmount(dto.highPrice24h, priceFactor) : null,
+    rawPrice24h: dto.price24h ? BigInt(dto.price24h) : null,
+    price24h: dto.price24h ? tokenUtils.convertTokensRawAmountToAmount(dto.price24h, priceFactor) : null,
+    rawBestAsk: dto.bestAsk ? BigInt(dto.bestAsk) : null,
+    bestAsk: dto.bestAsk ? tokenUtils.convertTokensRawAmountToAmount(dto.bestAsk, priceFactor) : null,
+    rawBestBid: dto.bestBid ? BigInt(dto.bestBid) : null,
+    bestBid: dto.bestBid ? tokenUtils.convertTokensRawAmountToAmount(dto.bestBid, priceFactor) : null,
+    rawTradingVolume24h: dto.tradingVolume24h ? BigInt(dto.tradingVolume24h) : null,
+    tradingVolume24h: dto.tradingVolume24h ? tokenUtils.convertTokensRawAmountToAmount(dto.tradingVolume24h, priceFactor) : null,
+    lastTouched: dto.lastTouched,
   };
 };
 

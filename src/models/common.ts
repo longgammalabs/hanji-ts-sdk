@@ -23,12 +23,6 @@ export interface Token {
   contractAddress: string;
 
   /**
-   * Number of decimals ignored for the token in markets.
-   * E.g. for X amount of token, the operating amount in the market contract is `X / 10^scalingFactor`.
-   */
-  scalingFactor: number;
-
-  /**
    * Number of decimals the token uses.
    */
   decimals: number;

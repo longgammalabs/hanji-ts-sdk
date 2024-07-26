@@ -120,6 +120,7 @@ export class HanjiSpotMarketContract {
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.marketInfo.scalingFactors.baseToken);
     const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.marketInfo.scalingFactors.price);
     const expires = getExpires();
+    const maxCommission = this.calculateMaxCommission(sizeAmount, priceAmount);
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
@@ -127,6 +128,7 @@ export class HanjiSpotMarketContract {
         params.side === 'ask',
         sizeAmount,
         priceAmount,
+        maxCommission,
         params.type === 'market',
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
@@ -149,12 +151,15 @@ export class HanjiSpotMarketContract {
       priceAmounts.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.price, this.marketInfo.scalingFactors.price));
     }
 
+    const maxCommissionPerOrder = this.calculateMaxCommissionPerOrder(sizeAmounts, priceAmounts);
+
     const tx = await this.processContractMethodCall(
       this.marketContract,
       this.marketContract.batchPlaceOrder!(
         directions,
         sizeAmounts,
         priceAmounts,
+        maxCommissionPerOrder,
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires
@@ -195,6 +200,7 @@ export class HanjiSpotMarketContract {
   async changeOrder(params: ChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newSize, this.marketInfo.scalingFactors.baseToken);
     const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newPrice, this.marketInfo.scalingFactors.price);
+    const maxCommission = this.calculateMaxCommission(sizeAmount, priceAmount);
     const expires = getExpires();
 
     const tx = await this.processContractMethodCall(
@@ -203,6 +209,7 @@ export class HanjiSpotMarketContract {
         params.orderId,
         sizeAmount,
         priceAmount,
+        maxCommission,
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires
@@ -224,12 +231,15 @@ export class HanjiSpotMarketContract {
       newPrices.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.newPrice, this.marketInfo.scalingFactors.price));
     }
 
+    const maxCommissionPerOrder = this.calculateMaxCommissionPerOrder(newSizes, newPrices);
+
     const tx = await this.processContractMethodCall(
       this.marketContract,
       this.marketContract.batchChangeOrder!(
         orderIds,
         newSizes,
         newPrices,
+        maxCommissionPerOrder,
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires
@@ -263,5 +273,28 @@ export class HanjiSpotMarketContract {
     return typeof amount === 'bigint'
       ? amount
       : tokenUtils.convertTokensAmountToRawAmount(amount, decimals);
+  }
+
+  private calculateMaxCommission(sizeAmount: bigint, priceAmount: bigint): bigint {
+    return BigInt(
+      BigNumber(sizeAmount.toString())
+        .times(BigNumber(priceAmount.toString()))
+        .times(0.00035)
+        .decimalPlaces(0, BigNumber.ROUND_CEIL)
+        .toString()
+    );
+  }
+
+  private calculateMaxCommissionPerOrder(sizeAmounts: bigint[], priceAmounts: bigint[]): bigint {
+    let maxCommission = 0n;
+
+    for (let i = 0; i < sizeAmounts.length; i++) {
+      const commission = this.calculateMaxCommission(sizeAmounts[i] ?? 0n, priceAmounts[i] ?? 0n);
+      if (commission > maxCommission) {
+        maxCommission = commission;
+      }
+    }
+
+    return maxCommission;
   }
 }

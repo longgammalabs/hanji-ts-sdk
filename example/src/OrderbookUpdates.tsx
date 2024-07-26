@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Container, Typography, Box } from '@mui/material';
-import { ClientAddressContext, HanjiClientContext } from './clientContext';
+import { HanjiClientContext } from './clientContext';
 import { MARKET_ADDRESS } from './constants';
 import { Orderbook } from 'hanji-ts-sdk';
 
@@ -8,7 +8,6 @@ export const OrderbookUpdates: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const hanjiClient = useContext(HanjiClientContext);
-  const address = useContext(ClientAddressContext);
 
   function onOrderbookUpdateed(_marketId: string, data: Orderbook) {
     setEvents(prevEvents => [...prevEvents, data]);

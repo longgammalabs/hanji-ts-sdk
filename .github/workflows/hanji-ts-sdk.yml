@@ -66,6 +66,12 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
+      
+      - name: Build for example
+        run: npm run build
+
+      - name: Install example dependencies
+        run: cd example && npm ci && cd -
 
       - name: Lint
         run: npm run lint
