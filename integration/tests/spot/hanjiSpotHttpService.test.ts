@@ -20,23 +20,23 @@ describe('Hanji Spot HTTP Client', () => {
   });
 
   test('get xtzusd market info', async () => {
-    const market = testConfig.testMarkets.xtzUsd.id;
-    const marketInfo = await hanjiClient.spot.getMarketInfo({ market });
-    if (marketInfo) {
-      expect(marketInfo.orderbookAddress).toBe(market);
-      expect(marketInfo.scalingFactors.baseToken).toBe(testConfig.testMarkets.xtzUsd.tokenXScalingFactor);
-      expect(marketInfo.scalingFactors.quoteToken).toBe(testConfig.testMarkets.xtzUsd.tokenYScalingFactor);
-      expect(marketInfo.scalingFactors.price).toBe(testConfig.testMarkets.xtzUsd.priceScalingFactor);
-      expect(marketInfo.lastPrice).toEqual(testConfig.testMarkets.xtzUsd.lastPrice);
-      expect(marketInfo.lowPrice24h).toEqual(testConfig.testMarkets.xtzUsd.lowPrice24h);
-      expect(marketInfo.highPrice24h).toEqual(testConfig.testMarkets.xtzUsd.highPrice24h);
-      expect(marketInfo.bestAsk).toEqual(testConfig.testMarkets.xtzUsd.bestAsk);
-      expect(marketInfo.bestBid).toEqual(testConfig.testMarkets.xtzUsd.bestBid);
-      expect(marketInfo.tradingVolume24h).toEqual(testConfig.testMarkets.xtzUsd.tradingVolume24h);
-      expect(marketInfo.lastTouched).toEqual(testConfig.testMarkets.xtzUsd.lastTouched);
+    const marketId = testConfig.testMarkets.xtzUsd.id;
+    const market = await hanjiClient.spot.getMarket({ market: marketId });
+    if (market) {
+      expect(market.orderbookAddress).toBe(marketId);
+      expect(market.tokenXScalingFactor).toBe(testConfig.testMarkets.xtzUsd.tokenXScalingFactor);
+      expect(market.tokenYScalingFactor).toBe(testConfig.testMarkets.xtzUsd.tokenYScalingFactor);
+      expect(market.priceScalingFactor).toBe(testConfig.testMarkets.xtzUsd.priceScalingFactor);
+      expect(market.lastPrice).toEqual(testConfig.testMarkets.xtzUsd.lastPrice);
+      expect(market.lowPrice24h).toEqual(testConfig.testMarkets.xtzUsd.lowPrice24h);
+      expect(market.highPrice24h).toEqual(testConfig.testMarkets.xtzUsd.highPrice24h);
+      expect(market.bestAsk).toEqual(testConfig.testMarkets.xtzUsd.bestAsk);
+      expect(market.bestBid).toEqual(testConfig.testMarkets.xtzUsd.bestBid);
+      expect(market.tradingVolume24h).toEqual(testConfig.testMarkets.xtzUsd.tradingVolume24h);
+      expect(market.lastTouched).toEqual(testConfig.testMarkets.xtzUsd.lastTouched);
     }
     else {
-      throw new Error('marketInfo is undefined');
+      throw new Error('market is undefined');
     }
   });
 

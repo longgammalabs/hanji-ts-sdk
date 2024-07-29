@@ -20,8 +20,8 @@ import {
   type HanjiWebSocketResponseDto, type PublicEventEmitter, type ToEventEmitter
 } from '../../common';
 import { getErrorLogMessage } from '../../logging';
+import { ALL_MARKETS_ID } from '../constants';
 
-const ALL_MARKETS_ID = 'allMarkets';
 const ALL_MARKETS_CHANNEL = 'allMarkets';
 
 interface HanjiSpotWebSocketServiceEvents {

@@ -14,7 +14,7 @@ export type {
   GetTradesParams,
   GetFillsParams,
   GetTokensParams,
-  GetMarketInfoParams,
+  GetMarketParams,
   GetMarketsParams,
   GetCandlesParams
 } from './params';
