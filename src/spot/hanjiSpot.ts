@@ -100,6 +100,13 @@ export interface HanjiSpotOptions {
  */
 interface HanjiSpotEvents {
   /**
+   * Emitted when some markets' data is updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [data: MarketUpdate[]]>}
+   */
+  allMarketUpdated: PublicEventEmitter<readonly [data: MarketUpdate[]]>;
+
+  /**
    * Emitted when a market's data is updated.
    * @event
    * @type {PublicEventEmitter<readonly [marketId: string, data: MarketUpdate]>}
@@ -169,6 +176,7 @@ export class HanjiSpot implements Disposable {
     userOrdersUpdated: new EventEmitter(),
     userFillsUpdated: new EventEmitter(),
     candlesUpdated: new EventEmitter(),
+    allMarketUpdated: new EventEmitter(),
   };
 
   /**
@@ -520,6 +528,22 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
+   * Subscribes to the all markets updates.
+   *
+   * @emits HanjiSpot#events#marketUpdated
+   */
+  subscribeToAllMarkets(): void {
+    this.hanjiWebSocketService.subscribeToAllMarkets();
+  }
+
+  /**
+   * Unsubscribes from the all markets updates.
+   */
+  unsubscribeFromAllMarkets(): void {
+    this.hanjiWebSocketService.unsubscribeFromAllMarkets();
+  }
+
+  /**
    * Subscribes to the orderbook updates for the specified market and aggregation level.
    *
    * @param {SubscribeToOrderbookParams} params - The parameters for subscribing to the orderbook updates.
@@ -651,6 +675,7 @@ export class HanjiSpot implements Disposable {
 
   protected attachEvents(): void {
     this.hanjiWebSocketService.events.marketUpdated.addListener(this.onMarketUpdated);
+    this.hanjiWebSocketService.events.allMarketsUpdated.addListener(this.onAllMarketsUpdated);
     this.hanjiWebSocketService.events.orderbookUpdated.addListener(this.onOrderbookUpdated);
     this.hanjiWebSocketService.events.tradesUpdated.addListener(this.onTradesUpdated);
     this.hanjiWebSocketService.events.userOrdersUpdated.addListener(this.onUserOrdersUpdated);
@@ -685,6 +710,18 @@ export class HanjiSpot implements Disposable {
       const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, marketInfo.scalingFactors.price);
 
       (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(marketId, marketUpdate);
+    }
+    catch (error) {
+      console.error(getErrorLogMessage(error));
+    }
+  };
+
+  protected onAllMarketsUpdated: Parameters<typeof this.hanjiWebSocketService.events.allMarketsUpdated['addListener']>[0] = async data => {
+    try {
+      const allMarketsUpdate = data.map(marketUpdateDot =>
+        this.mappers.mapMarketUpdateDtoToMarketUpdate(marketUpdateDot.id, marketUpdateDot, marketUpdateDot.priceScalingFactor));
+
+      (this.events.allMarketUpdated as ToEventEmitter<typeof this.events.allMarketUpdated>).emit(allMarketsUpdate);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));

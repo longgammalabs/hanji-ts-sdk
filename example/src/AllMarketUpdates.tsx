@@ -1,51 +1,39 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Container, Typography, Box } from '@mui/material';
-import { ClientAddressContext, HanjiClientContext } from './clientContext';
-import { MARKET_ADDRESS } from './constants';
-import { type OrderUpdate } from 'hanji-ts-sdk';
+import { HanjiClientContext } from './clientContext';
+import { MarketUpdate } from 'hanji-ts-sdk';
 
-export const UserOrdersUpdates: React.FC = () => {
+export const AllMarketsUpdates: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const hanjiClient = useContext(HanjiClientContext);
-  const address = useContext(ClientAddressContext);
 
-  function onUserOrdersUpdated(_marketId: string, data: OrderUpdate[]) {
-    setEvents(prevEvents => [...prevEvents, ...data]);
+  function onAllMarketsUpdateed(data: MarketUpdate[]) {
+    setEvents(_prevEvents => [...data]);
   }
 
   useEffect(() => {
-    hanjiClient.spot.events.userOrdersUpdated.addListener(onUserOrdersUpdated);
+    hanjiClient.spot.events.allMarketUpdated.addListener(onAllMarketsUpdateed);
 
     return () => {
-      hanjiClient.spot.events.userOrdersUpdated.removeListener(onUserOrdersUpdated);
+      hanjiClient.spot.events.allMarketUpdated.removeListener(onAllMarketsUpdateed);
     };
   }, []);
 
   const handleSubscribe = () => {
-    if (!address) {
-      alert('Please connect your wallet first');
-      return;
-    }
     setIsSubscribed(prev => !prev);
     if (!isSubscribed) {
-      hanjiClient.spot.subscribeToUserOrders({
-        market: MARKET_ADDRESS,
-        user: address,
-      });
+      hanjiClient.spot.subscribeToAllMarkets();
     }
     else {
-      hanjiClient.spot.unsubscribeFromUserOrders({
-        market: MARKET_ADDRESS,
-        user: address,
-      });
+      hanjiClient.spot.unsubscribeFromAllMarkets();
     }
   };
 
   return (
     <Container>
       <Typography variant="h6" component="h3" gutterBottom>
-        User Orders Updates
+        All Markets Updates
       </Typography>
       <Button variant="contained" color="primary" onClick={handleSubscribe}>
         {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
@@ -62,4 +50,4 @@ export const UserOrdersUpdates: React.FC = () => {
   );
 };
 
-export default UserOrdersUpdates;
+export default AllMarketsUpdates;

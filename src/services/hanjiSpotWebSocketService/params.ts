@@ -18,13 +18,13 @@ export type UnsubscribeFromTradesParams = SubscribeToTradesParams;
 
 export interface SubscribeToUserOrdersParams {
   user: string;
-  market: string;
+  market?: string;
 }
 export type UnsubscribeFromUserOrdersParams = SubscribeToUserOrdersParams;
 
 export interface SubscribeToUserFillsParams {
   user: string;
-  market: string;
+  market?: string;
 }
 export type UnsubscribeFromUserFillsParams = SubscribeToUserFillsParams;
 
