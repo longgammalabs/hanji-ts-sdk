@@ -23,6 +23,7 @@ import { getErrorLogMessage } from '../../logging';
 
 interface HanjiSpotWebSocketServiceEvents {
   marketUpdated: PublicEventEmitter<readonly [marketId: string, data: MarketUpdateDto]>;
+  allMarketsUpdated: PublicEventEmitter<readonly [data: MarketUpdateDto[]]>;
   orderbookUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdateDto]>;
   tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdateDto[]]>;
   userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdateDto[]]>;
@@ -42,6 +43,7 @@ export class HanjiSpotWebSocketService implements Disposable {
    */
   readonly events: HanjiSpotWebSocketServiceEvents = {
     subscriptionError: new EventEmitter(),
+    allMarketsUpdated: new EventEmitter(),
     marketUpdated: new EventEmitter(),
     orderbookUpdated: new EventEmitter(),
     tradesUpdated: new EventEmitter(),
@@ -88,6 +90,26 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'market',
       market: params.market,
+    });
+  }
+
+  /**
+   * Subscribes to all markets.
+   */
+  subscribeToAllMarkets() {
+    this.startHanjiWebSocketClientIfNeeded();
+
+    this.hanjiWebSocketClient.subscribe({
+      channel: 'allMarkets',
+    });
+  }
+
+  /**
+   * Unsubscribes from all markets.
+   */
+  unsubscribeFromAllMarkets() {
+    this.hanjiWebSocketClient.unsubscribe({
+      channel: 'allMarkets',
     });
   }
 
@@ -245,6 +267,9 @@ export class HanjiSpotWebSocketService implements Disposable {
         return;
 
       switch (message.channel) {
+        case 'allMarkets':
+          (this.events.allMarketsUpdated as ToEventEmitter<typeof this.events.allMarketsUpdated>).emit(message.data as MarketUpdateDto[]);
+          break;
         case 'market':
           (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(message.id, message.data as MarketUpdateDto);
           break;

@@ -8,6 +8,7 @@ import UserOrdersUpdates from './UserOrdersUpdates';
 import { ClientAddressContext, HanjiClientContext, defaultHanjiClient } from './clientContext';
 import ApproveToken from './ApproveToken';
 import OrderbookUpdates from './OrderbookUpdates';
+import AllMarketsUpdates from './AllMarketUpdates';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -45,6 +46,8 @@ function App() {
             <UserOrdersUpdates />
             <Divider />
             <OrderbookUpdates />
+            <Divider />
+            <AllMarketsUpdates />
           </Box>
         </Box>
       </ClientAddressContext.Provider>
