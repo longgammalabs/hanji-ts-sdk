@@ -358,7 +358,7 @@ export interface GetTokensParams {
   token?: string;
 }
 
-export interface GetMarketInfoParams {
+export interface GetMarketParams {
   /**
    * Id of the requested market
    *

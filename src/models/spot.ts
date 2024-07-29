@@ -166,6 +166,11 @@ export interface Market {
   tradingVolume24h: BigNumber | null;
 
   /**
+   * The total supply of the market as a BigNumber, or null if not available.
+   */
+  totalSupply: BigNumber | null;
+
+  /**
    * The timestamp of the last update as a number.
    */
   lastTouched: number;
@@ -527,119 +532,6 @@ export interface Fill {
 }
 
 export type FillUpdate = Fill;
-
-/**
- * Interface representing market information.
- */
-export interface MarketInfo {
-  /**
-   * Unique identifier for the market.
-   *
-   * @type {string}
-   */
-  id: string;
-
-  /**
-   * Name of the market.
-   *
-   * @type {string}
-   */
-  name: string;
-
-  /**
-   * Symbol representing the market.
-   *
-   * @type {string}
-   */
-  symbol: string;
-
-  /**
-   * Base token of the market.
-   *
-   * @type {Token}
-   */
-  baseToken: Token;
-
-  /**
-   * Quote token of the market.
-   *
-   * @type {Token}
-   */
-  quoteToken: Token;
-
-  /**
-   * Address of the market contract, i.e., orderbook.
-   *
-   * @type {string}
-   */
-  orderbookAddress: string;
-
-  /**
-   * Scaling factors for the market.
-   */
-  scalingFactors: {
-    /**
-     * Scaling factor for the base token.
-     *
-     * @type {number}
-     */
-    baseToken: number;
-
-    /**
-     * Scaling factor for the quote token.
-     *
-     * @type {number}
-     */
-    quoteToken: number;
-
-    /**
-     * Scaling factor for the price.
-     *
-     * @type {number}
-     */
-    price: number;
-  };
-
-  /**
-   * The last price of the market as a BigNumber, or null if not available.
-   */
-  lastPrice: BigNumber | null;
-
-  /**
-   * The lowest price in the last 24 hours as a BigNumber, or null if not available.
-   */
-  lowPrice24h: BigNumber | null;
-
-  /**
-   * The highest price in the last 24 hours as a BigNumber, or null if not available.
-   */
-  highPrice24h: BigNumber | null;
-
-  /**
-   * The price one day ago as a BigNumber, or null if not available.
-   */
-  price24h: BigNumber | null;
-
-  /**
-   * The best ask price as a BigNumber, or null if not available.
-   */
-  bestAsk: BigNumber | null;
-
-  /**
-   * The best bid price as a BigNumber, or null if not available.
-   */
-  bestBid: BigNumber | null;
-
-  /**
-   * The trading volume in the last 24 hours as a BigNumber, or null if not available.
-   */
-  tradingVolume24h: BigNumber | null;
-
-  /**
-   * The timestamp of the last update as a number.
-   */
-  lastTouched: number;
-}
 
 /**
  * Represents a candle in the trading system.

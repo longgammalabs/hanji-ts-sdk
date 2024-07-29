@@ -41,6 +41,7 @@ const testMarkets = {
     bestBid: expect.any(BigNumber),
     rawTradingVolume24h: expect.any(BigInt),
     tradingVolume24h: expect.any(BigNumber),
+    totalSupply: expect.any(BigNumber),
     lastTouched: expect.any(BigInt),
   },
   xtzUsd: {
@@ -82,6 +83,7 @@ const testMarkets = {
     bestBid: expect.any(BigNumber),
     rawTradingVolume24h: expect.any(BigInt),
     tradingVolume24h: expect.any(BigNumber),
+    totalSupply: expect.any(BigNumber),
     lastTouched: expect.any(Number),
   },
 } as const satisfies Record<string, Market>;

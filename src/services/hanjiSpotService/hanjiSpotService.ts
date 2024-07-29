@@ -2,6 +2,7 @@ import type { CandleDto, FillDto, MarketDto, OrderDto, OrderbookDto, TokenDto, T
 import type { GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams } from './params';
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
+import { ALL_MARKETS_ID } from '../constants';
 
 /**
  * HanjiSpotService provides methods to interact with the Hanji spot market API.
@@ -113,7 +114,7 @@ export class HanjiSpotService extends RemoteService {
    */
   async getMarkets(params: GetMarketsParams): Promise<MarketDto[]> {
     const queryParams = new URLSearchParams();
-    if (params.market)
+    if (params.market && params.market !== ALL_MARKETS_ID)
       queryParams.append('market', params.market);
 
     const queryParamsString = decodeURIComponent(queryParams.toString());

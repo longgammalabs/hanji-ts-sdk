@@ -12,7 +12,7 @@ import type {
   ClaimOrderSpotParams,
   DepositSpotParams,
   GetFillsParams,
-  GetMarketInfoParams,
+  GetMarketParams,
   GetMarketsParams,
   GetOrderbookParams,
   GetOrdersParams,
@@ -37,7 +37,7 @@ import type {
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
-import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, MarketInfo, Candle, CandleUpdate } from '../models';
+import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 
 /**
@@ -201,9 +201,9 @@ export class HanjiSpot implements Disposable {
   protected readonly hanjiService: HanjiSpotService;
   protected readonly hanjiWebSocketService: HanjiSpotWebSocketService;
   protected readonly marketContracts: Map<string, HanjiSpotMarketContract> = new Map();
-  protected readonly marketInfos: Map<string, MarketInfo> = new Map();
+  protected readonly markets: Map<string, Market> = new Map();
   protected readonly mappers: typeof mappers;
-  private readonly marketInfoPromises: Map<string, Promise<Market[]>> = new Map();
+  private readonly marketPromises: Map<string, Promise<Market[]>> = new Map();
 
   constructor(options: Readonly<HanjiSpotOptions>) {
     this.signerOrProvider = options.signerOrProvider;
@@ -354,25 +354,24 @@ export class HanjiSpot implements Disposable {
   /**
    * Retrieves the market information for the specified market.
    *
-   * @param {GetMarketInfoParams} params - The parameters for retrieving the market information.
-   * @returns {Promise<MarketInfo | undefined>} A Promise that resolves to the market information or undefined if the market is not found.
+   * @param {GetMarketParams} params - The parameters for retrieving the market information.
+   * @returns {Promise<Market | undefined>} A Promise that resolves to the market information or undefined if the market is not found.
    */
-  async getMarketInfo(params: GetMarketInfoParams): Promise<MarketInfo | undefined> {
-    let marketInfo = this.marketInfos.get(params.market);
+  async getMarket(params: GetMarketParams): Promise<Market | undefined> {
+    let market = this.markets.get(params.market);
 
-    if (!marketInfo) {
-      let market: Market | undefined;
+    if (!market) {
       try {
-        let getMarketInfoPromise = this.marketInfoPromises.get(params.market);
-        if (!getMarketInfoPromise) {
-          getMarketInfoPromise = this.getMarkets(params);
-          this.marketInfoPromises.set(params.market, getMarketInfoPromise);
+        let getMarketPromise = this.marketPromises.get(params.market);
+        if (!getMarketPromise) {
+          getMarketPromise = this.getMarkets(params);
+          this.marketPromises.set(params.market, getMarketPromise);
         }
 
-        const markets = await getMarketInfoPromise;
+        const markets = await getMarketPromise;
         market = markets[0];
 
-        this.marketInfoPromises.delete(params.market);
+        this.marketPromises.delete(params.market);
       }
       catch (error) {
         console.error(error);
@@ -380,27 +379,10 @@ export class HanjiSpot implements Disposable {
       if (!market)
         return undefined;
 
-      marketInfo = {
-        id: market.name,
-        name: market.name,
-        symbol: market.symbol,
-        baseToken: market.baseToken,
-        quoteToken: market.quoteToken,
-        orderbookAddress: market.orderbookAddress,
-        scalingFactors: this.getScalingFactors(market),
-        lastPrice: market.lastPrice,
-        lowPrice24h: market.lowPrice24h,
-        highPrice24h: market.highPrice24h,
-        price24h: market.price24h,
-        bestAsk: market.bestAsk,
-        bestBid: market.bestBid,
-        tradingVolume24h: market.tradingVolume24h,
-        lastTouched: market.lastTouched,
-      };
-      this.marketInfos.set(params.market, marketInfo);
+      this.markets.set(params.market, market);
     }
 
-    return marketInfo;
+    return market;
   }
 
   /**
@@ -413,7 +395,7 @@ export class HanjiSpot implements Disposable {
     const marketDtos = await this.hanjiService.getMarkets(params);
     const markets = marketDtos.map(marketDto => this.mappers.mapMarketDtoToMarket(
       marketDto,
-      this.getScalingFactors(marketDto).price
+      marketDto.priceScalingFactor
     ));
 
     return markets;
@@ -439,11 +421,11 @@ export class HanjiSpot implements Disposable {
    * @returns {Promise<Orderbook>} A Promise that resolves to the orderbook.
    */
   async getOrderbook(params: GetOrderbookParams): Promise<Orderbook> {
-    const [marketInfo, orderbookDto] = await Promise.all([
-      this.ensureMarketInfo(params),
+    const [market, orderbookDto] = await Promise.all([
+      this.ensureMarket(params),
       this.hanjiService.getOrderbook(params),
     ]);
-    const orderbook = this.mappers.mapOrderbookDtoToOrderbook(orderbookDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken);
+    const orderbook = this.mappers.mapOrderbookDtoToOrderbook(orderbookDto, market.priceScalingFactor, market.tokenXScalingFactor);
 
     return orderbook;
   }
@@ -455,11 +437,11 @@ export class HanjiSpot implements Disposable {
    * @returns {Promise<Order[]>} A Promise that resolves to an array of orders.
    */
   async getOrders(params: GetOrdersParams): Promise<Order[]> {
-    const [marketInfo, orderDtos] = await Promise.all([
-      this.ensureMarketInfo(params),
+    const [market, orderDtos] = await Promise.all([
+      this.ensureMarket(params),
       this.hanjiService.getOrders(params),
     ]);
-    const orders = orderDtos.map(orderDto => this.mappers.mapOrderDtoToOrder(orderDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
+    const orders = orderDtos.map(orderDto => this.mappers.mapOrderDtoToOrder(orderDto, market.priceScalingFactor, market.tokenXScalingFactor));
 
     return orders;
   }
@@ -471,11 +453,11 @@ export class HanjiSpot implements Disposable {
    * @returns {Promise<Trade[]>} A Promise that resolves to an array of trades.
    */
   async getTrades(params: GetTradesParams): Promise<Trade[]> {
-    const [marketInfo, tradeDtos] = await Promise.all([
-      this.ensureMarketInfo(params),
+    const [market, tradeDtos] = await Promise.all([
+      this.ensureMarket(params),
       this.hanjiService.getTrades(params),
     ]);
-    const trades = tradeDtos.map(tradeDto => this.mappers.mapTradeDtoToTrade(tradeDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
+    const trades = tradeDtos.map(tradeDto => this.mappers.mapTradeDtoToTrade(tradeDto, market.priceScalingFactor, market.tokenXScalingFactor));
 
     return trades;
   }
@@ -487,11 +469,11 @@ export class HanjiSpot implements Disposable {
    * @returns {Promise<Fill[]>} A Promise that resolves to an array of fills.
    */
   async getFills(params: GetFillsParams): Promise<Fill[]> {
-    const [marketInfo, fillDtos] = await Promise.all([
-      this.ensureMarketInfo(params),
+    const [market, fillDtos] = await Promise.all([
+      this.ensureMarket(params),
       this.hanjiService.getFills(params),
     ]);
-    const fills = fillDtos.map(fillDto => this.mappers.mapFillDtoToFill(fillDto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
+    const fills = fillDtos.map(fillDto => this.mappers.mapFillDtoToFill(fillDto, market.priceScalingFactor, market.tokenXScalingFactor));
 
     return fills;
   }
@@ -644,12 +626,12 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService[Symbol.dispose]();
   }
 
-  protected async ensureMarketInfo(params: { market: string }): Promise<MarketInfo> {
-    const marketInfo = await this.getMarketInfo(params);
-    if (!marketInfo)
+  protected async ensureMarket(params: { market: string }): Promise<Market> {
+    const market = await this.getMarket(params);
+    if (!market)
       throw new Error(`Market not found by the ${params.market} address`);
 
-    return marketInfo;
+    return market;
   }
 
   protected async getSpotMarketContract(params: { market: string }): Promise<HanjiSpotMarketContract> {
@@ -659,10 +641,10 @@ export class HanjiSpot implements Disposable {
     let marketContract = this.marketContracts.get(params.market);
 
     if (!marketContract) {
-      const marketInfo = await this.ensureMarketInfo(params);
+      const market = await this.ensureMarket(params);
 
       marketContract = new HanjiSpotMarketContract({
-        marketInfo,
+        market,
         signerOrProvider: this.signerOrProvider,
         transferExecutedTokensEnabled: this.transferExecutedTokensEnabled,
         autoWaitTransaction: this.autoWaitTransaction,
@@ -694,20 +676,9 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.subscriptionError.removeListener(this.onSubscriptionError);
   }
 
-  protected getScalingFactors(market: { tokenXScalingFactor: number; tokenYScalingFactor: number; priceScalingFactor: number }): MarketInfo['scalingFactors'] {
-    return {
-      baseToken: market.tokenXScalingFactor,
-      quoteToken: market.tokenYScalingFactor,
-      price: market.priceScalingFactor,
-    };
-  }
-
   protected onMarketUpdated: Parameters<typeof this.hanjiWebSocketService.events.marketUpdated['addListener']>[0] = async (marketId, data) => {
     try {
-      const marketInfo = await this.getMarketInfo({ market: marketId });
-      if (!marketInfo)
-        return;
-      const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, marketInfo.scalingFactors.price);
+      const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, data.priceScalingFactor);
 
       (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(marketId, marketUpdate);
     }
@@ -730,10 +701,10 @@ export class HanjiSpot implements Disposable {
 
   protected onOrderbookUpdated: Parameters<typeof this.hanjiWebSocketService.events.orderbookUpdated['addListener']>[0] = async (marketId, data) => {
     try {
-      const marketInfo = await this.getMarketInfo({ market: marketId });
-      if (!marketInfo)
+      const market = await this.getMarket({ market: marketId });
+      if (!market)
         return;
-      const orderbookUpdate = this.mappers.mapOrderbookUpdateDtoToOrderbookUpdate(marketId, data, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken);
+      const orderbookUpdate = this.mappers.mapOrderbookUpdateDtoToOrderbookUpdate(marketId, data, market.priceScalingFactor, market.tokenXScalingFactor);
 
       (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(marketId, orderbookUpdate);
     }
@@ -744,10 +715,10 @@ export class HanjiSpot implements Disposable {
 
   protected onTradesUpdated: Parameters<typeof this.hanjiWebSocketService.events.tradesUpdated['addListener']>[0] = async (marketId, data) => {
     try {
-      const marketInfo = await this.getMarketInfo({ market: marketId });
-      if (!marketInfo)
+      const market = await this.getMarket({ market: marketId });
+      if (!market)
         return;
-      const tradeUpdates = data.map(dto => this.mappers.mapTradeUpdateDtoToTradeUpdate(marketId, dto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
+      const tradeUpdates = data.map(dto => this.mappers.mapTradeUpdateDtoToTradeUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
 
       (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(marketId, tradeUpdates);
     }
@@ -758,10 +729,10 @@ export class HanjiSpot implements Disposable {
 
   protected onUserOrdersUpdated: Parameters<typeof this.hanjiWebSocketService.events.userOrdersUpdated['addListener']>[0] = async (marketId, data) => {
     try {
-      const marketInfo = await this.getMarketInfo({ market: marketId });
-      if (!marketInfo)
+      const market = await this.getMarket({ market: marketId });
+      if (!market)
         return;
-      const orderUpdates = data.map(dto => this.mappers.mapOrderUpdateDtoToOrderUpdate(marketId, dto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
+      const orderUpdates = data.map(dto => this.mappers.mapOrderUpdateDtoToOrderUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
 
       (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(marketId, orderUpdates);
     }
@@ -772,10 +743,10 @@ export class HanjiSpot implements Disposable {
 
   protected onUserFillsUpdated: Parameters<typeof this.hanjiWebSocketService.events.userFillsUpdated['addListener']>[0] = async (marketId, data) => {
     try {
-      const marketInfo = await this.getMarketInfo({ market: marketId });
-      if (!marketInfo)
+      const market = await this.getMarket({ market: marketId });
+      if (!market)
         return;
-      const fillUpdates = data.map(dto => this.mappers.mapFillUpdateDtoToFillUpdate(marketId, dto, marketInfo.scalingFactors.price, marketInfo.scalingFactors.baseToken));
+      const fillUpdates = data.map(dto => this.mappers.mapFillUpdateDtoToFillUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
 
       (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(marketId, fillUpdates);
     }
