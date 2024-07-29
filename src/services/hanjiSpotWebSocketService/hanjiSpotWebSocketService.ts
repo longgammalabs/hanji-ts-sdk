@@ -21,6 +21,9 @@ import {
 } from '../../common';
 import { getErrorLogMessage } from '../../logging';
 
+const ALL_MARKETS_ID = 'allMarkets';
+const ALL_MARKETS_CHANNEL = 'allMarkets';
+
 interface HanjiSpotWebSocketServiceEvents {
   marketUpdated: PublicEventEmitter<readonly [marketId: string, data: MarketUpdateDto]>;
   allMarketsUpdated: PublicEventEmitter<readonly [data: MarketUpdateDto[]]>;
@@ -100,7 +103,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.startHanjiWebSocketClientIfNeeded();
 
     this.hanjiWebSocketClient.subscribe({
-      channel: 'allMarkets',
+      channel: ALL_MARKETS_CHANNEL,
     });
   }
 
@@ -109,7 +112,7 @@ export class HanjiSpotWebSocketService implements Disposable {
    */
   unsubscribeFromAllMarkets() {
     this.hanjiWebSocketClient.unsubscribe({
-      channel: 'allMarkets',
+      channel: ALL_MARKETS_CHANNEL,
     });
   }
 
@@ -173,7 +176,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.subscribe({
       channel: 'userOrders',
       user: params.user,
-      market: params.market,
+      market: params.market || ALL_MARKETS_ID,
     });
   }
 
@@ -185,7 +188,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'userOrders',
       user: params.user,
-      market: params.market,
+      market: params.market || ALL_MARKETS_ID,
     });
   }
 
@@ -199,7 +202,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.subscribe({
       channel: 'userFills',
       user: params.user,
-      market: params.market,
+      market: params.market || ALL_MARKETS_ID,
     });
   }
 
@@ -211,7 +214,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     this.hanjiWebSocketClient.unsubscribe({
       channel: 'userFills',
       user: params.user,
-      market: params.market,
+      market: params.market || ALL_MARKETS_ID,
     });
   }
 
@@ -265,9 +268,8 @@ export class HanjiSpotWebSocketService implements Disposable {
     try {
       if (!message.data)
         return;
-
       switch (message.channel) {
-        case 'allMarkets':
+        case ALL_MARKETS_CHANNEL:
           (this.events.allMarketsUpdated as ToEventEmitter<typeof this.events.allMarketsUpdated>).emit(message.data as MarketUpdateDto[]);
           break;
         case 'market':

@@ -1,8 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Button, Container, Typography, Box } from '@mui/material';
 import { ClientAddressContext, HanjiClientContext } from './clientContext';
-import { MARKET_ADDRESS } from './constants';
-import { type OrderUpdate } from 'hanji-ts-sdk';
+import { FillUpdate, type OrderUpdate } from 'hanji-ts-sdk';
 
 export const UserOrdersUpdates: React.FC = () => {
   const [events, setEvents] = useState<any[]>([]);
@@ -13,12 +12,16 @@ export const UserOrdersUpdates: React.FC = () => {
   function onUserOrdersUpdated(_marketId: string, data: OrderUpdate[]) {
     setEvents(prevEvents => [...prevEvents, ...data]);
   }
+  function onUserFillsUpdated(_marketId: string, data: FillUpdate[]) {
+    setEvents(prevEvents => [...prevEvents, ...data]);
+  }
 
   useEffect(() => {
     hanjiClient.spot.events.userOrdersUpdated.addListener(onUserOrdersUpdated);
-
+    hanjiClient.spot.events.userFillsUpdated.addListener(onUserFillsUpdated);
     return () => {
       hanjiClient.spot.events.userOrdersUpdated.removeListener(onUserOrdersUpdated);
+      hanjiClient.spot.events.userFillsUpdated.removeListener(onUserFillsUpdated);
     };
   }, []);
 
@@ -30,13 +33,17 @@ export const UserOrdersUpdates: React.FC = () => {
     setIsSubscribed(prev => !prev);
     if (!isSubscribed) {
       hanjiClient.spot.subscribeToUserOrders({
-        market: MARKET_ADDRESS,
+        user: address,
+      });
+      hanjiClient.spot.subscribeToUserFills({
         user: address,
       });
     }
     else {
       hanjiClient.spot.unsubscribeFromUserOrders({
-        market: MARKET_ADDRESS,
+        user: address,
+      });
+      hanjiClient.spot.unsubscribeFromUserFills({
         user: address,
       });
     }
@@ -45,7 +52,7 @@ export const UserOrdersUpdates: React.FC = () => {
   return (
     <Container>
       <Typography variant="h6" component="h3" gutterBottom>
-        User Orders Updates
+        User Orders and Fills Updates
       </Typography>
       <Button variant="contained" color="primary" onClick={handleSubscribe}>
         {isSubscribed ? 'Unsubscribe' : 'Subscribe'}
