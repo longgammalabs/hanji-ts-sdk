@@ -4,18 +4,30 @@ import { ethers, type ContractTransactionResponse, type Provider, type Wallet } 
 import { HanjiClient, PlaceOrderSpotParams, type Order } from '../../../src';
 import { getTestConfig, type TestConfig } from '../../testConfig';
 import { expectOrder, transactionRegex, waitForOrder } from '../../testHelpers';
+import { erc20Abi } from '../../../src/abi';
 
-describe('Hanji Spot Client', () => {
+describe('Hanji Spot Client Contract API', () => {
   let testConfig: TestConfig;
   let provider: Provider;
   let wallet: Wallet;
   let hanjiClient: HanjiClient;
 
-  beforeAll(() => {
+  beforeAll(async () => {
     testConfig = getTestConfig();
     provider = new ethers.JsonRpcProvider(testConfig.rpcUrl);
     wallet = new ethers.Wallet(testConfig.accountPrivateKey, provider);
-  });
+    // check if user has 1 unit of each token for interacting
+    let contract = new ethers.Contract(testConfig.testMarkets.xtzUsd.baseToken.contractAddress, erc20Abi, provider);
+    let balance = await contract.balanceOf!(wallet.address);
+    if (balance < 1n * (10n ** BigInt(testConfig.testMarkets.xtzUsd.baseToken.decimals))) {
+      throw new Error('User does not have 1 unit of base token');
+    }
+    contract = new ethers.Contract(testConfig.testMarkets.xtzUsd.quoteToken.contractAddress, erc20Abi, provider);
+    balance = await contract.balanceOf!(wallet.address);
+    if (balance < 1n * (10n ** BigInt(testConfig.testMarkets.xtzUsd.quoteToken.decimals))) {
+      throw new Error('User does not have 1 unit of base token');
+    }
+  }, 15_000);
 
   beforeEach(async () => {
     hanjiClient = new HanjiClient({
@@ -56,7 +68,7 @@ describe('Hanji Spot Client', () => {
       quoteTokenAmount,
     });
     expect(tx.hash).toMatch(transactionRegex);
-  });
+  }, 30_000);
 
   test.each(
     [
@@ -76,7 +88,7 @@ describe('Hanji Spot Client', () => {
           },
           type: 'limit',
           side: 'ask',
-          rawPrice: 11700n,
+          rawPrice: 1170000n,
           price: new BigNumber(117),
           rawSize: 500n,
           size: new BigNumber(0.5),
@@ -92,7 +104,7 @@ describe('Hanji Spot Client', () => {
           },
           type: 'limit',
           side: 'ask',
-          rawPrice: 11700n,
+          rawPrice: 1170000n,
           price: new BigNumber(117),
           rawSize: 0n,
           size: new BigNumber(0),
@@ -120,7 +132,7 @@ describe('Hanji Spot Client', () => {
           type: 'limit',
           side: 'bid',
           status: 'open',
-          rawPrice: 1n,
+          rawPrice: 100n,
           price: new BigNumber(0.01),
           rawSize: 35n,
           size: new BigNumber(0.035),
@@ -137,7 +149,7 @@ describe('Hanji Spot Client', () => {
           type: 'limit',
           side: 'bid',
           status: 'cancelled',
-          rawPrice: 1n,
+          rawPrice: 100n,
           price: new BigNumber(0.01),
           rawSize: 0n,
           size: new BigNumber(0),
@@ -165,7 +177,7 @@ describe('Hanji Spot Client', () => {
           type: 'limit',
           side: 'ask',
           rawPrice: 3170000n,
-          price: new BigNumber(31700),
+          price: new BigNumber(317),
           rawSize: 770n,
           size: new BigNumber(0.77),
           rawOrigSize: 770n,
@@ -181,7 +193,7 @@ describe('Hanji Spot Client', () => {
           type: 'limit',
           side: 'ask',
           rawPrice: 3170000n,
-          price: new BigNumber(31700),
+          price: new BigNumber(317),
           rawSize: 0n,
           size: new BigNumber(0),
           rawOrigSize: 770n,
@@ -209,7 +221,7 @@ describe('Hanji Spot Client', () => {
           side: 'bid',
           status: 'open',
           rawPrice: 1n,
-          price: new BigNumber(0.01),
+          price: new BigNumber(0.0001),
           rawSize: 1n,
           size: new BigNumber(0.001),
           rawOrigSize: 1n,
@@ -226,7 +238,7 @@ describe('Hanji Spot Client', () => {
           side: 'bid',
           status: 'cancelled',
           rawPrice: 1n,
-          price: new BigNumber(0.01),
+          price: new BigNumber(0.0001),
           rawSize: 0n,
           size: new BigNumber(0),
           rawOrigSize: 1n,
@@ -236,7 +248,7 @@ describe('Hanji Spot Client', () => {
           owner: wallet.address.toLowerCase(),
         },
       }),
-    ] satisfies Array<(testConfig: TestConfig, wallet: Wallet) => {
+    ] as Array<(testConfig: TestConfig, wallet: Wallet) => {
       market: string;
       approveAmount: BigNumber | bigint;
       newOrderParams: PlaceOrderSpotParams;
@@ -274,5 +286,5 @@ describe('Hanji Spot Client', () => {
       o => o.orderId === newOrder!.orderId && o.status === 'cancelled'
     );
     expectOrder(canceledOrder, expectedCancelOrder);
-  });
+  }, 45_000);
 });
