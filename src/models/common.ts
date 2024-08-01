@@ -34,3 +34,5 @@ export interface Token {
 }
 
 export type TokenUpdate = Token;
+
+export type TokenType = 'base' | 'quote';

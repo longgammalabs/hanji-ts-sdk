@@ -29,8 +29,10 @@ export {
   type GetTokensParams,
   type GetMarketParams,
   type GetMarketsParams,
-  type GetCandlesParams
+  type GetCandlesParams,
 
+  type CalculateLimitDetailsParams,
+  type CalculateMarketDetailsParams
 } from './spot';
 
 export type {
@@ -54,7 +56,10 @@ export type {
   TradeUpdate,
   FillUpdate,
   TokenUpdate,
-  CandleUpdate
+  CandleUpdate,
+
+  MarketOrderDetails,
+  LimitOrderDetails
 } from './models';
 
 export {

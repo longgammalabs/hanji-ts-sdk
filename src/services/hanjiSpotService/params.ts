@@ -1,4 +1,4 @@
-import { CandleResolution, OrderStatus } from '../../models';
+import { CandleResolution, Direction, OrderStatus, TokenType } from '../../models';
 
 export interface GetOrderbookParams {
   market: string;
@@ -37,4 +37,27 @@ export interface GetCandlesParams {
   resolution: CandleResolution;
   fromTime?: number;
   toTime?: number;
+}
+
+export interface CalculateMarketDetailsParams {
+  market: string;
+  direction: Direction;
+  inputToken: TokenType;
+  inputs: {
+    tokenXInput: string;
+    tokenYInput: string;
+    slippage: number;
+  };
+}
+
+export interface CalculateLimitDetailsParams {
+  market: string;
+  direction: Direction;
+  inputToken: TokenType;
+  inputs: {
+    priceInput: string;
+    tokenXInput: string;
+    tokenYInput: string;
+    postOnly: boolean;
+  };
 }

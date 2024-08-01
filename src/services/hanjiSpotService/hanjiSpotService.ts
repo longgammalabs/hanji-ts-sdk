@@ -1,5 +1,5 @@
-import type { CandleDto, FillDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto } from './dtos';
-import type { GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams } from './params';
+import type { CandleDto, FillDto, LimitDetailsDto, MarketDetailsDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto } from './dtos';
+import type { CalculateLimitDetailsParams, CalculateMarketDetailsParams, GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams } from './params';
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
 import { ALL_MARKETS_ID } from '../constants';
@@ -139,6 +139,46 @@ export class HanjiSpotService extends RemoteService {
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
     const response = await this.fetch<CandleDto[]>(`/candles?${queryParamsString}`, 'json');
+
+    return response;
+  }
+
+  /**
+   * Calculates the market order details for a given token inputs.
+   * @param params - The parameters for the market details calculation.
+   * @returns The market order details data.
+   */
+  async calculateMarketDetails(params: CalculateMarketDetailsParams): Promise<MarketDetailsDto> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('market', params.market);
+    queryParams.append('direction', params.direction);
+    queryParams.append('tokenInput', params.inputToken);
+    if (params.inputs.tokenXInput)
+      queryParams.append('tokenXInput', params.inputs.tokenXInput);
+    if (params.inputs.tokenYInput)
+      queryParams.append('tokenYInput', params.inputs.tokenYInput);
+    queryParams.append('slippage', params.inputs.slippage.toString());
+
+    const queryParamsString = decodeURIComponent(queryParams.toString());
+    const response = await this.fetch<MarketDetailsDto>(`calculate//market-details?${queryParamsString}`, 'json');
+
+    return response;
+  }
+
+  async calculateLimitDetails(params: CalculateLimitDetailsParams): Promise<LimitDetailsDto> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('market', params.market);
+    queryParams.append('direction', params.direction);
+    queryParams.append('tokenInput', params.inputToken);
+    if (params.inputs.tokenXInput)
+      queryParams.append('tokenXInput', params.inputs.tokenXInput);
+    if (params.inputs.tokenYInput)
+      queryParams.append('tokenYInput', params.inputs.tokenYInput);
+    queryParams.append('postOnly', params.inputs.postOnly.toString());
+    queryParams.append('priceInput', params.inputs.priceInput);
+
+    const queryParamsString = decodeURIComponent(queryParams.toString());
+    const response = await this.fetch<LimitDetailsDto>(`calculate/limit-details?${queryParamsString}`, 'json');
 
     return response;
   }

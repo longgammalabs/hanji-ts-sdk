@@ -589,3 +589,44 @@ export interface Candle {
   lastTouched: number;
 }
 export type CandleUpdate = Candle;
+
+export interface MarketOrderDetails {
+  buy: {
+    fee: number;
+    estFee: number;
+    worstPrice: number;
+    estPrice: number;
+    estWorstPrice: number;
+    estSlippage: number;
+    tokenXReceive: number;
+    tokenYPay: number;
+    estTokenYPay: number;
+  };
+  sell: {
+    fee: number;
+    estFee: number;
+    worstPrice: number;
+    estPrice: number;
+    estWorstPrice: number;
+    estSlippage: number;
+    tokenXPay: number;
+    estTokenYReceive: number;
+  };
+}
+
+export interface LimitOrderDetails {
+  buy: {
+    maxFee: number;
+    price: number;
+    tokenXReceive: number;
+    maxTokenYPay: number;
+    minTokenYPay: number;
+  };
+  sell: {
+    maxFee: number;
+    price: number;
+    tokenXPay: number;
+    maxTokenYReceive: number;
+    minTokenYReceive: number;
+  };
+}

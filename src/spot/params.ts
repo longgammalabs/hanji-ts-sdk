@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-import { CandleResolution, OrderType, type OrderStatus, type Side } from '../models';
+import { CandleResolution, OrderType, TokenType, Direction, type OrderStatus, type Side } from '../models';
 
 export interface ApproveSpotParams {
   market: string;
@@ -412,6 +412,29 @@ export interface GetCandlesParams {
    */
   toTime?: number;
 }
+
+export interface CalculateLimitDetailsParams {
+  market: string;
+  direction: Direction;
+  inputToken: TokenType;
+  inputs: {
+    priceInput: string;
+    tokenXInput: string;
+    tokenYInput: string;
+    postOnly: boolean;
+  };
+};
+
+export interface CalculateMarketDetailsParams {
+  market: string;
+  direction: Direction;
+  inputToken: TokenType;
+  inputs: {
+    tokenXInput: string;
+    tokenYInput: string;
+    slippage: number;
+  };
+};
 
 export interface SubscribeToMarketParams {
   market: string;

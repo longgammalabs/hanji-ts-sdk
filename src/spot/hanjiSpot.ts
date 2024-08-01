@@ -33,11 +33,13 @@ import type {
   UnsubscribeFromUserOrdersParams,
   WithdrawSpotParams,
   SubscribeToCandlesParams,
-  UnsubscribeFromCandlesParams
+  UnsubscribeFromCandlesParams,
+  CalculateLimitDetailsParams,
+  CalculateMarketDetailsParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
-import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate } from '../models';
+import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 
 /**
@@ -488,6 +490,14 @@ export class HanjiSpot implements Disposable {
     const candles = await this.hanjiService.getCandles(params);
 
     return candles;
+  }
+
+  async calculateLimitDetails(params: CalculateLimitDetailsParams): Promise<LimitOrderDetails> {
+    return this.hanjiService.calculateLimitDetails(params);
+  }
+
+  async calculateMarketDetails(params: CalculateMarketDetailsParams): Promise<MarketOrderDetails> {
+    return this.hanjiService.calculateMarketDetails(params);
   }
 
   /**

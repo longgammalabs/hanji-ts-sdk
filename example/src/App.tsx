@@ -9,6 +9,7 @@ import { ClientAddressContext, HanjiClientContext, defaultHanjiClient } from './
 import ApproveToken from './ApproveToken';
 import OrderbookUpdates from './OrderbookUpdates';
 import AllMarketsUpdates from './AllMarketUpdates';
+import CalculateOrderDetails from './CalculateOrderDetails';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -39,6 +40,8 @@ function App() {
             <Typography variant="h6">HTTP API</Typography>
             <Divider />
             <Orderbook />
+            <Divider />
+            <CalculateOrderDetails />
           </Box>
           <Box p={1} sx={{ gridColumn: '3 / 4' }}>
             <Typography variant="h6">WebSocket</Typography>
