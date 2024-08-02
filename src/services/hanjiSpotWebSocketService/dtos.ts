@@ -99,4 +99,5 @@ export interface TokenUpdateDto {
   contractAddress: string;
   decimals: number;
   roundingDecimals: number;
+  supportsPermit: boolean;
 }

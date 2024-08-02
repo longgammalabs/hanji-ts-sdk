@@ -31,6 +31,11 @@ export interface Token {
    * Number of rounding decimals for the token.
    */
   roundingDecimals: number;
+
+  /**
+   * Indicates whether the token is ERC20Permit compatible.
+   */
+  supportsPermit: boolean;
 }
 
 export type TokenUpdate = Token;

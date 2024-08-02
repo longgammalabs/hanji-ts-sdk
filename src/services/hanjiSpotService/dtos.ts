@@ -64,6 +64,7 @@ export interface TokenDto {
   contractAddress: string;
   decimals: number;
   roundingDecimals: number;
+  supportsPermit: boolean;
 }
 
 export interface MarketDto {

@@ -359,6 +359,59 @@ export const lobAbi = [
   },
   {
     type: 'function',
+    name: 'depositTokens',
+    inputs: [
+      {
+        name: 'token_x_amount',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'token_y_amount',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'v_x',
+        type: 'uint8',
+        internalType: 'uint8',
+      },
+      {
+        name: 'r_x',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+      {
+        name: 's_x',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+      {
+        name: 'v_y',
+        type: 'uint8',
+        internalType: 'uint8',
+      },
+      {
+        name: 'r_y',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+      {
+        name: 's_y',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+      {
+        name: 'expires',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     name: 'extractDirectionAndPrice',
     inputs: [
       {
@@ -686,6 +739,80 @@ export const lobAbi = [
         name: 'expires',
         type: 'uint256',
         internalType: 'uint256',
+      },
+    ],
+    outputs: [
+      {
+        name: 'order_id',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+    ],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'placeOrder',
+    inputs: [
+      {
+        name: 'isAsk',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'quantity',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'price',
+        type: 'uint56',
+        internalType: 'uint56',
+      },
+      {
+        name: 'max_commission',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'amount_to_approve',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'market_only',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'post_only',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'transfer_executed_tokens',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'expires',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+      {
+        name: 'v',
+        type: 'uint8',
+        internalType: 'uint8',
+      },
+      {
+        name: 'r',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+      {
+        name: 's',
+        type: 'bytes32',
+        internalType: 'bytes32',
       },
     ],
     outputs: [
