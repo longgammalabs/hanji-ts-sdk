@@ -10,6 +10,7 @@ import ApproveToken from './ApproveToken';
 import OrderbookUpdates from './OrderbookUpdates';
 import AllMarketsUpdates from './AllMarketUpdates';
 import CalculateOrderDetails from './CalculateOrderDetails';
+import CandleUpdates from './CandleUpdates';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -51,6 +52,8 @@ function App() {
             <OrderbookUpdates />
             <Divider />
             <AllMarketsUpdates />
+            <Divider />
+            <CandleUpdates />
           </Box>
         </Box>
       </ClientAddressContext.Provider>

@@ -31,7 +31,7 @@ interface HanjiSpotWebSocketServiceEvents {
   tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdateDto[]]>;
   userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdateDto[]]>;
   userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdateDto[]]>;
-  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdateDto[]]>;
+  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdateDto]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
@@ -288,7 +288,7 @@ export class HanjiSpotWebSocketService implements Disposable {
           (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.id, message.data as FillUpdateDto[]);
           break;
         case 'candles':
-          (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(message.id, message.data as CandleUpdateDto[]);
+          (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(message.id, message.data as CandleUpdateDto);
           break;
         case 'error':
           (this.events.subscriptionError as ToEventEmitter<typeof this.events.subscriptionError>).emit(message.data as string);

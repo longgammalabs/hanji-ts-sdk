@@ -148,7 +148,7 @@ interface HanjiSpotEvents {
    * @event
    * @type {PublicEventEmitter<readonly [marketId: string, data: CandleUpdate[]]>}
    */
-  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdate[]]>;
+  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdate]>;
 
   /**
    * Emitted when there is an error related to a subscription.
