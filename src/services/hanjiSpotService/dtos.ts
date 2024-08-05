@@ -8,6 +8,7 @@ export interface OrderbookLevelDto {
 
 export interface OrderbookDto {
   timestamp: number;
+  aggregation: number;
   levels: {
     asks: OrderbookLevelDto[];
     bids: OrderbookLevelDto[];

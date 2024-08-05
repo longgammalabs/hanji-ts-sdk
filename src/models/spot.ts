@@ -213,6 +213,10 @@ export interface Orderbook {
   timestamp: number;
 
   /**
+   * The aggregation level of the orderbook, representing the granularity of the price levels.
+   */
+  aggregation: number;
+  /**
    * The levels of the orderbook, containing both ask and bid levels.
    */
   levels: {
