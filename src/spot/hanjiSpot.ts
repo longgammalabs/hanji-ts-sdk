@@ -35,11 +35,12 @@ import type {
   SubscribeToCandlesParams,
   UnsubscribeFromCandlesParams,
   CalculateLimitDetailsParams,
-  CalculateMarketDetailsParams
+  CalculateMarketDetailsParams,
+  GetUserBalancesParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
-import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails } from '../models';
+import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails, UserBalances } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 
 /**
@@ -492,12 +493,34 @@ export class HanjiSpot implements Disposable {
     return candles;
   }
 
+  /**
+   * Calculates the limit order details for a given token inputs.
+   *
+   * @param {CalculateLimitDetailsParams} params - The parameters for the limit details calculation.
+   * @returns {Promise<LimitOrderDetails>} A Promise that resolves to the limit order details data.
+   */
   async calculateLimitDetails(params: CalculateLimitDetailsParams): Promise<LimitOrderDetails> {
     return this.hanjiService.calculateLimitDetails(params);
   }
 
+  /**
+   * Calculates the market order details for a given token inputs.
+   *
+   * @param {CalculateMarketDetailsParams} params - The parameters for the market details calculation.
+   * @returns {Promise<MarketOrderDetails>} A Promise that resolves to the market order details data.
+   */
   async calculateMarketDetails(params: CalculateMarketDetailsParams): Promise<MarketOrderDetails> {
     return this.hanjiService.calculateMarketDetails(params);
+  }
+
+  /**
+   * Retrieves the user balances for the specified user.
+   *
+   * @param {GetUserBalancesParams} params - The parameters for retrieving the user balances.
+   * @returns {Promise<UserBalances>} A Promise that resolves to the user balances data.
+   */
+  async getUserBalances(params: GetUserBalancesParams): Promise<UserBalances> {
+    return this.hanjiService.getUserBalances(params);
   }
 
   /**

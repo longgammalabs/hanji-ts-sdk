@@ -61,3 +61,7 @@ export interface CalculateLimitDetailsParams {
     postOnly: boolean;
   };
 }
+
+export interface GetUserBalancesParams {
+  user: string;
+}

@@ -634,3 +634,38 @@ export interface LimitOrderDetails {
     minTokenYReceive: number;
   };
 }
+
+/**
+ * Represents the user balances for various tokens.
+ */
+export interface UserBalances {
+  balances: {
+    /**
+     * The symbol of the token.
+     *
+     * @type {string}
+     */
+    token: string;
+
+    /**
+     * The address of the token.
+     *
+     * @type {string}
+     */
+    tokenAddress: string;
+
+    /**
+     * The amount of the token that is currently locked in orders.
+     *
+     * @type {number}
+     */
+    hold: number;
+
+    /**
+     * The total user amount of the token.
+     *
+     * @type {number}
+     */
+    total: number;
+  }[];
+}

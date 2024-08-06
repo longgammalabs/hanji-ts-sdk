@@ -11,6 +11,7 @@ import OrderbookUpdates from './OrderbookUpdates';
 import AllMarketsUpdates from './AllMarketUpdates';
 import CalculateOrderDetails from './CalculateOrderDetails';
 import CandleUpdates from './CandleUpdates';
+import UserBalances from './UserBalances';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -41,6 +42,8 @@ function App() {
             <Typography variant="h6">HTTP API</Typography>
             <Divider />
             <Orderbook />
+            <Divider />
+            <UserBalances />
             <Divider />
             <CalculateOrderDetails />
           </Box>

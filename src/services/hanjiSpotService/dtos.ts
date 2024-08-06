@@ -141,3 +141,12 @@ export interface LimitDetailsDto {
     minTokenYReceive: number;
   };
 }
+
+export interface UserBalancesDto {
+  balances: {
+    token: string;
+    tokenAddress: string;
+    hold: number;
+    total: number;
+  }[];
+}

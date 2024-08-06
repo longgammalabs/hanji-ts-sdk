@@ -32,7 +32,8 @@ export {
   type GetCandlesParams,
 
   type CalculateLimitDetailsParams,
-  type CalculateMarketDetailsParams
+  type CalculateMarketDetailsParams,
+  type GetUserBalancesParams
 } from './spot';
 
 export type {
@@ -59,7 +60,8 @@ export type {
   CandleUpdate,
 
   MarketOrderDetails,
-  LimitOrderDetails
+  LimitOrderDetails,
+  UserBalances
 } from './models';
 
 export {

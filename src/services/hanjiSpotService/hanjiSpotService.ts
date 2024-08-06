@@ -1,5 +1,5 @@
-import type { CandleDto, FillDto, LimitDetailsDto, MarketDetailsDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto } from './dtos';
-import type { CalculateLimitDetailsParams, CalculateMarketDetailsParams, GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams } from './params';
+import type { CandleDto, FillDto, LimitDetailsDto, MarketDetailsDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto, UserBalancesDto } from './dtos';
+import type { CalculateLimitDetailsParams, CalculateMarketDetailsParams, GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams, GetUserBalancesParams } from './params';
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
 import { ALL_MARKETS_ID } from '../constants';
@@ -165,6 +165,11 @@ export class HanjiSpotService extends RemoteService {
     return response;
   }
 
+  /**
+   * Calculates the limit order details for a given token inputs.
+   * @param params - The parameters for the limit details calculation.
+   * @returns The limit order details data.
+   */
   async calculateLimitDetails(params: CalculateLimitDetailsParams): Promise<LimitDetailsDto> {
     const queryParams = new URLSearchParams();
     queryParams.append('market', params.market);
@@ -179,6 +184,16 @@ export class HanjiSpotService extends RemoteService {
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
     const response = await this.fetch<LimitDetailsDto>(`calculate/limit-details?${queryParamsString}`, 'json');
+
+    return response;
+  }
+
+  async getUserBalances(params: GetUserBalancesParams): Promise<UserBalancesDto> {
+    const queryParams = new URLSearchParams();
+    queryParams.append('user', params.user);
+
+    const queryParamsString = decodeURIComponent(queryParams.toString());
+    const response = await this.fetch<UserBalancesDto>(`user-balances?${queryParamsString}`, 'json');
 
     return response;
   }

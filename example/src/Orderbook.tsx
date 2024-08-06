@@ -33,7 +33,7 @@ export const Orderbook: React.FC = () => {
         Fetch Orderbook Data
       </Button>
       {orderbookData && (
-        <Box mt={2} textAlign="left">
+        <Box mt={2} mb={2} textAlign="left">
           <Typography variant="body1" component="pre">
             {JSON.stringify(orderbookData, (_key, value) =>
               typeof value === 'bigint'

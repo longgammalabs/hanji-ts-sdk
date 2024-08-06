@@ -436,6 +436,10 @@ export interface CalculateMarketDetailsParams {
   };
 };
 
+export interface GetUserBalancesParams {
+  user: string;
+}
+
 export interface SubscribeToMarketParams {
   market: string;
 }
