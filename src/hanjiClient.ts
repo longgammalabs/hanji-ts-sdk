@@ -1,4 +1,4 @@
-import type { Provider, Signer } from 'ethers/providers';
+import type { Signer } from 'ethers/providers';
 
 import { HanjiSpot } from './spot';
 
@@ -23,12 +23,12 @@ export interface HanjiClientOptions {
   webSocketApiBaseUrl: string;
 
   /**
-   * The ethers signer or provider used for signing transactions.
+   * The ethers signer used for signing transactions.
    * For only http/ws operations, you can set this to null.
    *
-   * @type {Signer | Provider | null}
+   * @type {Signer | null}
    */
-  signerOrProvider: Signer | Provider | null;
+  signer: Signer | null;
 
   /**
    * Whether to connect to the WebSocket immediately after creating the HanjiClient (true)
@@ -64,11 +64,11 @@ export class HanjiClient {
   }
 
   /**
-   * Sets the signer or provider for the HanjiClient.
+   * Sets the signer for the HanjiClient.
    *
-   * @param {Signer | Provider} signerOrProvider - The signer or provider to set.
+   * @param {Signer } signer - The signer to set.
    */
-  setSignerOrProvider(signerOrProvider: Signer | Provider): void {
-    this.spot.setSignerOrProvider(signerOrProvider);
+  setSigner(signer: Signer): void {
+    this.spot.setSigner(signer);
   }
 }

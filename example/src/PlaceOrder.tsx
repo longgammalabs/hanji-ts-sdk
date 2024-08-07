@@ -7,6 +7,7 @@ import { MARKET_ADDRESS } from './constants';
 export const PlaceOrder: React.FC = () => {
   const [size, setSize] = useState('');
   const [price, setPrice] = useState('');
+  const [permitValue, setPermitValue] = useState('');
   const [isAsk, setIsAsk] = useState(false);
   const [isMarket, setIsMarket] = useState(false);
   const hanjiClient = useContext(HanjiClientContext);
@@ -25,6 +26,31 @@ export const PlaceOrder: React.FC = () => {
         price: BigNumber(price),
       });
       console.log('Order placed', response);
+    }
+    catch (error) {
+      console.error('Error fetching placing order:', error);
+    }
+    finally {
+      setIsFetching(false);
+    }
+  };
+
+  const handlePlaceOrderWithPermit = async (event: React.MouseEvent) => {
+    event.preventDefault();
+    console.log('Placing order with permit:', { size, price, isAsk, isMarket, permitValue });
+    setIsFetching(true);
+    try {
+      const response = await hanjiClient.spot.placeOrderWithPermit({
+        market: MARKET_ADDRESS,
+        type: isMarket ? 'market' : 'limit',
+        side: isAsk ? 'ask' : 'bid',
+        size: BigNumber(size),
+        price: BigNumber(price),
+        permit: BigNumber(permitValue),
+      });
+
+      console.log('Order with permit placed', response);
+      return;
     }
     catch (error) {
       console.error('Error fetching placing order:', error);
@@ -68,8 +94,21 @@ export const PlaceOrder: React.FC = () => {
           control={<Checkbox checked={isMarket} onChange={e => setIsMarket(e.target.checked)} />}
           label="Is Market"
         />
-        <Button type="submit" variant="contained" color="primary" disabled={isFetching}>
+        <Button type="submit" variant="contained" color="primary" name="submitType" value="placeOrder" disabled={isFetching}>
           Place Order
+        </Button>
+        <div>
+          <TextField
+            label="Permit"
+            variant="outlined"
+            fullWidth
+            margin="normal"
+            value={permitValue}
+            onChange={e => setPermitValue(e.target.value)}
+          />
+        </div>
+        <Button type="button" onClick={handlePlaceOrderWithPermit} variant="contained" color="primary" name="submitType" value="placeOrderWithPermit" disabled={isFetching}>
+          Place Order With Permit
         </Button>
       </form>
     </Container>

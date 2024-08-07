@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { Contract, type Provider, type Signer, type ContractTransactionResponse } from 'ethers';
+import { Contract, type Signer, type ContractTransactionResponse, Signature } from 'ethers';
 
 import { TransactionFailedError } from './errors';
 import type {
@@ -11,16 +11,17 @@ import type {
   ClaimOrderSpotParams,
   DepositSpotParams,
   PlaceOrderSpotParams,
+  PlaceOrderWithPermitSpotParams,
   SetClaimableStatusParams,
   WithdrawSpotParams
 } from './params';
-import { erc20Abi, lobAbi } from '../abi';
+import { erc20Abi, lobAbi, erc20PermitAbi } from '../abi';
 import type { Market, Token } from '../models';
 import { tokenUtils } from '../utils';
 
 export interface HanjiSpotMarketContractOptions {
   market: Market;
-  signerOrProvider: Signer | Provider;
+  signer: Signer;
   transferExecutedTokensEnabled?: boolean;
   autoWaitTransaction?: boolean;
 }
@@ -38,20 +39,38 @@ export class HanjiSpotMarketContract {
   transferExecutedTokensEnabled: boolean;
   autoWaitTransaction: boolean;
 
-  protected readonly signerOrProvider: Signer | Provider;
+  protected readonly signer: Signer;
   protected readonly marketContract: Contract;
   protected readonly baseTokenContract: Contract;
   protected readonly quoteTokenContract: Contract;
+  private _chainId: bigint | undefined;
+  protected get chainId(): Promise<bigint> {
+    if (this._chainId === undefined) {
+      return this.signer.provider!.getNetwork().then(network => {
+        this._chainId = network.chainId;
+        return this._chainId;
+      });
+    }
+    return Promise.resolve(this._chainId);
+  }
 
   constructor(options: Readonly<HanjiSpotMarketContractOptions>) {
     this.market = options.market;
-    this.signerOrProvider = options.signerOrProvider;
+    this.signer = options.signer;
     this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled ?? HanjiSpotMarketContract.defaultTransferExecutedTokensEnabled;
     this.autoWaitTransaction = options.autoWaitTransaction ?? HanjiSpotMarketContract.defaultAutoWaitTransaction;
 
-    this.marketContract = new Contract(this.market.orderbookAddress, lobAbi, options.signerOrProvider);
-    this.baseTokenContract = new Contract(this.market.baseToken.contractAddress, erc20Abi, options.signerOrProvider);
-    this.quoteTokenContract = new Contract(this.market.quoteToken.contractAddress, erc20Abi, options.signerOrProvider);
+    this.marketContract = new Contract(this.market.orderbookAddress, lobAbi, options.signer);
+    this.baseTokenContract = new Contract(
+      this.market.baseToken.contractAddress,
+      this.market.baseToken.supportsPermit ? erc20PermitAbi : erc20Abi,
+      options.signer
+    );
+    this.quoteTokenContract = new Contract(
+      this.market.quoteToken.contractAddress,
+      this.market.quoteToken.supportsPermit ? erc20PermitAbi : erc20Abi,
+      options.signer
+    );
   }
 
   async approveTokens(params: ApproveSpotParams): Promise<ContractTransactionResponse> {
@@ -133,6 +152,55 @@ export class HanjiSpotMarketContract {
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires
+      )
+    );
+
+    return tx;
+  }
+
+  async placeOrderWithPermit(params: PlaceOrderWithPermitSpotParams): Promise<ContractTransactionResponse> {
+    if ((params.side === 'ask' && !this.market.baseToken.supportsPermit)
+      || (params.side === 'bid' && !this.market.quoteToken.supportsPermit)) {
+      throw Error('Token doesn\'t support permits');
+    }
+    const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenXScalingFactor);
+    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    let quantityToPermit, amountToPermit: bigint;
+    if (params.side === 'ask') {
+      amountToPermit = this.convertTokensAmountToRawAmountIfNeeded(
+        params.permit,
+        this.market.tokenXScalingFactor
+      );
+      quantityToPermit = amountToPermit * 10n ** BigInt(
+        this.market.baseToken.decimals - this.market.tokenXScalingFactor);
+    }
+    else {
+      amountToPermit = this.convertTokensAmountToRawAmountIfNeeded(
+        params.permit,
+        this.market.tokenYScalingFactor
+      );
+      quantityToPermit = amountToPermit * 10n ** BigInt(
+        this.market.quoteToken.decimals - this.market.tokenYScalingFactor);
+    }
+
+    const expires = getExpires();
+    const maxCommission = this.calculateMaxCommission(sizeAmount, priceAmount);
+    const { v, r, s } = await this.signPermit(params.side === 'ask', quantityToPermit, expires);
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.placeOrder!(
+        params.side === 'ask',
+        sizeAmount,
+        priceAmount,
+        maxCommission,
+        amountToPermit,
+        params.type === 'market',
+        params.type === 'limit_post_only',
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
+        expires,
+        v,
+        r,
+        s
       )
     );
 
@@ -296,5 +364,46 @@ export class HanjiSpotMarketContract {
     }
 
     return maxCommission;
+  }
+
+  private async signPermit(isBaseToken: boolean, quantityToPermit: bigint, deadline: bigint): Promise<{ v: string; r: string; s: string }> {
+    const tokenContract = isBaseToken ? this.baseTokenContract : this.quoteTokenContract;
+
+    const owner = await this.signer.getAddress();
+    const spender = this.market.orderbookAddress;
+
+    const domain = {
+      name: await tokenContract.name!(),
+      version: '1',
+      chainId: await this.chainId,
+      verifyingContract: await tokenContract.getAddress(),
+    };
+
+    const types = {
+      Permit: [
+        { name: 'owner', type: 'address' },
+        { name: 'spender', type: 'address' },
+        { name: 'value', type: 'uint256' },
+        { name: 'nonce', type: 'uint256' },
+        { name: 'deadline', type: 'uint256' },
+      ],
+    };
+
+    const nonce = await tokenContract.nonces!(owner);
+    const message = {
+      owner,
+      spender,
+      value: quantityToPermit,
+      nonce,
+      deadline,
+    };
+    const signature = await this.signer.signTypedData(domain, types, message);
+    const splitSig = Signature.from(signature);
+
+    return {
+      v: splitSig.v.toString(),
+      r: splitSig.r,
+      s: splitSig.s,
+    };
   }
 }

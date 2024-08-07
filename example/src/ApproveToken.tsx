@@ -7,6 +7,7 @@ import {
   Button,
   Typography
 } from '@mui/material';
+import BigNumber from 'bignumber.js';
 import { HanjiClientContext } from './clientContext';
 import { MARKET_ADDRESS } from './constants';
 
@@ -23,7 +24,7 @@ export const ApproveToken: React.FC = () => {
       const approveToken = await hanjiClient.spot.approveTokens({
         market: MARKET_ADDRESS,
         isBaseToken,
-        amount: BigInt(amount),
+        amount: BigNumber(amount),
       });
       console.log('Approve Token:', approveToken);
     }

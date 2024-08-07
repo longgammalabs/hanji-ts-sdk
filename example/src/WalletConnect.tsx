@@ -1,5 +1,5 @@
 import React, { useContext, useState } from 'react';
-import { ethers } from 'ethers';
+import { BrowserProvider, Signer } from 'ethers';
 import { MetaMaskInpageProvider } from '@metamask/providers';
 import { ClientAddressContext, HanjiClientContext } from './clientContext';
 
@@ -15,16 +15,16 @@ export const WalletConnect = ({ setAddress }: { setAddress: (address: string) =>
   const connectWallet = async () => {
     if ((window as any).ethereum) {
       try {
-        let signer = null;
+        let signer: Signer | undefined;
 
         let provider;
         if (window.ethereum == null) {
           alert('MetaMask not installed; using read-only defaults');
         }
         else {
-          provider = new ethers.BrowserProvider(window.ethereum);
-          signer = await provider.getSigner();
-          hanjiClient.setSignerOrProvider(signer);
+          provider = new BrowserProvider(window.ethereum);
+          signer = (await provider.getSigner());
+          hanjiClient.setSigner(signer);
           const address = await signer.getAddress();
           setAddress(address);
           setConnected(true);
