@@ -1,5 +1,5 @@
 import type { ContractTransactionResponse } from 'ethers';
-import type { Provider, Signer } from 'ethers/providers';
+import type { Signer } from 'ethers/providers';
 
 import { HanjiSpotMarketContract } from './hanjiSpotMarketContract';
 import * as mappers from './mappers';
@@ -36,7 +36,8 @@ import type {
   UnsubscribeFromCandlesParams,
   CalculateLimitDetailsParams,
   CalculateMarketDetailsParams,
-  GetUserBalancesParams
+  GetUserBalancesParams,
+  PlaceOrderWithPermitSpotParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
@@ -64,12 +65,12 @@ export interface HanjiSpotOptions {
   webSocketApiBaseUrl: string;
 
   /**
-   * The ethers signer or provider used for signing transactions.
+   * The ethers signer used for signing transactions.
    * For only http/ws operations, you can set this to null.
    *
-   * @type {Signer | Provider | null}
+   * @type {Signer | null}
    */
-  signerOrProvider: Signer | Provider | null;
+  signer: Signer | null;
 
   /**
    * Whether to connect to the WebSocket immediately after creating the HanjiSpot (true)
@@ -200,16 +201,16 @@ export class HanjiSpot implements Disposable {
    */
   autoWaitTransaction: boolean | undefined;
 
-  protected signerOrProvider: Signer | Provider | null;
+  protected signer: Signer | null;
   protected readonly hanjiService: HanjiSpotService;
   protected readonly hanjiWebSocketService: HanjiSpotWebSocketService;
-  protected readonly marketContracts: Map<string, HanjiSpotMarketContract> = new Map();
+  private marketContracts: Map<string, HanjiSpotMarketContract> = new Map();
   protected readonly markets: Map<string, Market> = new Map();
   protected readonly mappers: typeof mappers;
-  private readonly marketPromises: Map<string, Promise<Market[]>> = new Map();
+  private marketPromises: Map<string, Promise<Market[]>> = new Map();
 
   constructor(options: Readonly<HanjiSpotOptions>) {
-    this.signerOrProvider = options.signerOrProvider;
+    this.signer = options.signer;
     this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled;
     this.autoWaitTransaction = options.autoWaitTransaction;
     this.hanjiService = new HanjiSpotService(options.apiBaseUrl);
@@ -220,13 +221,15 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
-   * Sets a new signer or provider for the HanjiSpot instance.
+   * Sets a new signer for the HanjiSpot instance.
    *
-   * @param {Signer | Provider} signerOrProvider - The new signer or provider to be set.
+   * @param {Signer} signer - The new signer to be set.
    * @returns {HanjiSpot} Returns the HanjiSpot instance for method chaining.
    */
-  setSignerOrProvider(signerOrProvider: Signer | Provider): HanjiSpot {
-    this.signerOrProvider = signerOrProvider;
+  setSigner(signer: Signer): HanjiSpot {
+    this.signer = signer;
+    this.marketContracts = new Map();
+    this.marketPromises = new Map();
     return this;
   }
 
@@ -292,6 +295,12 @@ export class HanjiSpot implements Disposable {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.placeOrder(params);
+  }
+
+  async placeOrderWithPermit(params: PlaceOrderWithPermitSpotParams): Promise<ContractTransactionResponse> {
+    const marketContract = await this.getSpotMarketContract(params);
+
+    return marketContract.placeOrderWithPermit(params);
   }
 
   /**
@@ -668,8 +677,8 @@ export class HanjiSpot implements Disposable {
   }
 
   protected async getSpotMarketContract(params: { market: string }): Promise<HanjiSpotMarketContract> {
-    if (this.signerOrProvider === null) {
-      throw new Error('Signer or provider is not set');
+    if (this.signer === null) {
+      throw new Error('Signer is not set');
     }
     let marketContract = this.marketContracts.get(params.market);
 
@@ -678,7 +687,7 @@ export class HanjiSpot implements Disposable {
 
       marketContract = new HanjiSpotMarketContract({
         market,
-        signerOrProvider: this.signerOrProvider,
+        signer: this.signer,
         transferExecutedTokensEnabled: this.transferExecutedTokensEnabled,
         autoWaitTransaction: this.autoWaitTransaction,
       });

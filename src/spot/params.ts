@@ -138,6 +138,21 @@ export interface PlaceOrderSpotParams {
   transferExecutedTokens?: boolean;
 }
 
+/**
+ * Parameters for placing an order with a permit on the spot market.
+ *
+ * @interface PlaceOrderWithPermitSpotParams
+ * @extends PlaceOrderSpotParams
+ */
+export interface PlaceOrderWithPermitSpotParams extends PlaceOrderSpotParams {
+  /**
+   * The quantity of tokens to permit for the order.
+   *
+   * @type {BigNumber | bigint}
+   */
+  permit: BigNumber | bigint;
+}
+
 export type BatchPlaceOrderSpotParams = {
   market: string;
   type: 'limit' | 'limit_post_only';
