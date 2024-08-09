@@ -1,83 +1,20 @@
 export const lobAbi = [
   {
-    type: 'constructor',
-    inputs: [
-      {
-        name: '_trie_factory',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_tokenXAddress',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_tokenYAddress',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_supports_native_eth',
-        type: 'bool',
-        internalType: 'bool',
-      },
-      {
-        name: 'scaling_token_x',
-        type: 'uint256',
-        internalType: 'uint256',
-      },
-      {
-        name: 'scaling_token_y',
-        type: 'uint256',
-        internalType: 'uint256',
-      },
-      {
-        name: '_administrator',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_marketmaker',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_pauser',
-        type: 'address',
-        internalType: 'address',
-      },
-      {
-        name: '_should_invoke_on_trade',
-        type: 'bool',
-        internalType: 'bool',
-      },
-      {
-        name: '_admin_commission_rate',
-        type: 'uint64',
-        internalType: 'uint64',
-      },
-      {
-        name: '_total_aggressive_commission_rate',
-        type: 'uint64',
-        internalType: 'uint64',
-      },
-      {
-        name: '_total_passive_commission_rate',
-        type: 'uint64',
-        internalType: 'uint64',
-      },
-      {
-        name: '_passive_order_payout_rate',
-        type: 'uint64',
-        internalType: 'uint64',
-      },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
     type: 'receive',
     stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'UPGRADE_INTERFACE_VERSION',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'string',
+        internalType: 'string',
+      },
+    ],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -85,35 +22,6 @@ export const lobAbi = [
     inputs: [],
     outputs: [],
     stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
-    name: 'assembleOrderbookFromOrders',
-    inputs: [
-      {
-        name: 'isAsk',
-        type: 'bool',
-        internalType: 'bool',
-      },
-      {
-        name: 'max_price_levels',
-        type: 'uint24',
-        internalType: 'uint24',
-      },
-    ],
-    outputs: [
-      {
-        name: 'array_prices',
-        type: 'uint56[]',
-        internalType: 'uint56[]',
-      },
-      {
-        name: 'array_shares',
-        type: 'uint128[]',
-        internalType: 'uint128[]',
-      },
-    ],
-    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -189,55 +97,6 @@ export const lobAbi = [
   },
   {
     type: 'function',
-    name: 'batchPlaceOrder',
-    inputs: [
-      {
-        name: 'directions',
-        type: 'bool[]',
-        internalType: 'bool[]',
-      },
-      {
-        name: 'quantities',
-        type: 'uint128[]',
-        internalType: 'uint128[]',
-      },
-      {
-        name: 'prices',
-        type: 'uint56[]',
-        internalType: 'uint56[]',
-      },
-      {
-        name: 'max_commission_per_order',
-        type: 'uint128',
-        internalType: 'uint128',
-      },
-      {
-        name: 'post_only',
-        type: 'bool',
-        internalType: 'bool',
-      },
-      {
-        name: 'transfer_tokens',
-        type: 'bool',
-        internalType: 'bool',
-      },
-      {
-        name: 'expires',
-        type: 'uint256',
-        internalType: 'uint256',
-      },
-    ],
-    outputs: [
-      {
-        name: 'new_order_ids',
-        type: 'uint64[]',
-        internalType: 'uint64[]',
-      },
-    ],
-    stateMutability: 'nonpayable',
-  },
-  {
-    type: 'function',
     name: 'changeMarketMakerAddress',
     inputs: [
       {
@@ -296,7 +155,7 @@ export const lobAbi = [
     ],
     outputs: [
       {
-        name: '',
+        name: 'order_id',
         type: 'uint64',
         internalType: 'uint64',
       },
@@ -436,24 +295,6 @@ export const lobAbi = [
   },
   {
     type: 'function',
-    name: 'firstLevel',
-    inputs: [],
-    outputs: [
-      {
-        name: 'bid',
-        type: 'uint56',
-        internalType: 'uint56',
-      },
-      {
-        name: 'ask',
-        type: 'uint56',
-        internalType: 'uint56',
-      },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     name: 'getAccumulatedFees',
     inputs: [],
     outputs: [
@@ -492,6 +333,11 @@ export const lobAbi = [
       },
       {
         name: '_supports_native_eth',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: '_is_token_x_weth',
         type: 'bool',
         internalType: 'bool',
       },
@@ -613,6 +459,102 @@ export const lobAbi = [
   },
   {
     type: 'function',
+    name: 'initialize',
+    inputs: [
+      {
+        name: '_trie_factory',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_tokenXAddress',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_tokenYAddress',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_supports_native_eth',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: '_is_token_x_weth',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'scaling_token_x',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+      {
+        name: 'scaling_token_y',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+      {
+        name: '_administrator',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_marketmaker',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_pauser',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: '_should_invoke_on_trade',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: '_admin_commission_rate',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+      {
+        name: '_total_aggressive_commission_rate',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+      {
+        name: '_total_passive_commission_rate',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+      {
+        name: '_passive_order_payout_rate',
+        type: 'uint64',
+        internalType: 'uint64',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'initialize',
+    inputs: [
+      {
+        name: '_administrator',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
     name: 'marketmaker',
     inputs: [],
     outputs: [
@@ -698,6 +640,134 @@ export const lobAbi = [
   },
   {
     type: 'function',
+    name: 'placeMarketOrderWithTargetValue',
+    inputs: [
+      {
+        name: 'isAsk',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'target_token_y_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'price',
+        type: 'uint56',
+        internalType: 'uint56',
+      },
+      {
+        name: 'max_commission',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'amount_to_approve',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'transfer_executed_tokens',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'expires',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+      {
+        name: 'v',
+        type: 'uint8',
+        internalType: 'uint8',
+      },
+      {
+        name: 'r',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+      {
+        name: 's',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+    outputs: [
+      {
+        name: 'executed_shares',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'executed_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'aggressive_fee',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+    ],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'placeMarketOrderWithTargetValue',
+    inputs: [
+      {
+        name: 'isAsk',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'target_token_y_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'price',
+        type: 'uint56',
+        internalType: 'uint56',
+      },
+      {
+        name: 'max_commission',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'transfer_executed_tokens',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'expires',
+        type: 'uint256',
+        internalType: 'uint256',
+      },
+    ],
+    outputs: [
+      {
+        name: 'executed_shares',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'executed_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'aggressive_fee',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+    ],
+    stateMutability: 'payable',
+  },
+  {
+    type: 'function',
     name: 'placeOrder',
     inputs: [
       {
@@ -746,6 +816,21 @@ export const lobAbi = [
         name: 'order_id',
         type: 'uint64',
         internalType: 'uint64',
+      },
+      {
+        name: 'executed_shares',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'executed_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'aggressive_fee',
+        type: 'uint128',
+        internalType: 'uint128',
       },
     ],
     stateMutability: 'payable',
@@ -821,8 +906,80 @@ export const lobAbi = [
         type: 'uint64',
         internalType: 'uint64',
       },
+      {
+        name: 'executed_shares',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'executed_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'aggressive_fee',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
     ],
     stateMutability: 'payable',
+  },
+  {
+    type: 'function',
+    name: 'previewPlaceAggressiveOrder',
+    inputs: [
+      {
+        name: 'isAsk',
+        type: 'bool',
+        internalType: 'bool',
+      },
+      {
+        name: 'price',
+        type: 'uint56',
+        internalType: 'uint56',
+      },
+      {
+        name: 'max_executable_shares',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'max_executable_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+    ],
+    outputs: [
+      {
+        name: 'executed_shares',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'executed_value',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+      {
+        name: 'fee',
+        type: 'uint128',
+        internalType: 'uint128',
+      },
+    ],
+    stateMutability: 'view',
+  },
+  {
+    type: 'function',
+    name: 'proxiableUUID',
+    inputs: [],
+    outputs: [
+      {
+        name: '',
+        type: 'bytes32',
+        internalType: 'bytes32',
+      },
+    ],
+    stateMutability: 'view',
   },
   {
     type: 'function',
@@ -870,6 +1027,24 @@ export const lobAbi = [
     inputs: [],
     outputs: [],
     stateMutability: 'nonpayable',
+  },
+  {
+    type: 'function',
+    name: 'upgradeToAndCall',
+    inputs: [
+      {
+        name: 'newImplementation',
+        type: 'address',
+        internalType: 'address',
+      },
+      {
+        name: 'data',
+        type: 'bytes',
+        internalType: 'bytes',
+      },
+    ],
+    outputs: [],
+    stateMutability: 'payable',
   },
   {
     type: 'function',
@@ -934,6 +1109,19 @@ export const lobAbi = [
         type: 'uint128',
         indexed: false,
         internalType: 'uint128',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
+    name: 'Initialized',
+    inputs: [
+      {
+        name: 'version',
+        type: 'uint64',
+        indexed: false,
+        internalType: 'uint64',
       },
     ],
     anonymous: false,
@@ -1046,6 +1234,18 @@ export const lobAbi = [
         indexed: false,
         internalType: 'uint128',
       },
+      {
+        name: 'market_only',
+        type: 'bool',
+        indexed: false,
+        internalType: 'bool',
+      },
+      {
+        name: 'post_only',
+        type: 'bool',
+        indexed: false,
+        internalType: 'bool',
+      },
     ],
     anonymous: false,
   },
@@ -1134,6 +1334,19 @@ export const lobAbi = [
   },
   {
     type: 'event',
+    name: 'Upgraded',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        indexed: true,
+        internalType: 'address',
+      },
+    ],
+    anonymous: false,
+  },
+  {
+    type: 'event',
     name: 'Withdrawn',
     inputs: [
       {
@@ -1196,6 +1409,22 @@ export const lobAbi = [
   },
   {
     type: 'error',
+    name: 'ERC1967InvalidImplementation',
+    inputs: [
+      {
+        name: 'implementation',
+        type: 'address',
+        internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'ERC1967NonPayable',
+    inputs: [],
+  },
+  {
+    type: 'error',
     name: 'EnforcedPause',
     inputs: [],
   },
@@ -1251,6 +1480,11 @@ export const lobAbi = [
   },
   {
     type: 'error',
+    name: 'InvalidInitialization',
+    inputs: [],
+  },
+  {
+    type: 'error',
     name: 'InvalidMarketMaker',
     inputs: [],
   },
@@ -1282,6 +1516,11 @@ export const lobAbi = [
   {
     type: 'error',
     name: 'NonceExhaustedFailure',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'NotInitializing',
     inputs: [],
   },
   {
@@ -1340,6 +1579,22 @@ export const lobAbi = [
         name: 'token',
         type: 'address',
         internalType: 'address',
+      },
+    ],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnauthorizedCallContext',
+    inputs: [],
+  },
+  {
+    type: 'error',
+    name: 'UUPSUnsupportedProxiableUUID',
+    inputs: [
+      {
+        name: 'slot',
+        type: 'bytes32',
+        internalType: 'bytes32',
       },
     ],
   },

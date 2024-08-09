@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import { useContext, useState } from 'react';
 import { BrowserProvider, Signer } from 'ethers';
 import { MetaMaskInpageProvider } from '@metamask/providers';
 import { ClientAddressContext, HanjiClientContext } from './clientContext';

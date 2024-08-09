@@ -41,6 +41,8 @@ describe('Hanji Spot HTTP Client', () => {
       expect(market.lastTouched).toEqual(testConfig.testMarkets.xtzUsd.lastTouched);
       expect(market.baseToken).toEqual(testConfig.testMarkets.xtzUsd.baseToken);
       expect(market.quoteToken).toEqual(testConfig.testMarkets.xtzUsd.quoteToken);
+      expect(market.supportsNativeToken).toBe(testConfig.testMarkets.xtzUsd.supportsNativeToken);
+      expect(market.isNativeTokenX).toBe(testConfig.testMarkets.xtzUsd.isNativeTokenX);
     }
     else {
       throw new Error('market is undefined');

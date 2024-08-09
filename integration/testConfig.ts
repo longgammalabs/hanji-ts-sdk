@@ -3,7 +3,7 @@ import type { Market } from '../src';
 
 const testMarkets = {
   btcUsd: {
-    id: '0x75B85038636BD5CaF46Cab0eC25703ccC04D185f'.toLowerCase(),
+    id: '0x20DF4428CC0b174Ca3ec3d77208D766C8cb085E1'.toLowerCase(),
     name: 'BTCeUSD',
     symbol: 'BTCeUSD',
     baseToken: {
@@ -24,7 +24,7 @@ const testMarkets = {
       roundingDecimals: 2,
       supportsPermit: true,
     },
-    orderbookAddress: '0x75B85038636BD5CaF46Cab0eC25703ccC04D185f'.toLowerCase(),
+    orderbookAddress: '0x20DF4428CC0b174Ca3ec3d77208D766C8cb085E1'.toLowerCase(),
     aggregations: expect.any(Array),
     rawLastPrice: expect.any(BigInt),
     lastPrice: expect.any(BigNumber),
@@ -45,9 +45,11 @@ const testMarkets = {
     tradingVolume24h: expect.any(BigNumber),
     totalSupply: expect.any(BigNumber),
     lastTouched: expect.any(BigInt),
+    supportsNativeToken: false,
+    isNativeTokenX: false,
   },
   xtzUsd: {
-    id: '0xfd3d8A89994DD00f11c91340212B2b4b31f8B1B6'.toLowerCase(),
+    id: '0x98Cb927F0896306377e3be11ee39EFbbDE98F274'.toLowerCase(),
     name: 'XTZeUSD',
     symbol: 'XTZeUSD',
     baseToken: {
@@ -68,7 +70,7 @@ const testMarkets = {
       roundingDecimals: 2,
       supportsPermit: true,
     },
-    orderbookAddress: '0xfd3d8A89994DD00f11c91340212B2b4b31f8B1B6'.toLowerCase(),
+    orderbookAddress: '0x98Cb927F0896306377e3be11ee39EFbbDE98F274'.toLowerCase(),
     aggregations: expect.any(Array),
     rawLastPrice: expect.any(BigInt),
     lastPrice: expect.any(BigNumber),
@@ -89,6 +91,8 @@ const testMarkets = {
     tradingVolume24h: expect.any(BigNumber),
     totalSupply: expect.any(BigNumber),
     lastTouched: expect.any(Number),
+    supportsNativeToken: true,
+    isNativeTokenX: true,
   },
 } as const satisfies Record<string, Market>;
 

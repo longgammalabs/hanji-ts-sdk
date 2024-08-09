@@ -89,6 +89,8 @@ export interface MarketDto {
   coinMarketCapId: string;
   totalSupply: string;
   lastTouched: number;
+  supportsNativeToken: boolean;
+  isNativeTokenX: boolean;
 }
 
 export interface CandleDto {

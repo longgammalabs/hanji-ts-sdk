@@ -174,6 +174,16 @@ export interface Market {
    * The timestamp of the last update as a number.
    */
   lastTouched: number;
+
+  /**
+   * Indicates whether the market supports using a native token.
+   */
+  supportsNativeToken: boolean;
+
+  /**
+   * Indicates whether the native token is token X (base token).
+   */
+  isNativeTokenX: boolean;
 }
 
 export type MarketUpdate = Market;

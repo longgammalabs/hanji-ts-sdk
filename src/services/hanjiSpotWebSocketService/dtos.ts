@@ -90,6 +90,8 @@ export interface MarketUpdateDto {
   lastTouched: number;
   baseToken: TokenUpdateDto;
   quoteToken: TokenUpdateDto;
+  supportsNativeToken: boolean;
+  isNativeTokenX: boolean;
 }
 
 export interface TokenUpdateDto {
