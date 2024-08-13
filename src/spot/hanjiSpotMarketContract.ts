@@ -136,10 +136,17 @@ export class HanjiSpotMarketContract {
   }
 
   async placeOrder(params: PlaceOrderSpotParams): Promise<ContractTransactionResponse> {
+    if (params.useNativeToken && this.market.supportsNativeToken
+      && !((params.side === 'ask' && this.market.isNativeTokenX) || (params.side !== 'ask' && !this.market.isNativeTokenX))) {
+      throw Error('Token to send is not native.');
+    }
+
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenXScalingFactor);
     const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
     const expires = getExpires();
-    const maxCommission = this.calculateMaxCommission(sizeAmount, priceAmount);
+    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
+    const value = this.convertTokensAmountToRawAmountIfNeeded(params.quantityToSend,
+      params.side === 'ask' ? this.market.baseToken.decimals : this.market.baseToken.decimals);
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
@@ -151,7 +158,8 @@ export class HanjiSpotMarketContract {
         params.type === 'market',
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
-        expires
+        expires,
+        { value }
       )
     );
 
@@ -268,7 +276,7 @@ export class HanjiSpotMarketContract {
   async changeOrder(params: ChangeOrderSpotParams): Promise<ContractTransactionResponse> {
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newSize, this.market.tokenXScalingFactor);
     const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.newPrice, this.market.priceScalingFactor);
-    const maxCommission = this.calculateMaxCommission(sizeAmount, priceAmount);
+    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
     const expires = getExpires();
 
     const tx = await this.processContractMethodCall(

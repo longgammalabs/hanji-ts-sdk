@@ -81,6 +81,9 @@ describe('Hanji Spot Client Contract API', () => {
           side: 'ask',
           price: new BigNumber(117),
           size: new BigNumber(0.5),
+          useNativeToken: false,
+          maxCommission: new BigNumber(1),
+          quantityToSend: 0n,
         },
         expectedNewOrder: {
           market: {
@@ -124,6 +127,9 @@ describe('Hanji Spot Client Contract API', () => {
           side: 'bid',
           price: new BigNumber(0.01),
           size: new BigNumber(0.035),
+          useNativeToken: false,
+          maxCommission: new BigNumber(1),
+          quantityToSend: 0n,
         },
         expectedNewOrder: {
           market: {
@@ -169,6 +175,8 @@ describe('Hanji Spot Client Contract API', () => {
           side: 'ask',
           price: 3170000n,
           size: 770n,
+          maxCommission: new BigNumber(1),
+          quantityToSend: 0n,
         },
         expectedNewOrder: {
           market: {
@@ -212,6 +220,8 @@ describe('Hanji Spot Client Contract API', () => {
           side: 'bid',
           price: 1n,
           size: 1n,
+          maxCommission: new BigNumber(1),
+          quantityToSend: 0n,
         },
         expectedNewOrder: {
           market: {

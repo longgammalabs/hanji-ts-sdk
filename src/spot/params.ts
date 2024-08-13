@@ -130,12 +130,35 @@ export interface PlaceOrderSpotParams {
   price: BigNumber | bigint;
 
   /**
+   * The maximum commission for the order.
+   *
+   * @type {BigNumber | bigint}
+   */
+  maxCommission: BigNumber | bigint;
+
+  /**
+   * The quantity of tokens to send for the order.
+   * This is the amount of tokens that will be transferred for the order.
+   *
+   * @type {BigNumber | bigint}
+   */
+  quantityToSend: BigNumber | bigint;
+
+  /**
    * Whether to transfer executed tokens automatically.
    *
    * @type {boolean}
    * @optional
    */
   transferExecutedTokens?: boolean;
+
+  /**
+   * Whether to use the native token for the transaction.
+   *
+   * @type {boolean}
+   * @optional
+   */
+  useNativeToken?: boolean;
 }
 
 /**
@@ -144,13 +167,66 @@ export interface PlaceOrderSpotParams {
  * @interface PlaceOrderWithPermitSpotParams
  * @extends PlaceOrderSpotParams
  */
-export interface PlaceOrderWithPermitSpotParams extends PlaceOrderSpotParams {
+export interface PlaceOrderWithPermitSpotParams {
+  /**
+   * The ID of the market where the order will be placed.
+   *
+   * @type {string}
+   */
+  market: string;
+
+  /**
+   * The type of the order (e.g., limit, market).
+   *
+   * @type {OrderType}
+   */
+  type: OrderType;
+
+  /**
+   * The side of the order (buy or sell).
+   *
+   * @type {Side}
+   */
+  side: Side;
+
+  /**
+   * The size of the order. The amount of tokens to order divided by the scaling factor.
+   * This amount would be multiplied by the scaling factor inside the function
+   *
+   * @type {BigNumber | bigint}
+   */
+  size: BigNumber | bigint;
+
+  /**
+   * The price at which the order will be placed.
+   * No more than 6 significant digits.
+   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`
+   *
+   * @type {BigNumber | bigint}
+   */
+  price: BigNumber | bigint;
+
+  /**
+   * The maximum commission for the order.
+   *
+   * @type {BigNumber | bigint}
+   */
+  maxCommission: BigNumber | bigint;
+
   /**
    * The quantity of tokens to permit for the order.
    *
    * @type {BigNumber | bigint}
    */
   permit: BigNumber | bigint;
+
+  /**
+   * Whether to transfer executed tokens automatically.
+   *
+   * @type {boolean}
+   * @optional
+   */
+  transferExecutedTokens?: boolean;
 }
 
 export type BatchPlaceOrderSpotParams = {
@@ -245,6 +321,20 @@ export interface ChangeOrderSpotParams {
    */
   type: 'limit' | 'limit_post_only';
 
+  /**
+   * The maximum commission for the order.
+   *
+   * @type {BigNumber | bigint}
+   */
+  maxCommission: BigNumber | bigint;
+
+  /**
+   * The quantity of tokens to send for the order.
+   * This is the amount of tokens that will be transferred for the order.
+   *
+   * @type {BigNumber | bigint}
+   */
+  quantityToSend: BigNumber | bigint;
   /**
    * Whether to transfer executed tokens automatically.
    *
