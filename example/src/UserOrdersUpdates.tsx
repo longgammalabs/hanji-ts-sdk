@@ -9,10 +9,10 @@ export const UserOrdersUpdates: React.FC = () => {
   const hanjiClient = useContext(HanjiClientContext);
   const address = useContext(ClientAddressContext);
 
-  function onUserOrdersUpdated(_marketId: string, data: OrderUpdate[]) {
+  function onUserOrdersUpdated(_marketId: string, _isSnapshot: boolean, data: OrderUpdate[]) {
     setEvents(prevEvents => [...prevEvents, ...data]);
   }
-  function onUserFillsUpdated(_marketId: string, data: FillUpdate[]) {
+  function onUserFillsUpdated(_marketId: string, _isSnapshot: boolean, data: FillUpdate[]) {
     setEvents(prevEvents => [...prevEvents, ...data]);
   }
 

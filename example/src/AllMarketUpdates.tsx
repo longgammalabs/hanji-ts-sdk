@@ -8,7 +8,7 @@ export const AllMarketsUpdates: React.FC = () => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const hanjiClient = useContext(HanjiClientContext);
 
-  function onAllMarketsUpdateed(data: MarketUpdate[]) {
+  function onAllMarketsUpdateed(_isSnapshot: boolean, data: MarketUpdate[]) {
     setEvents(_prevEvents => [...data]);
   }
 

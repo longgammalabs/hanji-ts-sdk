@@ -9,7 +9,7 @@ export const CandleUpdates: React.FC = () => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const hanjiClient = useContext(HanjiClientContext);
 
-  function onCandleUpdated(_marketId: string, data: CandleUpdate) {
+  function onCandleUpdated(_marketId: string, _isSnapshot: boolean, data: CandleUpdate) {
     setEvents(prevEvents => [...prevEvents, data]);
   }
 

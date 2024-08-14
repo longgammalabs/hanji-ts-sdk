@@ -9,7 +9,7 @@ export const OrderbookUpdates: React.FC = () => {
   const [isSubscribed, setIsSubscribed] = useState<boolean>(false);
   const hanjiClient = useContext(HanjiClientContext);
 
-  function onOrderbookUpdateed(_marketId: string, data: OrderbookUpdate) {
+  function onOrderbookUpdateed(_marketId: string, _isSnapshot: boolean, data: OrderbookUpdate) {
     setEvents(prevEvents => [...prevEvents, data]);
   }
 
