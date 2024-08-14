@@ -106,51 +106,51 @@ interface HanjiSpotEvents {
   /**
    * Emitted when some markets' data is updated.
    * @event
-   * @type {PublicEventEmitter<readonly [data: MarketUpdate[]]>}
+   * @type {PublicEventEmitter<readonly [isSnapshot: boolean, data: MarketUpdate[]]>}
    */
-  allMarketUpdated: PublicEventEmitter<readonly [data: MarketUpdate[]]>;
+  allMarketUpdated: PublicEventEmitter<readonly [isSnapshot: boolean, data: MarketUpdate[]]>;
 
   /**
    * Emitted when a market's data is updated.
    * @event
-   * @type {PublicEventEmitter<readonly [marketId: string, data: MarketUpdate]>}
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: MarketUpdate]>}
    */
-  marketUpdated: PublicEventEmitter<readonly [marketId: string, data: MarketUpdate]>;
+  marketUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: MarketUpdate]>;
 
   /**
    * Emitted when a market's orderbook is updated.
    * @event
-   * @type {PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdate]>}
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderbookUpdate]>}
    */
-  orderbookUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdate]>;
+  orderbookUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderbookUpdate]>;
 
   /**
    * Emitted when a market's trades are updated.
    * @event
-   * @type {PublicEventEmitter<readonly [marketId: string, data: TradeUpdate[]]>}
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: TradeUpdate[]]>}
    */
-  tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdate[]]>;
+  tradesUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: TradeUpdate[]]>;
 
   /**
    * Emitted when a user's orders are updated.
    * @event
-   * @type {PublicEventEmitter<readonly [marketId: string, data: OrderUpdate[]]>}
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderUpdate[]]>}
    */
-  userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdate[]]>;
+  userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderUpdate[]]>;
 
   /**
    * Emitted when a user's fills are updated.
    * @event
-   * @type {PublicEventEmitter<readonly [marketId: string, data: FillUpdate[]]>}
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: FillUpdate[]]>}
    */
-  userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdate[]]>;
+  userFillsUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: FillUpdate[]]>;
 
   /**
    * Emitted when a market's candle is updated.
    * @event
-   * @type {PublicEventEmitter<readonly [marketId: string, data: CandleUpdate[]]>}
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: CandleUpdate[]]>}
    */
-  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdate]>;
+  candlesUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: CandleUpdate]>;
 
   /**
    * Emitted when there is an error related to a subscription.
@@ -485,7 +485,7 @@ export class HanjiSpot implements Disposable {
       this.ensureMarket(params),
       this.hanjiService.getFills(params),
     ]);
-    const fills = fillDtos.map(fillDto => this.mappers.mapFillDtoToFill(fillDto, market.priceScalingFactor, market.tokenXScalingFactor));
+    const fills = fillDtos.map(fillDto => this.mappers.mapFillDtoToFill(fillDto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor));
 
     return fills;
   }
@@ -718,87 +718,87 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.subscriptionError.removeListener(this.onSubscriptionError);
   }
 
-  protected onMarketUpdated: Parameters<typeof this.hanjiWebSocketService.events.marketUpdated['addListener']>[0] = async (marketId, data) => {
+  protected onMarketUpdated: Parameters<typeof this.hanjiWebSocketService.events.marketUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
       const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, data.priceScalingFactor);
 
-      (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(marketId, marketUpdate);
+      (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(marketId, isSnapshot, marketUpdate);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };
 
-  protected onAllMarketsUpdated: Parameters<typeof this.hanjiWebSocketService.events.allMarketsUpdated['addListener']>[0] = async data => {
+  protected onAllMarketsUpdated: Parameters<typeof this.hanjiWebSocketService.events.allMarketsUpdated['addListener']>[0] = async (isSnapshot, data) => {
     try {
       const allMarketsUpdate = data.map(marketUpdateDot =>
         this.mappers.mapMarketUpdateDtoToMarketUpdate(marketUpdateDot.id, marketUpdateDot, marketUpdateDot.priceScalingFactor));
 
-      (this.events.allMarketUpdated as ToEventEmitter<typeof this.events.allMarketUpdated>).emit(allMarketsUpdate);
+      (this.events.allMarketUpdated as ToEventEmitter<typeof this.events.allMarketUpdated>).emit(isSnapshot, allMarketsUpdate);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };
 
-  protected onOrderbookUpdated: Parameters<typeof this.hanjiWebSocketService.events.orderbookUpdated['addListener']>[0] = async (marketId, data) => {
+  protected onOrderbookUpdated: Parameters<typeof this.hanjiWebSocketService.events.orderbookUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
       const market = await this.getMarket({ market: marketId });
       if (!market)
         return;
       const orderbookUpdate = this.mappers.mapOrderbookUpdateDtoToOrderbookUpdate(marketId, data, market.priceScalingFactor, market.tokenXScalingFactor);
 
-      (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(marketId, orderbookUpdate);
+      (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(marketId, isSnapshot, orderbookUpdate);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };
 
-  protected onTradesUpdated: Parameters<typeof this.hanjiWebSocketService.events.tradesUpdated['addListener']>[0] = async (marketId, data) => {
+  protected onTradesUpdated: Parameters<typeof this.hanjiWebSocketService.events.tradesUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
       const market = await this.getMarket({ market: marketId });
       if (!market)
         return;
       const tradeUpdates = data.map(dto => this.mappers.mapTradeUpdateDtoToTradeUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
 
-      (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(marketId, tradeUpdates);
+      (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(marketId, isSnapshot, tradeUpdates);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };
 
-  protected onUserOrdersUpdated: Parameters<typeof this.hanjiWebSocketService.events.userOrdersUpdated['addListener']>[0] = async (marketId, data) => {
+  protected onUserOrdersUpdated: Parameters<typeof this.hanjiWebSocketService.events.userOrdersUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
       const market = await this.getMarket({ market: marketId });
       if (!market)
         return;
       const orderUpdates = data.map(dto => this.mappers.mapOrderUpdateDtoToOrderUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
 
-      (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(marketId, orderUpdates);
+      (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(marketId, isSnapshot, orderUpdates);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };
 
-  protected onUserFillsUpdated: Parameters<typeof this.hanjiWebSocketService.events.userFillsUpdated['addListener']>[0] = async (marketId, data) => {
+  protected onUserFillsUpdated: Parameters<typeof this.hanjiWebSocketService.events.userFillsUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
       const market = await this.getMarket({ market: marketId });
       if (!market)
         return;
-      const fillUpdates = data.map(dto => this.mappers.mapFillUpdateDtoToFillUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
+      const fillUpdates = data.map(dto => this.mappers.mapFillUpdateDtoToFillUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor));
 
-      (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(marketId, fillUpdates);
+      (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(marketId, isSnapshot, fillUpdates);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
     }
   };
 
-  protected onCandlesUpdated: Parameters<typeof this.hanjiWebSocketService.events.candlesUpdated['addListener']>[0] = (marketId, data) => {
-    (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(marketId, data);
+  protected onCandlesUpdated: Parameters<typeof this.hanjiWebSocketService.events.candlesUpdated['addListener']>[0] = (marketId, isSnapshot, data) => {
+    (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(marketId, isSnapshot, data);
   };
 
   protected onSubscriptionError: Parameters<typeof this.hanjiWebSocketService.events.subscriptionError['addListener']>[0] = error => {

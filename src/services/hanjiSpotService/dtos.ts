@@ -56,6 +56,7 @@ export interface FillDto {
   txnHash: string;
   price: string;
   size: string;
+  fee: string;
 }
 
 export interface TokenDto {

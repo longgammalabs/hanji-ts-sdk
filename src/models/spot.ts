@@ -543,6 +543,20 @@ export interface Fill {
    * @type {BigNumber}
    */
   size: BigNumber;
+
+  /**
+   * The raw fee of the fill as a bigint.
+   *
+   * @type {bigint}
+   */
+  rawFee: bigint;
+
+  /**
+   * The formatted fee of the fill as a BigNumber.
+   *
+   * @type {BigNumber}
+   */
+  fee: BigNumber;
 }
 
 export type FillUpdate = Fill;
