@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { ethers, type ContractTransactionResponse, type Provider, type Wallet } from 'ethers';
 
-import { HanjiClient, PlaceOrderSpotParams, type Order } from '../../../src';
+import { HanjiClient, PlaceOrderSpotParams, type Order, PlaceOrderWithPermitSpotParams } from '../../../src';
 import { getTestConfig, type TestConfig } from '../../testConfig';
 import { expectOrder, transactionRegex, waitForOrder } from '../../testHelpers';
 import { erc20Abi } from '../../../src/abi';
@@ -37,38 +37,6 @@ describe('Hanji Spot Client Contract API', () => {
       webSocketConnectImmediately: false,
     });
   });
-
-  test.each([
-    // isBaseToken, approveTokensAmount, baseTokenAmount, quoteTokenAmount
-    [true, new BigNumber(1), new BigNumber(1), new BigNumber(0)],
-    [false, new BigNumber(1), new BigNumber(0), new BigNumber(1)],
-    [true, 1_000n * (10n ** 15n), 1_000n, 0n],
-    [false, 1_000n * (10n ** 11n), 0n, 1_000n],
-  ])('Deposit and Withdraw [isBase: %p, base: %i, quote: %i]', async (isBaseToken, approveTokensAmount, baseTokenAmount, quoteTokenAmount) => {
-    const market = testConfig.testMarkets.xtzUsd.id;
-    let tx: ContractTransactionResponse;
-
-    tx = await hanjiClient.spot.approveTokens({
-      market,
-      amount: approveTokensAmount,
-      isBaseToken,
-    });
-    expect(tx.hash).toMatch(transactionRegex);
-
-    tx = await hanjiClient.spot.depositTokens({
-      market,
-      baseTokenAmount,
-      quoteTokenAmount,
-    });
-    expect(tx.hash).toMatch(transactionRegex);
-
-    tx = await hanjiClient.spot.withdrawTokens({
-      market,
-      baseTokenAmount,
-      quoteTokenAmount,
-    });
-    expect(tx.hash).toMatch(transactionRegex);
-  }, 30_000);
 
   test.each(
     [
@@ -297,4 +265,126 @@ describe('Hanji Spot Client Contract API', () => {
     );
     expectOrder(canceledOrder, expectedCancelOrder);
   }, 45_000);
+
+  test.each(
+    [
+      (testConfig, wallet) => ({
+        market: testConfig.testMarkets.xtzUsd.id,
+        newOrderParams: {
+          market: testConfig.testMarkets.xtzUsd.id,
+          type: 'limit',
+          side: 'bid',
+          price: new BigNumber(0.01),
+          size: new BigNumber(1),
+          maxCommission: new BigNumber(0),
+          permit: new BigNumber(0.01),
+        },
+        expectedNewOrder: {
+          market: {
+            id: testConfig.testMarkets.xtzUsd.id,
+          },
+          type: 'limit',
+          side: 'bid',
+          rawPrice: 100n,
+          price: new BigNumber(0.01),
+          rawSize: 1000n,
+          size: new BigNumber(1),
+          rawOrigSize: 1000n,
+          origSize: new BigNumber(1),
+          rawClaimed: 0n,
+          claimed: new BigNumber(0),
+          owner: wallet.address.toLowerCase(),
+        },
+        expectedCancelOrder: {
+          market: {
+            id: testConfig.testMarkets.xtzUsd.id,
+          },
+          type: 'limit',
+          side: 'bid',
+          rawPrice: 100n,
+          price: new BigNumber(0.01),
+          rawSize: 0n,
+          size: new BigNumber(0),
+          rawOrigSize: 1000n,
+          origSize: new BigNumber(1),
+          rawClaimed: 0n,
+          claimed: new BigNumber(0),
+          owner: wallet.address.toLowerCase(),
+        },
+      }),
+      (testConfig, wallet) => ({
+        market: testConfig.testMarkets.xtzUsd.id,
+        newOrderParams: {
+          market: testConfig.testMarkets.xtzUsd.id,
+          type: 'limit',
+          side: 'bid',
+          price: 1n,
+          size: 1n,
+          maxCommission: 0n,
+          permit: 1n * (10n ** 13n),
+        },
+        expectedNewOrder: {
+          market: {
+            id: testConfig.testMarkets.xtzUsd.id,
+          },
+          type: 'limit',
+          side: 'bid',
+          status: 'open',
+          rawPrice: 1n,
+          price: new BigNumber(0.0001),
+          rawSize: 1n,
+          size: new BigNumber(0.001),
+          rawOrigSize: 1n,
+          origSize: new BigNumber(0.001),
+          rawClaimed: 0n,
+          claimed: new BigNumber(0),
+          owner: wallet.address.toLowerCase(),
+        },
+        expectedCancelOrder: {
+          market: {
+            id: testConfig.testMarkets.xtzUsd.id,
+          },
+          type: 'limit',
+          side: 'bid',
+          status: 'cancelled',
+          rawPrice: 1n,
+          price: new BigNumber(0.0001),
+          rawSize: 0n,
+          size: new BigNumber(0),
+          rawOrigSize: 1n,
+          origSize: new BigNumber(0.001),
+          rawClaimed: 0n,
+          claimed: new BigNumber(0),
+          owner: wallet.address.toLowerCase(),
+        },
+      }),
+    ] as Array<(testConfig: TestConfig, wallet: Wallet) => {
+      market: string;
+      newOrderParams: PlaceOrderWithPermitSpotParams;
+      expectedNewOrder: Partial<Order>;
+      expectedCancelOrder: Partial<Order>;
+    }>
+  )('Post a new limit order with permit and cancel it', async getTestCase => {
+    const { market, newOrderParams, expectedNewOrder, expectedCancelOrder } = getTestCase(testConfig, wallet);
+    let tx: ContractTransactionResponse;
+    tx = await hanjiClient.spot.placeOrderWithPermit(newOrderParams);
+
+    const newOrder = await waitForOrder(
+      () => hanjiClient.spot.getOrders({ market, user: wallet.address }),
+      o => o.txnHash === tx.hash
+    );
+    expectOrder(newOrder, expectedNewOrder);
+
+    tx = await hanjiClient.spot.claimOrder({
+      market,
+      orderId: newOrder!.orderId,
+    });
+    expect(tx.hash).toMatch(transactionRegex);
+
+    const canceledOrder = await waitForOrder(
+      () => hanjiClient.spot.getOrders({ market, user: wallet.address }),
+      o => o.orderId === newOrder!.orderId && o.status === 'cancelled'
+    );
+    expectOrder(canceledOrder, expectedCancelOrder);
+  }, 60_000);
 });

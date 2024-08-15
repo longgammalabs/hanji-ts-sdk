@@ -137,7 +137,7 @@ export interface PlaceOrderSpotParams {
   maxCommission: BigNumber | bigint;
 
   /**
-   * The quantity of tokens to send for the order.
+   * The quantity of native tokens to send for the order.
    * This is the amount of tokens that will be transferred for the order.
    *
    * @type {BigNumber | bigint}
@@ -228,6 +228,10 @@ export interface PlaceOrderWithPermitSpotParams {
    */
   transferExecutedTokens?: boolean;
 }
+
+export type PlaceMarketOrderWithTargetValueParams = Omit<PlaceOrderSpotParams, 'type'>;
+
+export type PlaceMarketOrderWithTargetValueWithPermitParams = Omit<PlaceOrderWithPermitSpotParams, 'type'>;
 
 export type BatchPlaceOrderSpotParams = {
   market: string;

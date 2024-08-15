@@ -10,6 +10,8 @@ import type {
   ChangeOrderSpotParams,
   ClaimOrderSpotParams,
   DepositSpotParams,
+  PlaceMarketOrderWithTargetValueParams,
+  PlaceMarketOrderWithTargetValueWithPermitParams,
   PlaceOrderSpotParams,
   PlaceOrderWithPermitSpotParams,
   SetClaimableStatusParams,
@@ -146,7 +148,7 @@ export class HanjiSpotMarketContract {
     const expires = getExpires();
     const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
     const value = this.convertTokensAmountToRawAmountIfNeeded(params.quantityToSend,
-      params.side === 'ask' ? this.market.baseToken.decimals : this.market.baseToken.decimals);
+      params.side === 'ask' ? this.market.baseToken.decimals : this.market.quoteToken.decimals);
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
@@ -204,6 +206,83 @@ export class HanjiSpotMarketContract {
         amountToPermit,
         params.type === 'market',
         params.type === 'limit_post_only',
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
+        expires,
+        v,
+        r,
+        s
+      )
+    );
+
+    return tx;
+  }
+
+  async placeMarketOrderWithTargetValue(params: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse> {
+    if (params.useNativeToken && this.market.supportsNativeToken
+      && !((params.side === 'ask' && this.market.isNativeTokenX) || (params.side !== 'ask' && !this.market.isNativeTokenX))) {
+      throw Error('Token to send is not native.');
+    }
+
+    const targetTokenYValue = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenYScalingFactor);
+    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
+    const expires = getExpires();
+    const value = this.convertTokensAmountToRawAmountIfNeeded(params.quantityToSend,
+      params.side === 'ask' ? this.market.baseToken.decimals : this.market.quoteToken.decimals);
+
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.placeMarketOrderWithTargetValue!(
+        params.side === 'ask',
+        targetTokenYValue,
+        priceAmount,
+        maxCommission,
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
+        expires,
+        { value }
+      )
+    );
+
+    return tx;
+  }
+
+  async placeMarketOrderWithTargetValueWithPermit(params: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse> {
+    if ((params.side === 'ask' && !this.market.baseToken.supportsPermit)
+      || (params.side === 'bid' && !this.market.quoteToken.supportsPermit)) {
+      throw Error('Token doesn\'t support permits');
+    }
+
+    const targetTokenYValue = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenYScalingFactor);
+    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    let quantityToPermit, amountToPermit: bigint;
+    if (params.side === 'ask') {
+      amountToPermit = this.convertTokensAmountToRawAmountIfNeeded(
+        params.permit,
+        this.market.tokenXScalingFactor
+      );
+      quantityToPermit = amountToPermit * 10n ** BigInt(
+        this.market.baseToken.decimals - this.market.tokenXScalingFactor);
+    }
+    else {
+      amountToPermit = this.convertTokensAmountToRawAmountIfNeeded(
+        params.permit,
+        this.market.tokenYScalingFactor
+      );
+      quantityToPermit = amountToPermit * 10n ** BigInt(
+        this.market.quoteToken.decimals - this.market.tokenYScalingFactor);
+    }
+    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
+    const expires = getExpires();
+    const { v, r, s } = await this.signPermit(params.side === 'ask', quantityToPermit, expires);
+
+    const tx = await this.processContractMethodCall(
+      this.marketContract,
+      this.marketContract.placeMarketOrderWithTargetValue!(
+        params.side === 'ask',
+        targetTokenYValue,
+        priceAmount,
+        maxCommission,
+        amountToPermit,
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires,
         v,
