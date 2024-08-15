@@ -66,9 +66,9 @@ export class HanjiClient {
   /**
    * Sets the signer for the HanjiClient.
    *
-   * @param {Signer } signer - The signer to set.
+   * @param {Signer | null} signer - The signer to set. For only http/ws operations, you can set this to null.
    */
-  setSigner(signer: Signer): void {
+  setSigner(signer: Signer | null): void {
     this.spot.setSigner(signer);
   }
 }

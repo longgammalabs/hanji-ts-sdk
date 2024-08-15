@@ -225,10 +225,10 @@ export class HanjiSpot implements Disposable {
   /**
    * Sets a new signer for the HanjiSpot instance.
    *
-   * @param {Signer} signer - The new signer to be set.
+   * @param {Signer | null} signer - The new signer to be set. For only http/ws operations, you can set this to null.
    * @returns {HanjiSpot} Returns the HanjiSpot instance for method chaining.
    */
-  setSigner(signer: Signer): HanjiSpot {
+  setSigner(signer: Signer | null): HanjiSpot {
     this.signer = signer;
     this.marketContracts = new Map();
     this.marketPromises = new Map();
