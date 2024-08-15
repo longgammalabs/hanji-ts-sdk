@@ -37,7 +37,9 @@ import type {
   CalculateLimitDetailsParams,
   CalculateMarketDetailsParams,
   GetUserBalancesParams,
-  PlaceOrderWithPermitSpotParams
+  PlaceOrderWithPermitSpotParams,
+  PlaceMarketOrderWithTargetValueParams,
+  PlaceMarketOrderWithTargetValueWithPermitParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
@@ -297,10 +299,40 @@ export class HanjiSpot implements Disposable {
     return marketContract.placeOrder(params);
   }
 
+  /**
+   * Places a new order with a permit in the corresponding market contract.
+   *
+   * @param {PlaceOrderWithPermitSpotParams} params - The parameters for placing a new order with a permit.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
   async placeOrderWithPermit(params: PlaceOrderWithPermitSpotParams): Promise<ContractTransactionResponse> {
     const marketContract = await this.getSpotMarketContract(params);
 
     return marketContract.placeOrderWithPermit(params);
+  }
+
+  /**
+   * Places a market order with a quote token value in the corresponding market contract.
+   *
+   * @param {PlaceMarketOrderWithTargetValueParams} params - The parameters for placing a market order with a target value.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
+  async placeMarketOrderWithTargetValue(params: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse> {
+    const marketContract = await this.getSpotMarketContract(params);
+
+    return marketContract.placeMarketOrderWithTargetValue(params);
+  }
+
+  /**
+   * Places a market order with a quote token value and a permit in the corresponding market contract.
+   *
+   * @param {PlaceMarketOrderWithTargetValueWithPermitParams} params - The parameters for placing a market order with a target value and a permit.
+   * @return {Promise<ContractTransactionResponse>} A Promise that resolves to the transaction response.
+   */
+  async placeMarketOrderWithTargetValueWithPermit(params: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse> {
+    const marketContract = await this.getSpotMarketContract(params);
+
+    return marketContract.placeMarketOrderWithTargetValueWithPermit(params);
   }
 
   /**

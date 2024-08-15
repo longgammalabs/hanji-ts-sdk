@@ -6,6 +6,9 @@ export type {
   DepositSpotParams,
   WithdrawSpotParams,
   PlaceOrderSpotParams,
+  PlaceOrderWithPermitSpotParams,
+  PlaceMarketOrderWithTargetValueParams,
+  PlaceMarketOrderWithTargetValueWithPermitParams,
   ChangeOrderSpotParams,
   ClaimOrderSpotParams,
 

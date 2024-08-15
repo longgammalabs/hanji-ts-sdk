@@ -19,6 +19,9 @@ export {
   type DepositSpotParams,
   type WithdrawSpotParams,
   type PlaceOrderSpotParams,
+  type PlaceOrderWithPermitSpotParams,
+  type PlaceMarketOrderWithTargetValueParams,
+  type PlaceMarketOrderWithTargetValueWithPermitParams,
   type ChangeOrderSpotParams,
   type ClaimOrderSpotParams,
 
