@@ -25,13 +25,13 @@ import { ALL_MARKETS_ID } from '../constants';
 const ALL_MARKETS_CHANNEL = 'allMarkets';
 
 interface HanjiSpotWebSocketServiceEvents {
-  marketUpdated: PublicEventEmitter<readonly [marketId: string, data: MarketUpdateDto]>;
-  allMarketsUpdated: PublicEventEmitter<readonly [data: MarketUpdateDto[]]>;
-  orderbookUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderbookUpdateDto]>;
-  tradesUpdated: PublicEventEmitter<readonly [marketId: string, data: TradeUpdateDto[]]>;
-  userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, data: OrderUpdateDto[]]>;
-  userFillsUpdated: PublicEventEmitter<readonly [marketId: string, data: FillUpdateDto[]]>;
-  candlesUpdated: PublicEventEmitter<readonly [marketId: string, data: CandleUpdateDto]>;
+  marketUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: MarketUpdateDto]>;
+  allMarketsUpdated: PublicEventEmitter<readonly [isSnapshot: boolean, data: MarketUpdateDto[]]>;
+  orderbookUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderbookUpdateDto]>;
+  tradesUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: TradeUpdateDto[]]>;
+  userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderUpdateDto[]]>;
+  userFillsUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: FillUpdateDto[]]>;
+  candlesUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: CandleUpdateDto]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
 }
 
@@ -270,25 +270,25 @@ export class HanjiSpotWebSocketService implements Disposable {
         return;
       switch (message.channel) {
         case ALL_MARKETS_CHANNEL:
-          (this.events.allMarketsUpdated as ToEventEmitter<typeof this.events.allMarketsUpdated>).emit(message.data as MarketUpdateDto[]);
+          (this.events.allMarketsUpdated as ToEventEmitter<typeof this.events.allMarketsUpdated>).emit(message.isSnapshot, message.data as MarketUpdateDto[]);
           break;
         case 'market':
-          (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(message.id, message.data as MarketUpdateDto);
+          (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(message.id, message.isSnapshot, message.data as MarketUpdateDto);
           break;
         case 'orderbook':
-          (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(message.id, message.data as OrderbookUpdateDto);
+          (this.events.orderbookUpdated as ToEventEmitter<typeof this.events.orderbookUpdated>).emit(message.id, message.isSnapshot, message.data as OrderbookUpdateDto);
           break;
         case 'trades':
-          (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(message.id, message.data as TradeUpdateDto[]);
+          (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(message.id, message.isSnapshot, message.data as TradeUpdateDto[]);
           break;
         case 'userOrders':
-          (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(message.id, message.data as OrderUpdateDto[]);
+          (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(message.id, message.isSnapshot, message.data as OrderUpdateDto[]);
           break;
         case 'userFills':
-          (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.id, message.data as FillUpdateDto[]);
+          (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.id, message.isSnapshot, message.data as FillUpdateDto[]);
           break;
         case 'candles':
-          (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(message.id, message.data as CandleUpdateDto);
+          (this.events.candlesUpdated as ToEventEmitter<typeof this.events.candlesUpdated>).emit(message.id, message.isSnapshot, message.data as CandleUpdateDto);
           break;
         case 'error':
           (this.events.subscriptionError as ToEventEmitter<typeof this.events.subscriptionError>).emit(message.data as string);

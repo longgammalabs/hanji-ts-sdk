@@ -47,6 +47,7 @@ export interface FillUpdateDto {
   txnHash: string;
   price: string;
   size: string;
+  fee: string;
 }
 
 export interface CandleUpdateDto {

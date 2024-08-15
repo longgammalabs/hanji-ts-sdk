@@ -103,13 +103,15 @@ export const mapOrderDtoToOrder = (dto: OrderUpdateDto, priceFactor: number, siz
   };
 };
 
-export const mapFillDtoToFill = (dto: FillDto, priceFactor: number, sizeFactor: number): Fill => {
+export const mapFillDtoToFill = (dto: FillDto, priceFactor: number, tokenXFactor: number, tokenYFactor: number): Fill => {
   return {
     ...dto,
     rawPrice: BigInt(dto.price),
     price: tokenUtils.convertTokensRawAmountToAmount(dto.price, priceFactor),
     rawSize: BigInt(dto.size),
-    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, sizeFactor),
+    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, tokenXFactor),
+    rawFee: BigInt(dto.fee),
+    fee: tokenUtils.convertTokensRawAmountToAmount(dto.fee, tokenYFactor),
   };
 };
 
@@ -144,5 +146,6 @@ export const mapFillUpdateDtoToFillUpdate = (
   _marketId: string,
   dto: FillUpdateDto,
   priceFactor: number,
-  sizeFactor: number
-): FillUpdate => mapFillDtoToFill(dto, priceFactor, sizeFactor);
+  tokenXFactor: number,
+  tokenYFactor: number
+): FillUpdate => mapFillDtoToFill(dto, priceFactor, tokenXFactor, tokenYFactor);
