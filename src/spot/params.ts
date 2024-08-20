@@ -2,9 +2,29 @@ import BigNumber from 'bignumber.js';
 
 import { CandleResolution, OrderType, TokenType, Direction, type OrderStatus, type Side } from '../models';
 
+/**
+ * Parameters for approving tokens for the token transfer.
+ */
 export interface ApproveSpotParams {
+  /**
+   * The market identifier.
+   *
+   * @type {string}
+   */
   market: string;
+  /**
+   * Indicates whether the token to be approved is a base token.
+   *
+   * @type {boolean}
+   */
   isBaseToken: boolean;
+  /**
+   * The amount of tokens to approve.
+   * If `bigint` is provided, then the token's contract unit is used.
+   * If `BigNumber` is provided, then the scaled unit with the token's decimals is used.
+   *
+   * @type {BigNumber | bigint}
+   */
   amount: BigNumber | bigint;
 }
 
@@ -67,15 +87,47 @@ interface WithdrawBaseSpotParams {
   withdrawAll?: boolean;
 }
 
+/**
+ * Parameters for withdrawing specific token amounts from the spot market contract.
+ *
+ * @interface WithdrawSpecificTokenAmountsSpotParams
+ * @extends WithdrawBaseSpotParams
+ */
 interface WithdrawSpecificTokenAmountsSpotParams extends WithdrawBaseSpotParams {
+  /**
+   * Amount of base tokens to withdraw.
+   *
+   * @type {BigNumber | bigint}
+   */
   baseTokenAmount: BigNumber | bigint;
+  /**
+   * Amount of quote tokens to withdraw.
+   *
+   * @type {BigNumber | bigint}
+   */
   quoteTokenAmount: BigNumber | bigint;
 }
 
+/**
+ * Parameters for withdrawing all tokens from the spot market.
+ *
+ * @interface WithdrawAllSpotParams
+ * @extends WithdrawBaseSpotParams
+ */
 interface WithdrawAllSpotParams extends WithdrawBaseSpotParams {
+  /**
+   * Flag to withdraw all tokens.
+   *
+   * @type {true}
+   */
   withdrawAll: true;
 }
 
+/**
+ * Union type for withdraw parameters.
+ *
+ * @type {WithdrawSpecificTokenAmountsSpotParams | WithdrawAllSpotParams}
+ */
 export type WithdrawSpotParams =
   | WithdrawSpecificTokenAmountsSpotParams
   | WithdrawAllSpotParams;

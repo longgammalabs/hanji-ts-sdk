@@ -31,14 +31,16 @@ Deposits the specified amount of tokens to the corresponding market contract.
 ## withdrawTokens
 
 ```typescript
-async withdrawTokens({ market, token, amount }: WithdrawSpotParams): Promise<ContractTransactionResponse>
+async withdrawTokens({ bmarket, aseTokenAmount, quoteTokenAmount, withdrawAll }: WithdrawSpotParams): Promise<ContractTransactionResponse>
 ```
 
-Withdraws the specified amount of tokens from the corresponding market contract.
+Withdraws the specified amount of tokens or all tokens from the corresponding market contract.
 
 - `market`: The market identifier.
-- `token`: The token to be withdrawn.
-- `amount`: The amount of tokens to withdraw. The Hanji scaled units are used.
+- `baseTokenAmount`: The amount of base tokens to withdraw. If `bigint` is provided, then the token's contract unit is used. If `BigNumber` is provided, then the scaled unit with the token's decimals is used. Optional if `withdrawAll` is true.
+- `quoteTokenAmount`: The amount of quote tokens to withdraw. If `bigint` is provided, then the token's contract unit is used. If `BigNumber` is provided, then the scaled unit with the token's decimals is used. Optional if `withdrawAll` is true.
+- `withdrawAll`: A flag indicating whether to withdraw all tokens. If true, `baseTokenAmount` and `quoteTokenAmount` are ignored.
+
 
 ## setClaimableStatus
 
@@ -54,10 +56,11 @@ Sets the claimable status for the corresponding market contract.
 ## placeOrder
 
 ```typescript
-async placeOrder({ market, side, size, price, type, transferExecutedTokens }: PlaceOrderSpotParams): Promise<ContractTransactionResponse>
+async placeOrder({ market, side, size, price, type, transferExecutedTokens, maxCommission, quantityToSend, useNativeToken }: PlaceOrderSpotParams): Promise<ContractTransactionResponse>
 ```
 
 Places a new order in the corresponding market contract.
+It can place limit or market order and use native token if market supports it.
 
 - `market`: The market identifier.
 - `side`: The order side (buy or sell).
@@ -65,6 +68,61 @@ Places a new order in the corresponding market contract.
 - `price`: The price of the order.
 - `type`: The type of the order (e.g., limit, market).
 - `transferExecutedTokens`: Whether to transfer executed tokens automatically.
+- `maxCommission`:  The upper bound of commission to pay.
+- `quantityToSend`: The amount of native token to send.
+- `useNativeToken`: Use native token for the transaction instead of the wrapped token.
+
+## placeOrderWithPermit
+
+```typescript
+async placeOrderWithPermit({ market, side, size, price, permit, type, transferExecutedTokens, maxCommission }: PlaceOrderWithPermitSpotParams): Promise<ContractTransactionResponse>
+```
+
+Places a new order with a permit in the corresponding market contract if the token supports ERC20Permit interface.
+
+- `market`: The market identifier.
+- `side`: The order side (buy or sell).
+- `size`: The size of the order.
+- `price`: The price of the order.
+- `permit`: The quantity of tokens to permit for the order. Ussually the same value as the approve value.
+- `type`: The type of the order (e.g., limit, market).
+- `transferExecutedTokens`: Whether to transfer executed tokens automatically.
+- `maxCommission`: The upper bound of commission to pay.
+
+This method allows placing an order with a permit, which is useful for tokens that support permit functionality, enabling gasless approvals.
+
+## placeMarketOrderWithTargetValue
+
+```typescript
+async placeMarketOrderWithTargetValue({ market, side, targetValue, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse>
+```
+
+Places a market order with a target value of the quote token in the corresponding market contract.
+
+- `market`: The market identifier.
+- `side`: The order side (buy or sell).
+- `targetValue`: The quote token value to spend.
+- `maxCommission`: The upper bound of commission to pay.
+- `useNativeToken`: Use native token for the transaction instead of the wrapped token.
+
+This method allows placing a market order by specifying the target value of the quote token, which is useful for executing orders based on a specific value rather than base token quantity.
+
+## placeMarketOrderWithTargetValueWithPermit
+
+````typescript
+async placeMarketOrderWithTargetValueWithPermit({ market, side, targetValue, permit, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse>
+````
+
+Places a market order with a target value of the quote token and a permit in the corresponding market contract.
+
+- `market`: The market identifier.
+- `side`: The order side (buy or sell).
+- `targetValue`: The quote token value to spend.
+- `permit`: The quantity of tokens to permit for the order. Usually the same value as the approve value.
+- `maxCommission`: The upper bound of commission to pay.
+- `transferExecutedTokens`: Whether to transfer executed tokens automatically.
+
+The same action as in `placeMarketOrderWithTargetValue` but it uses a token that supports permit.
 
 ## claimOrder
 
@@ -81,7 +139,7 @@ Claims an order or fully cancels it in the corresponding market contract.
 ## changeOrder
 
 ```typescript
-async changeOrder({ market, orderId, newSize, newPrice, type, transferExecutedTokens }: ChangeOrderSpotParams): Promise<ContractTransactionResponse>
+async changeOrder({ market, orderId, newSize, newPrice, type, maxCommission, transferExecutedTokens }: ChangeOrderSpotParams): Promise<ContractTransactionResponse>
 ```
 
 Changes an existing order in the corresponding market contract.
@@ -92,6 +150,7 @@ Changes an existing order in the corresponding market contract.
 - `newPrice`: The new price of the order.
 - `type`: The type of the order (e.g., limit, limit_post_only).
 - `transferExecutedTokens`: Whether to transfer executed tokens automatically.
+- `maxCommission`: The upper bound of commission to pay.
 
 ## getMarket
 
@@ -190,11 +249,12 @@ The `HanjiSpot.events` property defines various events that you can listen to fo
 
 - `marketUpdated`: Triggered when there is an update in the market.
 - `orderbookUpdated`: Triggered when there is an update in the order book.
-- `tradeUpdated`: Triggered when a new trade occurs.
+- `tradesUpdated`: Triggered when a new trade occurs.
 - `userFillUpdated`: Triggered when a fill is updated.
 - `userOrderUpdated`: Triggered when an order is updated.
 - `candleUpdated`: Triggered when new candle data is available.
 - `allMarketsUpdated`: Triggered when there is an update across any market.
+- `subscriptionError`: Triggered when there is an error related to a subscription.
 
 You can add event listeners to these events to handle real-time data as it comes in. Events start coming after ypu subscribe to them with certain methods
 
@@ -345,7 +405,9 @@ tx = await hanjiClient.spot.placeOrder({
   type: 'limit',
   side: 'ask',
   size: new BigNumber(45.123),
-  price: new BigNumber(1.17)
+  price: new BigNumber(1.17),
+  maxCommission: new bigNumber(0.1),
+  quantityToSend: 0n
 });
 console.log(tx.hash);
 
@@ -401,6 +463,8 @@ tx = await hanjiClient.spot.createOrder({
   side: 'ask',
   size: new BigNumber(45.123),
   price: new BigNumber(1.17)
+  maxCommission: new bigNumber(0.1),
+  quantityToSend: 0n
 });
 console.log(tx.hash);
 ```

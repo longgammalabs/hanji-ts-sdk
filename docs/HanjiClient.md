@@ -16,8 +16,8 @@ Creates a new instance of the `HanjiClient`.
 |-----------------------------|-------------------------------|-----------------------------------------------------------------------------|
 | `apiBaseUrl`                | `string`                      | The base URL for the Hanji API.                                             |
 | `webSocketApiBaseUrl`       | `string`                      | The base URL for the Hanji WebSocket API.                                   |
-| `signerOrProvider`          | `Signer \| Provider \| null`  | The ethers signer or provider used for signing transactions.                |
-| `webSocketConnectImmediately?` | `boolean`                    | Whether to connect to the WebSocket immediately after creating the `HanjiClient` (default is true). |
+| `signer`                    | `Signer \| null`              | The ethers signer used for signing transactions.                            |
+| `webSocketConnectImmediately?` | `boolean`                 | Whether to connect to the WebSocket immediately after creating the `HanjiClient` (default is true). |
 
 ## Properties
 
@@ -27,13 +27,13 @@ An instance of `HanjiSpot` that provides API functions to interact with the Hanj
 
 ## Methods
 
-### `setSignerOrProvider(signerOrProvider: Signer | Provider): void`
+### `setSigner(signer: Signer | null): void`
 
-Sets the signer or provider for the `HanjiClient`.
+Sets or unsets the signer for the `HanjiClient`.
 
 **Parameters:**
 
-- `signerOrProvider` (Signer | Provider): The signer or provider to set.
+- `signer` (Signer): The signer to set.
 
 ## Example Usage
 
@@ -43,13 +43,13 @@ import { HanjiClient, HanjiClientOptions } from 'hanji-ts-sdk';
 const options: HanjiClientOptions = {
   apiBaseUrl: 'https://api.hanji.io',
   webSocketApiBaseUrl: 'wss://ws.hanji.io',
-  signerOrProvider: null,
+  signer: null,
   webSocketConnectImmediately: false,
 };
 
 const hanjiClient = new HanjiClient(options);
 
 // If you need to use user-oriented methods, set a signer or provider:
-// newSignerOrProvider = new ethers.Wallet(<yourPrivateKey>, <provider>);
-hanjiClient.setSignerOrProvider(newSignerOrProvider);
+// newSigner = new ethers.Wallet(<yourPrivateKey>, <provider>);
+hanjiClient.setSignerOrProvider(newSigner);
 ```
