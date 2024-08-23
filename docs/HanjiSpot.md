@@ -94,13 +94,15 @@ This method allows placing an order with a permit, which is useful for tokens th
 ## placeMarketOrderWithTargetValue
 
 ```typescript
-async placeMarketOrderWithTargetValue({ market, side, targetValue, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse>
+async placeMarketOrderWithTargetValue({ market, side, price, size, targetValue, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse>
 ```
 
 Places a market order with a target value of the quote token in the corresponding market contract.
 
 - `market`: The market identifier.
 - `side`: The order side (buy or sell).
+- `price`: The price of the order.
+- `size`: The quote token value to spend.
 - `targetValue`: The quote token value to spend.
 - `maxCommission`: The upper bound of commission to pay.
 - `useNativeToken`: Use native token for the transaction instead of the wrapped token.
@@ -110,14 +112,15 @@ This method allows placing a market order by specifying the target value of the 
 ## placeMarketOrderWithTargetValueWithPermit
 
 ````typescript
-async placeMarketOrderWithTargetValueWithPermit({ market, side, targetValue, permit, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse>
+async placeMarketOrderWithTargetValueWithPermit({ market, side, price, size, permit, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse>
 ````
 
 Places a market order with a target value of the quote token and a permit in the corresponding market contract.
 
 - `market`: The market identifier.
 - `side`: The order side (buy or sell).
-- `targetValue`: The quote token value to spend.
+- `price`: The price of the order.
+- `size`: The quote token value to spend.
 - `permit`: The quantity of tokens to permit for the order. Usually the same value as the approve value.
 - `maxCommission`: The upper bound of commission to pay.
 - `transferExecutedTokens`: Whether to transfer executed tokens automatically.
