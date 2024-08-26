@@ -439,7 +439,8 @@ export class HanjiSpot implements Disposable {
     const marketDtos = await this.hanjiService.getMarkets(params);
     const markets = marketDtos.map(marketDto => this.mappers.mapMarketDtoToMarket(
       marketDto,
-      marketDto.priceScalingFactor
+      marketDto.priceScalingFactor,
+      marketDto.tokenXScalingFactor
     ));
 
     return markets;
@@ -752,7 +753,7 @@ export class HanjiSpot implements Disposable {
 
   protected onMarketUpdated: Parameters<typeof this.hanjiWebSocketService.events.marketUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
-      const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, data.priceScalingFactor);
+      const marketUpdate = this.mappers.mapMarketUpdateDtoToMarketUpdate(marketId, data, data.priceScalingFactor, data.tokenXScalingFactor);
 
       (this.events.marketUpdated as ToEventEmitter<typeof this.events.marketUpdated>).emit(marketId, isSnapshot, marketUpdate);
     }
@@ -764,7 +765,7 @@ export class HanjiSpot implements Disposable {
   protected onAllMarketsUpdated: Parameters<typeof this.hanjiWebSocketService.events.allMarketsUpdated['addListener']>[0] = async (isSnapshot, data) => {
     try {
       const allMarketsUpdate = data.map(marketUpdateDot =>
-        this.mappers.mapMarketUpdateDtoToMarketUpdate(marketUpdateDot.id, marketUpdateDot, marketUpdateDot.priceScalingFactor));
+        this.mappers.mapMarketUpdateDtoToMarketUpdate(marketUpdateDot.id, marketUpdateDot, marketUpdateDot.priceScalingFactor, marketUpdateDot.tokenXScalingFactor));
 
       (this.events.allMarketUpdated as ToEventEmitter<typeof this.events.allMarketUpdated>).emit(isSnapshot, allMarketsUpdate);
     }
