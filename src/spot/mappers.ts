@@ -33,7 +33,7 @@ export const mapTokenDtoToToken = (dto: TokenDto): Token => {
   return dto;
 };
 
-export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number): Market => {
+export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number, sizeFactor: number): Market => {
   return {
     ...dto,
     rawLastPrice: dto.lastPrice ? BigInt(dto.lastPrice) : null,
@@ -49,7 +49,7 @@ export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number): Marke
     rawBestBid: dto.bestBid ? BigInt(dto.bestBid) : null,
     bestBid: dto.bestBid ? tokenUtils.convertTokensRawAmountToAmount(dto.bestBid, priceFactor) : null,
     rawTradingVolume24h: dto.tradingVolume24h ? BigInt(dto.tradingVolume24h) : null,
-    tradingVolume24h: dto.tradingVolume24h ? tokenUtils.convertTokensRawAmountToAmount(dto.tradingVolume24h, priceFactor) : null,
+    tradingVolume24h: dto.tradingVolume24h ? tokenUtils.convertTokensRawAmountToAmount(dto.tradingVolume24h, sizeFactor) : null,
     totalSupply: dto.totalSupply ? BigNumber(dto.totalSupply) : null,
     lastTouched: dto.lastTouched,
   };
@@ -118,8 +118,9 @@ export const mapFillDtoToFill = (dto: FillDto, priceFactor: number, tokenXFactor
 export const mapMarketUpdateDtoToMarketUpdate = (
   _marketId: string,
   dto: MarketUpdateDto,
-  priceFactor: number
-): MarketUpdate => mapMarketDtoToMarket(dto, priceFactor);
+  priceFactor: number,
+  sizeFactor: number
+): MarketUpdate => mapMarketDtoToMarket(dto, priceFactor, sizeFactor);
 
 export const mapOrderbookUpdateDtoToOrderbookUpdate = (
   _marketId: string,
