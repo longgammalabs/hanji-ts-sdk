@@ -371,6 +371,13 @@ export interface Order {
    * @type {OrderStatus}
    */
   status: OrderStatus;
+
+  /**
+   * Indicates if the order was placed with post-only flag.
+   *
+   * @type {boolean}
+   */
+  isPostOnly: boolean;
 }
 
 export type OrderUpdate = Order;
@@ -693,3 +700,148 @@ export interface UserBalances {
     total: number;
   }[];
 }
+
+/**
+ * Represents an order history log in the Hanji Spot market.
+ */
+export interface OrderHistory {
+  /**
+   * The unique identifier of the order.
+   *
+   * @type {string}
+   */
+  orderId: string;
+
+  /**
+   * The market information where the order is placed.
+   */
+  market: {
+    /**
+     * The unique identifier of the market.
+     *
+     * @type {string}
+     */
+    id: string;
+  };
+
+  /**
+   * The type of the order (e.g., limit, market).
+   *
+   * @type {OrderType}
+   */
+  type: OrderType;
+
+  /**
+   * The owner of the order.
+   *
+   * @type {string}
+   */
+  owner: string;
+
+  /**
+   * The side of the order (ask or bid).
+   *
+   * @type {Side}
+   */
+  side: Side;
+
+  /**
+   * The raw price of the order as a bigint.
+   *
+   * @type {bigint}
+   */
+  rawPrice: bigint;
+
+  /**
+   * The formatted price of the order as a BigNumber.
+   *
+   * @type {BigNumber}
+   */
+  price: BigNumber;
+
+  /**
+   * The raw size of the order as a bigint.
+   *
+   * @type {bigint}
+   */
+  rawSize: bigint;
+
+  /**
+   * The formatted size of the order as a BigNumber.
+   *
+   * @type {BigNumber}
+   */
+  size: BigNumber;
+
+  /**
+   * The raw original size of the order as a bigint.
+   *
+   * @type {bigint}
+   */
+  rawOrigSize: bigint;
+
+  /**
+   * The formatted original size of the order as a BigNumber.
+   *
+   * @type {BigNumber}
+   */
+  origSize: BigNumber;
+
+  /**
+   * The raw claimed amount of the order as a bigint.
+   *
+   * @type {bigint}
+   */
+  rawClaimed: bigint;
+
+  /**
+   * The formatted claimed amount of the order as a BigNumber.
+   *
+   * @type {BigNumber}
+   */
+  claimed: BigNumber;
+
+  /**
+   * The timestamp when the order history log was created.
+   *
+   * @type {number}
+   */
+  timestamp: number;
+
+  /**
+   * The transaction hash associated with the order history log.
+   *
+   * @type {string}
+   */
+  txnHash: string;
+
+  /**
+   * The status of the order associated with the order history log.
+   *
+   * @type {OrderStatus}
+   */
+  status: OrderStatus;
+
+  /**
+   * The raw fee for the order as a bigint associated with the order history log.
+   *
+   * @type {bigint}
+   */
+  rawFee: bigint;
+
+  /**
+   * The formatted fee for the order as a BigNumber associated with the order history log.
+   *
+   * @type {BigNumber}
+   */
+  fee: BigNumber;
+
+  /**
+   * Indicates if the order was placed with post-only flag.
+   *
+   * @type {boolean}
+   */
+  isPostOnly: boolean;
+}
+
+export type OrderHistoryUpdate = OrderHistory;

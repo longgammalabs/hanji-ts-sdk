@@ -3,6 +3,7 @@ export type {
   OrderbookDto,
   OrderbookLevelDto,
   OrderDto,
+  OrderHistoryDto,
   TradeDto,
   FillDto,
   TokenDto,

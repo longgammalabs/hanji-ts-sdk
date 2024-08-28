@@ -36,6 +36,7 @@ export const expectOrder = (order: Order | undefined | null, values?: Partial<Or
     lastTouched: expect.any(Number),
     txnHash: expect.stringMatching(transactionRegex),
     status: expect.any(String),
+    isPostOnly: expect.any(Boolean),
     ...values,
   });
 };

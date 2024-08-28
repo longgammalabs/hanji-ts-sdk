@@ -39,11 +39,14 @@ import type {
   GetUserBalancesParams,
   PlaceOrderWithPermitSpotParams,
   PlaceMarketOrderWithTargetValueParams,
-  PlaceMarketOrderWithTargetValueWithPermitParams
+  PlaceMarketOrderWithTargetValueWithPermitParams,
+  GetOrderHistoryParams,
+  UnsubscribeFromUserOrderHistoryParams,
+  SubscribeToUserOrderHistoryParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
-import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails, UserBalances } from '../models';
+import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails, UserBalances, OrderHistoryUpdate, OrderHistory } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 
 /**
@@ -141,6 +144,13 @@ interface HanjiSpotEvents {
   userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderUpdate[]]>;
 
   /**
+   * Emitted when a user's order history is updated.
+   * @event
+   * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderHistoryUpdate[]]>}
+   */
+  userOrderHistoryUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderHistoryUpdate[]]>;
+
+  /**
    * Emitted when a user's fills are updated.
    * @event
    * @type {PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: FillUpdate[]]>}
@@ -180,6 +190,7 @@ export class HanjiSpot implements Disposable {
     orderbookUpdated: new EventEmitter(),
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
+    userOrderHistoryUpdated: new EventEmitter(),
     userFillsUpdated: new EventEmitter(),
     candlesUpdated: new EventEmitter(),
     allMarketUpdated: new EventEmitter(),
@@ -492,6 +503,22 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
+   * Retrieves the order history for the specified market.
+   *
+   * @param {GetOrderHistoryParams} params - The parameters for retrieving the order history.
+   * @returns {Promise<OrderHistory[]>} A Promise that resolves to an array of order history logs.
+   */
+  async getOrderHistory(params: GetOrderHistoryParams): Promise<OrderHistory[]> {
+    const [market, orderHistoryDtos] = await Promise.all([
+      this.ensureMarket(params),
+      this.hanjiService.getOrderHistory(params),
+    ]);
+    const orderHistory = orderHistoryDtos.map(orderHistoryDto => this.mappers.mapOrderHistoryDtoToOrderHistory(orderHistoryDto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor));
+
+    return orderHistory;
+  }
+
+  /**
    * Retrieves the trades for the specified market.
    *
    * @param {GetTradesParams} params - The parameters for retrieving the trades.
@@ -659,6 +686,26 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
+   * Subscribes to the user order history updates for the specified market and user.
+   *
+   * @param {SubscribeToUserOrderHistoryParams} params - The parameters for subscribing to the user order history updates.
+   * @emits HanjiSpot#events#userOrderHistoryUpdated
+   */
+  subscribeToUserOrderHistory(params: SubscribeToUserOrderHistoryParams): void {
+    this.hanjiWebSocketService.subscribeToUserOrderHistory(params);
+  }
+
+  /**
+     * Unsubscribes from the user order updates for the specified market and user.
+     *
+     * @param {UnsubscribeFromUserOrderHistoryParams} params - The parameters for unsubscribing from the user orders updates.
+     * @emits HanjiSpot#events#userOrderHistoryUpdated
+     */
+  unsubscribeFromUserOrderHistory(params: UnsubscribeFromUserOrderHistoryParams): void {
+    this.hanjiWebSocketService.unsubscribeFromUserOrderHistory(params);
+  }
+
+  /**
    * Subscribes to the user fills updates for the specified market and user.
    *
    * @param {SubscribeToUserFillsParams} params - The parameters for subscribing to the user fills updates.
@@ -736,6 +783,7 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.orderbookUpdated.addListener(this.onOrderbookUpdated);
     this.hanjiWebSocketService.events.tradesUpdated.addListener(this.onTradesUpdated);
     this.hanjiWebSocketService.events.userOrdersUpdated.addListener(this.onUserOrdersUpdated);
+    this.hanjiWebSocketService.events.userOrderHistoryUpdated.addListener(this.onUserOrderHistoryUpdated);
     this.hanjiWebSocketService.events.userFillsUpdated.addListener(this.onUserFillsUpdated);
     this.hanjiWebSocketService.events.candlesUpdated.addListener(this.onCandlesUpdated);
     this.hanjiWebSocketService.events.subscriptionError.addListener(this.onSubscriptionError);
@@ -746,6 +794,7 @@ export class HanjiSpot implements Disposable {
     this.hanjiWebSocketService.events.orderbookUpdated.removeListener(this.onOrderbookUpdated);
     this.hanjiWebSocketService.events.tradesUpdated.removeListener(this.onTradesUpdated);
     this.hanjiWebSocketService.events.userOrdersUpdated.removeListener(this.onUserOrdersUpdated);
+    this.hanjiWebSocketService.events.userOrderHistoryUpdated.removeListener(this.onUserOrderHistoryUpdated);
     this.hanjiWebSocketService.events.userFillsUpdated.removeListener(this.onUserFillsUpdated);
     this.hanjiWebSocketService.events.candlesUpdated.removeListener(this.onCandlesUpdated);
     this.hanjiWebSocketService.events.subscriptionError.removeListener(this.onSubscriptionError);
@@ -810,6 +859,20 @@ export class HanjiSpot implements Disposable {
       const orderUpdates = data.map(dto => this.mappers.mapOrderUpdateDtoToOrderUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
 
       (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(marketId, isSnapshot, orderUpdates);
+    }
+    catch (error) {
+      console.error(getErrorLogMessage(error));
+    }
+  };
+
+  protected onUserOrderHistoryUpdated: Parameters<typeof this.hanjiWebSocketService.events.userOrderHistoryUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
+    try {
+      const market = await this.getMarket({ market: marketId });
+      if (!market)
+        return;
+      const orderHistoryUpdates = data.map(dto => this.mappers.mapOrderHistoryUpdateDtoToOrderHistoryUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor));
+
+      (this.events.userOrderHistoryUpdated as ToEventEmitter<typeof this.events.userOrderHistoryUpdated>).emit(marketId, isSnapshot, orderHistoryUpdates);
     }
     catch (error) {
       console.error(getErrorLogMessage(error));
