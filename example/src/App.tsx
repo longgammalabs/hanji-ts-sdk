@@ -12,6 +12,7 @@ import AllMarketsUpdates from './AllMarketUpdates';
 import CalculateOrderDetails from './CalculateOrderDetails';
 import CandleUpdates from './CandleUpdates';
 import UserBalances from './UserBalances';
+import UserOrderHistoryUpdates from './UserOrderHistoryUpdates';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -51,6 +52,8 @@ function App() {
             <Typography variant="h6">WebSocket</Typography>
             <Divider />
             <UserOrdersUpdates />
+            <Divider />
+            <UserOrderHistoryUpdates />
             <Divider />
             <OrderbookUpdates />
             <Divider />
