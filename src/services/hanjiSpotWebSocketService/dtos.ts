@@ -31,6 +31,26 @@ export interface OrderUpdateDto {
   lastTouched: number;
   txnHash: string;
   status: OrderStatus;
+  isPostOnly: boolean;
+}
+
+export interface OrderHistoryUpdateDto {
+  market: {
+    id: string;
+  };
+  timestamp: number;
+  owner: string;
+  type: OrderType;
+  side: Side;
+  txnHash: string;
+  orderId: string;
+  price: string;
+  size: string;
+  origSize: string;
+  status: OrderStatus;
+  claimed: string;
+  fee: string;
+  isPostOnly: boolean;
 }
 
 export interface FillUpdateDto {

@@ -22,6 +22,12 @@ export interface SubscribeToUserOrdersParams {
 }
 export type UnsubscribeFromUserOrdersParams = SubscribeToUserOrdersParams;
 
+export interface SubscribeToUserOrderHistoryParams {
+  user: string;
+  market?: string;
+}
+export type UnsubscribeFromUserOrderHistoryParams = SubscribeToUserOrderHistoryParams;
+
 export interface SubscribeToUserFillsParams {
   user: string;
   market?: string;

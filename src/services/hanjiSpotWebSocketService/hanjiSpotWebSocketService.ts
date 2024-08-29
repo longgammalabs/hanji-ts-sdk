@@ -1,8 +1,10 @@
+/* eslint-disable @stylistic/indent */
 import type {
   CandleUpdateDto,
   FillUpdateDto,
   MarketUpdateDto,
   OrderUpdateDto,
+  OrderHistoryUpdateDto,
   OrderbookUpdateDto,
   TradeUpdateDto
 } from './dtos';
@@ -11,6 +13,7 @@ import type {
   SubscribeToOrderbookParams, UnsubscribeFromOrderbookParams,
   SubscribeToTradesParams, UnsubscribeFromTradesParams,
   SubscribeToUserOrdersParams, UnsubscribeFromUserOrdersParams,
+  SubscribeToUserOrderHistoryParams, UnsubscribeFromUserOrderHistoryParams,
   SubscribeToUserFillsParams, UnsubscribeFromUserFillsParams,
   SubscribeToCandlesParams,
   UnsubscribeFromCandlesParams
@@ -30,6 +33,7 @@ interface HanjiSpotWebSocketServiceEvents {
   orderbookUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderbookUpdateDto]>;
   tradesUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: TradeUpdateDto[]]>;
   userOrdersUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderUpdateDto[]]>;
+  userOrderHistoryUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: OrderHistoryUpdateDto[]]>;
   userFillsUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: FillUpdateDto[]]>;
   candlesUpdated: PublicEventEmitter<readonly [marketId: string, isSnapshot: boolean, data: CandleUpdateDto]>;
   subscriptionError: PublicEventEmitter<readonly [error: string]>;
@@ -51,6 +55,7 @@ export class HanjiSpotWebSocketService implements Disposable {
     orderbookUpdated: new EventEmitter(),
     tradesUpdated: new EventEmitter(),
     userOrdersUpdated: new EventEmitter(),
+    userOrderHistoryUpdated: new EventEmitter(),
     userFillsUpdated: new EventEmitter(),
     candlesUpdated: new EventEmitter(),
   };
@@ -193,6 +198,32 @@ export class HanjiSpotWebSocketService implements Disposable {
   }
 
   /**
+   * Subscribes to user order history updates for a given market and user.
+   * @param params - The parameters for the user order history subscription.
+   */
+    subscribeToUserOrderHistory(params: SubscribeToUserOrderHistoryParams) {
+      this.startHanjiWebSocketClientIfNeeded();
+
+      this.hanjiWebSocketClient.subscribe({
+        channel: 'userOrderHistory',
+        user: params.user,
+        market: params.market || ALL_MARKETS_ID,
+      });
+    }
+
+    /**
+     * Unsubscribes from user order history updates for a given market and user.
+     * @param params - The parameters for the user order history unsubscription.
+     */
+    unsubscribeFromUserOrderHistory(params: UnsubscribeFromUserOrderHistoryParams) {
+      this.hanjiWebSocketClient.unsubscribe({
+        channel: 'userOrderHistory',
+        user: params.user,
+        market: params.market || ALL_MARKETS_ID,
+      });
+    }
+
+  /**
    * Subscribes to user fill updates for a given market and user.
    * @param params - The parameters for the user fill subscription.
    */
@@ -283,6 +314,9 @@ export class HanjiSpotWebSocketService implements Disposable {
           break;
         case 'userOrders':
           (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(message.id, message.isSnapshot, message.data as OrderUpdateDto[]);
+          break;
+        case 'userOrderHistory':
+          (this.events.userOrderHistoryUpdated as ToEventEmitter<typeof this.events.userOrderHistoryUpdated>).emit(message.id, message.isSnapshot, message.data as OrderHistoryUpdateDto[]);
           break;
         case 'userFills':
           (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(message.id, message.isSnapshot, message.data as FillUpdateDto[]);

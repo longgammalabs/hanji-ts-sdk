@@ -14,6 +14,7 @@ export type {
 
   GetOrderbookParams,
   GetOrdersParams,
+  GetOrderHistoryParams,
   GetTradesParams,
   GetFillsParams,
   GetTokensParams,

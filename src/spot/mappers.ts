@@ -10,7 +10,8 @@ import type {
   TradeUpdate,
   OrderUpdate,
   FillUpdate,
-  Fill
+  Fill,
+  OrderHistoryUpdate
 } from '../models';
 import type {
   TokenDto,
@@ -23,6 +24,7 @@ import type {
 import type {
   FillUpdateDto,
   MarketUpdateDto,
+  OrderHistoryUpdateDto,
   OrderUpdateDto,
   OrderbookUpdateDto,
   TradeUpdateDto
@@ -103,6 +105,22 @@ export const mapOrderDtoToOrder = (dto: OrderUpdateDto, priceFactor: number, siz
   };
 };
 
+export const mapOrderHistoryDtoToOrderHistory = (dto: OrderHistoryUpdateDto, priceFactor: number, tokenXFactor: number, tokenYFactor: number): OrderHistoryUpdate => {
+  return {
+    ...dto,
+    rawPrice: BigInt(dto.price),
+    price: tokenUtils.convertTokensRawAmountToAmount(dto.price, priceFactor),
+    rawSize: BigInt(dto.size),
+    size: tokenUtils.convertTokensRawAmountToAmount(dto.size, tokenXFactor),
+    rawOrigSize: BigInt(dto.origSize),
+    origSize: tokenUtils.convertTokensRawAmountToAmount(dto.origSize, tokenXFactor),
+    rawClaimed: BigInt(dto.claimed),
+    claimed: tokenUtils.convertTokensRawAmountToAmount(dto.claimed, tokenXFactor),
+    rawFee: BigInt(dto.fee),
+    fee: tokenUtils.convertTokensRawAmountToAmount(dto.fee, tokenYFactor),
+  };
+};
+
 export const mapFillDtoToFill = (dto: FillDto, priceFactor: number, tokenXFactor: number, tokenYFactor: number): Fill => {
   return {
     ...dto,
@@ -142,6 +160,14 @@ export const mapOrderUpdateDtoToOrderUpdate = (
   priceFactor: number,
   sizeFactor: number
 ): OrderUpdate => mapOrderDtoToOrder(dto, priceFactor, sizeFactor);
+
+export const mapOrderHistoryUpdateDtoToOrderHistoryUpdate = (
+  _marketId: string,
+  dto: OrderHistoryUpdateDto,
+  priceFactor: number,
+  tokenXFactor: number,
+  tokenYFactor: number
+): OrderHistoryUpdate => mapOrderHistoryDtoToOrderHistory(dto, priceFactor, tokenXFactor, tokenYFactor);
 
 export const mapFillUpdateDtoToFillUpdate = (
   _marketId: string,

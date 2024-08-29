@@ -13,6 +13,12 @@ export interface GetOrdersParams {
   status?: OrderStatus | OrderStatus[];
 }
 
+export interface GetOrderHistoryParams {
+  market: string;
+  user: string;
+  limit?: number;
+}
+
 export interface GetTradesParams {
   market: string;
   limit?: number;

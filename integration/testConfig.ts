@@ -3,14 +3,14 @@ import type { Market } from '../src';
 
 const testMarkets = {
   btcUsd: {
-    id: '0x57356345cf0eC97540442Ed2F183E1e33a3288F8'.toLowerCase(),
+    id: '0xB882A8b89b92C14086b028AE522C4563D49FE122'.toLowerCase(),
     name: 'BTCUSDC',
     symbol: 'BTCUSDC',
     baseToken: {
       id: 'BTC',
       name: 'Bitcoin',
       symbol: 'BTC',
-      contractAddress: '0x63fB6490ade3BB819F22F8A37dB76102A63dE5b4'.toLowerCase(),
+      contractAddress: '0x6bDE94725379334b469449f4CF49bCfc85ebFb27'.toLowerCase(),
       decimals: 18,
       roundingDecimals: 4,
       supportsPermit: false,
@@ -24,7 +24,7 @@ const testMarkets = {
       roundingDecimals: 2,
       supportsPermit: false,
     },
-    orderbookAddress: '0x57356345cf0eC97540442Ed2F183E1e33a3288F8'.toLowerCase(),
+    orderbookAddress: '0xB882A8b89b92C14086b028AE522C4563D49FE122'.toLowerCase(),
     aggregations: expect.any(Array),
     rawLastPrice: expect.any(BigInt),
     lastPrice: expect.any(BigNumber),

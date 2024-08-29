@@ -1,5 +1,5 @@
-import type { CandleDto, FillDto, LimitDetailsDto, MarketDetailsDto, MarketDto, OrderDto, OrderbookDto, TokenDto, TradeDto, UserBalancesDto } from './dtos';
-import type { CalculateLimitDetailsParams, CalculateMarketDetailsParams, GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrdersParams, GetTokensParams, GetTradesParams, GetUserBalancesParams } from './params';
+import type { CandleDto, FillDto, LimitDetailsDto, MarketDetailsDto, MarketDto, OrderDto, OrderHistoryDto, OrderbookDto, TokenDto, TradeDto, UserBalancesDto } from './dtos';
+import type { CalculateLimitDetailsParams, CalculateMarketDetailsParams, GetCandlesParams, GetFillsParams, GetMarketsParams, GetOrderbookParams, GetOrderHistoryParams, GetOrdersParams, GetTokensParams, GetTradesParams, GetUserBalancesParams } from './params';
 import { guards } from '../../utils';
 import { RemoteService } from '../remoteService';
 import { ALL_MARKETS_ID } from '../constants';
@@ -50,6 +50,25 @@ export class HanjiSpotService extends RemoteService {
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
     const response = await this.fetch<OrderDto[]>(`/orders?${queryParamsString}`, 'json');
+
+    return response;
+  }
+
+  /**
+   * Retrieves the order history for a given market.
+   * @param params - The parameters for the order history request.
+   * @returns The order history data.
+   */
+  async getOrderHistory(params: GetOrderHistoryParams): Promise<OrderHistoryDto[]> {
+    const queryParams = new URLSearchParams({
+      market: params.market,
+      user: params.user,
+    });
+    if (params.limit)
+      queryParams.append('limit', params.limit.toString());
+
+    const queryParamsString = decodeURIComponent(queryParams.toString());
+    const response = await this.fetch<OrderHistoryDto[]>(`/order-history?${queryParamsString}`, 'json');
 
     return response;
   }

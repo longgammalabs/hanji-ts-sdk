@@ -41,7 +41,6 @@ Withdraws the specified amount of tokens or all tokens from the corresponding ma
 - `quoteTokenAmount`: The amount of quote tokens to withdraw. If `bigint` is provided, then the token's contract unit is used. If `BigNumber` is provided, then the scaled unit with the token's decimals is used. Optional if `withdrawAll` is true.
 - `withdrawAll`: A flag indicating whether to withdraw all tokens. If true, `baseTokenAmount` and `quoteTokenAmount` are ignored.
 
-
 ## setClaimableStatus
 
 ```typescript
@@ -210,6 +209,18 @@ Retrieves the orders for the specified market.
 - `limit`: Optional limit on the number of orders to retrieve.
 - `status`: Optional filter for order status.
 
+## getOrderHistory
+
+```typescript
+async getOrderHistory({ market, user, limit }: GetOrderHistoryParams): Promise<OrderHistory[]>
+```
+
+Retrieves the order history for the specified market.
+
+- `market`: The market identifier.
+- `user`: The user's address.
+- `limit`: Optional limit on the number of orders to retrieve.
+
 ## getTrades
 
 ```typescript
@@ -255,6 +266,7 @@ The `HanjiSpot.events` property defines various events that you can listen to fo
 - `tradesUpdated`: Triggered when a new trade occurs.
 - `userFillUpdated`: Triggered when a fill is updated.
 - `userOrderUpdated`: Triggered when an order is updated.
+- `userOrderHistoryUpdated`: Triggered when an order history is updated.
 - `candleUpdated`: Triggered when new candle data is available.
 - `allMarketsUpdated`: Triggered when there is an update across any market.
 - `subscriptionError`: Triggered when there is an error related to a subscription.
@@ -268,6 +280,7 @@ The HanjiSpot class also includes methods for subscribing to and unsubscribing f
 ## Market Subscriptions
 
 ### subscribeToMarket
+
 ```typescript
 subscribeToMarket({ market }: { market: string }): void
 ```
@@ -275,6 +288,7 @@ subscribeToMarket({ market }: { market: string }): void
 Subscribes to updates for a specific market.
 
 ### unsubscribeFromMarket
+
 ```typescript
 unsubscribeFromMarket({ market }: { market: string }): void
 ```
@@ -282,6 +296,7 @@ unsubscribeFromMarket({ market }: { market: string }): void
 Unsubscribes from updates for a specific market.
 
 ### subscribeToAllMarkets
+
 ```typescript
 subscribeToAllMarkets(): void
 ```
@@ -289,6 +304,7 @@ subscribeToAllMarkets(): void
 Subscribes to updates for all markets.
 
 ### unsubscribeFromAllMarkets
+
 ```typescript
 unsubscribeFromAllMarkets(): void
 ```
@@ -298,6 +314,7 @@ Unsubscribes from updates for all markets.
 ## Orderbook Subscriptions
 
 ### subscribeToOrderbook
+
 ```typescript
 subscribeToOrderbook({ market, aggregation }: { market: string, aggregation: number }): void
 ```
@@ -305,6 +322,7 @@ subscribeToOrderbook({ market, aggregation }: { market: string, aggregation: num
 Subscribes to orderbook updates for a specific market.
 
 ### unsubscribeFromOrderbook
+
 ```typescript
 unsubscribeFromOrderbook({ market, aggregation }: { market: string, aggregation: number }): void
 ```
@@ -314,6 +332,7 @@ Unsubscribes from orderbook updates for a specific market.
 ## Trade Subscriptions
 
 ### subscribeToTrades
+
 ```typescript
 subscribeToTrades({ market }: { market: string }): void
 ```
@@ -321,6 +340,7 @@ subscribeToTrades({ market }: { market: string }): void
 Subscribes to trade updates for a specific market.
 
 ### unsubscribeFromTrades
+
 ```typescript
 unsubscribeFromTrades({ market }: { market: string }): void
 ```
@@ -330,6 +350,7 @@ Unsubscribes from trade updates for a specific market.
 ## User Order Subscriptions
 
 ### subscribeToUserOrders
+
 ```typescript
 subscribeToUserOrders({ user, market }: { user: string, market?: string }): void
 ```
@@ -337,15 +358,35 @@ subscribeToUserOrders({ user, market }: { user: string, market?: string }): void
 Subscribes to user order updates for a specific market and user.
 
 ### unsubscribeFromUserOrders
+
 ```typescript
 unsubscribeFromUserOrders({ user, market }: { user: string, market?: string }): void
 ```
 
 Unsubscribes from user order updates for a specific market and user.
 
+## User Order History Subscriptions
+
+### subscribeToUserOrderHistory
+
+```typescript
+subscribeToUserOrderHistory({ user, market }: { user: string, market?: string }): void
+```
+
+Subscribes to user order history updates for a specific market and user.
+
+### unsubscribeFromUserOrderHistory
+
+```typescript
+unsubscribeFromUserOrderHistory({ user, market }: { user: string, market?: string }): void
+```
+
+Unsubscribes from user order history updates for a specific market and user.
+
 ## User Fill Subscriptions
 
 ### subscribeToUserFills
+
 ```typescript
 subscribeToUserFills({ user, market }: { user: string, market?: string }): void
 ```
@@ -353,6 +394,7 @@ subscribeToUserFills({ user, market }: { user: string, market?: string }): void
 Subscribes to user fill updates for a specific market and user.
 
 ### unsubscribeFromUserFills
+
 ```typescript
 unsubscribeFromUserFills({ user, market }: { user: string, market?: string }): void
 ```
@@ -362,6 +404,7 @@ Unsubscribes from user fill updates for a specific market and user.
 ## Candle Subscriptions
 
 ### subscribeToCandles
+
 ```typescript
 subscribeToCandles({ market, resolution }: { market: string, resolution: CandleResolution }): void
 ```
@@ -369,6 +412,7 @@ subscribeToCandles({ market, resolution }: { market: string, resolution: CandleR
 Subscribes to candle updates for a specific market and resolution.
 
 ### unsubscribeFromCandles
+
 ```typescript
 unsubscribeFromCandles({ market, resolution }: { market: string, resolution: CandleResolution }): void
 ```
@@ -494,6 +538,18 @@ const orders = await hanjiClient.spot.getOrders({
   user: '<userAddress>', // The address of the user
   limit: 10, // Number of orders to retrieve [100 by default]
   status: 'open', // Order statuses to filter by
+});
+```
+
+### getOrderHistory
+
+Returns user's order history.
+
+```ts
+const orderHistory = await hanjiClient.spot.getOrderHistory({
+  market: '<orderbookAddress>', // The address of the orderbook
+  user: '<userAddress>', // The address of the user
+  limit: 10, // Number of history logs to retrieve [100 by default]
 });
 ```
 

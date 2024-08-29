@@ -475,6 +475,34 @@ export interface GetOrdersParams {
   status?: OrderStatus | OrderStatus[];
 }
 
+/**
+ * Parameters for retrieving the order history.
+ *
+ * @interface GetOrderHistoryParams
+ */
+export interface GetOrderHistoryParams {
+  /**
+   * Id of the requested market
+   *
+   * @type {string}
+   */
+  market: string;
+  /**
+   * Address in 42-character hexadecimal format
+   *
+   * @type {string}
+   */
+  user: string;
+  /**
+   * Number of order history logs to retrieve
+   *
+   * @type {number}
+   * @optional
+   * @default 100
+   */
+  limit?: number;
+}
+
 export interface GetTradesParams {
   /**
    * Id of the requested market
@@ -627,6 +655,12 @@ export interface SubscribeToUserOrdersParams {
   market?: string;
 }
 export type UnsubscribeFromUserOrdersParams = SubscribeToUserOrdersParams;
+
+export interface SubscribeToUserOrderHistoryParams {
+  user: string;
+  market?: string;
+}
+export type UnsubscribeFromUserOrderHistoryParams = SubscribeToUserOrderHistoryParams;
 
 export interface SubscribeToUserFillsParams {
   user: string;
