@@ -48,6 +48,7 @@ import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../c
 import { getErrorLogMessage } from '../logging';
 import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails, UserBalances, OrderHistoryUpdate, OrderHistory } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
+import { ALL_MARKETS_ID } from '../services/constants';
 
 /**
  * Options for configuring the HanjiSpot instance.
@@ -218,9 +219,9 @@ export class HanjiSpot implements Disposable {
   protected readonly hanjiService: HanjiSpotService;
   protected readonly hanjiWebSocketService: HanjiSpotWebSocketService;
   private marketContracts: Map<string, HanjiSpotMarketContract> = new Map();
-  protected readonly markets: Map<string, Market> = new Map();
+  protected readonly cachedMarkets: Map<string, Market> = new Map();
   protected readonly mappers: typeof mappers;
-  private marketPromises: Map<string, Promise<Market[]>> = new Map();
+  private cachedMarketsPromise: Promise<Market[]> | undefined = undefined;
 
   constructor(options: Readonly<HanjiSpotOptions>) {
     this.signer = options.signer;
@@ -242,7 +243,6 @@ export class HanjiSpot implements Disposable {
   setSigner(signer: Signer | null): HanjiSpot {
     this.signer = signer;
     this.marketContracts = new Map();
-    this.marketPromises = new Map();
     return this;
   }
 
@@ -407,35 +407,44 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
+   * Retrieves the markets information from cache.
+   *
+   * @returns {Promise<Map<string, Market> | undefined>} A Promise that resolves to the markets information or undefined if error when requesting markets.
+   */
+  async getCachedMarkets(): Promise<Map<string, Market> | undefined> {
+    const markets = this.cachedMarkets;
+
+    if (!markets.size) {
+      try {
+        let getMarketsPromise = this.cachedMarketsPromise;
+        if (!getMarketsPromise) {
+          getMarketsPromise = this.getMarkets({ market: ALL_MARKETS_ID });
+          this.cachedMarketsPromise = getMarketsPromise;
+        }
+
+        const marketsRes = await getMarketsPromise;
+        this.cachedMarketsPromise = undefined;
+        marketsRes.forEach(market => markets.set(market.id, market));
+      }
+      catch (error) {
+        console.error(error);
+      }
+
+      if (!markets.size) return undefined;
+    }
+
+    return markets;
+  }
+
+  /**
    * Retrieves the market information for the specified market.
    *
    * @param {GetMarketParams} params - The parameters for retrieving the market information.
    * @returns {Promise<Market | undefined>} A Promise that resolves to the market information or undefined if the market is not found.
    */
   async getMarket(params: GetMarketParams): Promise<Market | undefined> {
-    let market = this.markets.get(params.market);
-
-    if (!market) {
-      try {
-        let getMarketPromise = this.marketPromises.get(params.market);
-        if (!getMarketPromise) {
-          getMarketPromise = this.getMarkets(params);
-          this.marketPromises.set(params.market, getMarketPromise);
-        }
-
-        const markets = await getMarketPromise;
-        market = markets[0];
-
-        this.marketPromises.delete(params.market);
-      }
-      catch (error) {
-        console.error(error);
-      }
-      if (!market)
-        return undefined;
-
-      this.markets.set(params.market, market);
-    }
+    const markets = await this.getMarkets(params);
+    const market = markets[0];
 
     return market;
   }
@@ -749,7 +758,8 @@ export class HanjiSpot implements Disposable {
   }
 
   protected async ensureMarket(params: { market: string }): Promise<Market> {
-    const market = await this.getMarket(params);
+    const markets = await this.getCachedMarkets();
+    const market = markets?.get(params.market);
     if (!market)
       throw new Error(`Market not found by the ${params.market} address`);
 
@@ -825,7 +835,8 @@ export class HanjiSpot implements Disposable {
 
   protected onOrderbookUpdated: Parameters<typeof this.hanjiWebSocketService.events.orderbookUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
-      const market = await this.getMarket({ market: marketId });
+      const markets = await this.getCachedMarkets();
+      const market = markets?.get(marketId);
       if (!market)
         return;
       const orderbookUpdate = this.mappers.mapOrderbookUpdateDtoToOrderbookUpdate(marketId, data, market.priceScalingFactor, market.tokenXScalingFactor);
@@ -839,10 +850,15 @@ export class HanjiSpot implements Disposable {
 
   protected onTradesUpdated: Parameters<typeof this.hanjiWebSocketService.events.tradesUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
-      const market = await this.getMarket({ market: marketId });
-      if (!market)
+      const markets = await this.getCachedMarkets();
+      if (!markets)
         return;
-      const tradeUpdates = data.map(dto => this.mappers.mapTradeUpdateDtoToTradeUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
+      const tradeUpdates = data.map(dto => {
+        const market = markets.get(dto.market.id);
+        if (!market)
+          throw new Error(`Market not found for marketId: ${dto.market.id}`);
+        return this.mappers.mapTradeUpdateDtoToTradeUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor);
+      });
 
       (this.events.tradesUpdated as ToEventEmitter<typeof this.events.tradesUpdated>).emit(marketId, isSnapshot, tradeUpdates);
     }
@@ -853,10 +869,15 @@ export class HanjiSpot implements Disposable {
 
   protected onUserOrdersUpdated: Parameters<typeof this.hanjiWebSocketService.events.userOrdersUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
-      const market = await this.getMarket({ market: marketId });
-      if (!market)
+      const markets = await this.getCachedMarkets();
+      if (!markets)
         return;
-      const orderUpdates = data.map(dto => this.mappers.mapOrderUpdateDtoToOrderUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor));
+      const orderUpdates = data.map(dto => {
+        const market = markets.get(dto.market.id);
+        if (!market)
+          throw new Error(`Market not found for marketId: ${dto.market.id}`);
+        return this.mappers.mapOrderUpdateDtoToOrderUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor);
+      });
 
       (this.events.userOrdersUpdated as ToEventEmitter<typeof this.events.userOrdersUpdated>).emit(marketId, isSnapshot, orderUpdates);
     }
@@ -867,10 +888,15 @@ export class HanjiSpot implements Disposable {
 
   protected onUserOrderHistoryUpdated: Parameters<typeof this.hanjiWebSocketService.events.userOrderHistoryUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
-      const market = await this.getMarket({ market: marketId });
-      if (!market)
+      const markets = await this.getCachedMarkets();
+      if (!markets)
         return;
-      const orderHistoryUpdates = data.map(dto => this.mappers.mapOrderHistoryUpdateDtoToOrderHistoryUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor));
+      const orderHistoryUpdates = data.map(dto => {
+        const market = markets.get(dto.market.id);
+        if (!market)
+          throw new Error(`Market not found for marketId: ${dto.market.id}`);
+        return this.mappers.mapOrderHistoryUpdateDtoToOrderHistoryUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor);
+      });
 
       (this.events.userOrderHistoryUpdated as ToEventEmitter<typeof this.events.userOrderHistoryUpdated>).emit(marketId, isSnapshot, orderHistoryUpdates);
     }
@@ -881,10 +907,15 @@ export class HanjiSpot implements Disposable {
 
   protected onUserFillsUpdated: Parameters<typeof this.hanjiWebSocketService.events.userFillsUpdated['addListener']>[0] = async (marketId, isSnapshot, data) => {
     try {
-      const market = await this.getMarket({ market: marketId });
-      if (!market)
+      const markets = await this.getCachedMarkets();
+      if (!markets)
         return;
-      const fillUpdates = data.map(dto => this.mappers.mapFillUpdateDtoToFillUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor));
+      const fillUpdates = data.map(dto => {
+        const market = markets.get(dto.market.id);
+        if (!market)
+          throw new Error(`Market not found for marketId: ${dto.market.id}`);
+        return this.mappers.mapFillUpdateDtoToFillUpdate(marketId, dto, market.priceScalingFactor, market.tokenXScalingFactor, market.tokenYScalingFactor);
+      });
 
       (this.events.userFillsUpdated as ToEventEmitter<typeof this.events.userFillsUpdated>).emit(marketId, isSnapshot, fillUpdates);
     }
