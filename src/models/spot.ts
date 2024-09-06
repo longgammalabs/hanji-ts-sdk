@@ -698,6 +698,20 @@ export interface UserBalances {
      * @type {number}
      */
     total: number;
+
+    /**
+     * The user deposits amount of the tokenX.
+     *
+     * @type {number}
+     */
+    depositedTokenX: number;
+
+    /**
+     * The user deposits amount of the tokenY.
+     *
+     * @type {number}
+     */
+    depositedTokenY: number;
   }[];
 }
 
