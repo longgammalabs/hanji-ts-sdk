@@ -71,6 +71,9 @@ export interface FillUpdateDto {
 }
 
 export interface CandleUpdateDto {
+  market: {
+    id: string;
+  };
   resolution: string;
   time: number;
   open: string;
@@ -82,6 +85,9 @@ export interface CandleUpdateDto {
 }
 
 export interface TradeUpdateDto {
+  market: {
+    id: string;
+  };
   tradeId: string;
   direction: Direction;
   price: string;
