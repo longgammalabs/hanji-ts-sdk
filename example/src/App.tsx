@@ -13,6 +13,7 @@ import CalculateOrderDetails from './CalculateOrderDetails';
 import CandleUpdates from './CandleUpdates';
 import UserBalances from './UserBalances';
 import UserOrderHistoryUpdates from './UserOrderHistoryUpdates';
+import ClaimOrder from './ClaimOrder';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -32,6 +33,8 @@ function App() {
                     <ApproveToken />
                     <Divider />
                     <PlaceOrder />
+                    <Divider />
+                    <ClaimOrder />
                   </>
                 )
                 : (
