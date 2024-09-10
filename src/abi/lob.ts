@@ -30,6 +30,7 @@ export const lobAbi = [
     inputs: [
       { name: 'addresses', type: 'address[]', internalType: 'address[]' },
       { name: 'order_ids', type: 'uint64[]', internalType: 'uint64[]' },
+      { name: 'only_claim', type: 'bool', internalType: 'bool' },
       { name: 'expires', type: 'uint256', internalType: 'uint256' },
     ],
     outputs: [],
@@ -72,6 +73,7 @@ export const lobAbi = [
     name: 'claimOrder',
     inputs: [
       { name: 'order_id', type: 'uint64', internalType: 'uint64' },
+      { name: 'only_claim', type: 'bool', internalType: 'bool' },
       { name: 'transfer_tokens', type: 'bool', internalType: 'bool' },
       { name: 'expires', type: 'uint256', internalType: 'uint256' },
     ],
@@ -107,16 +109,6 @@ export const lobAbi = [
   },
   {
     type: 'function',
-    name: 'extractDirectionAndPrice',
-    inputs: [{ name: 'order_id', type: 'uint64', internalType: 'uint64' }],
-    outputs: [
-      { name: 'isAsk', type: 'bool', internalType: 'bool' },
-      { name: 'price', type: 'uint72', internalType: 'uint72' },
-    ],
-    stateMutability: 'pure',
-  },
-  {
-    type: 'function',
     name: 'getAccumulatedFees',
     inputs: [],
     outputs: [{ name: '', type: 'uint256', internalType: 'uint256' }],
@@ -140,21 +132,6 @@ export const lobAbi = [
       { name: '_total_passive_commission_rate', type: 'uint64', internalType: 'uint64' },
       { name: '_passive_order_payout_rate', type: 'uint64', internalType: 'uint64' },
       { name: '_should_invoke_on_trade', type: 'bool', internalType: 'bool' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
-    name: 'getOrderInfo',
-    inputs: [{ name: 'order_id', type: 'uint64', internalType: 'uint64' }],
-    outputs: [
-      { name: 'isAsk', type: 'bool', internalType: 'bool' },
-      { name: 'price', type: 'uint72', internalType: 'uint72' },
-      { name: 'total_shares', type: 'uint128', internalType: 'uint128' },
-      { name: 'remain_shares', type: 'uint128', internalType: 'uint128' },
-      { name: 'payout_amount', type: 'uint128', internalType: 'uint128' },
-      { name: 'total_fee', type: 'uint128', internalType: 'uint128' },
-      { name: 'current_execution_fee', type: 'uint128', internalType: 'uint128' },
     ],
     stateMutability: 'view',
   },
@@ -326,22 +303,6 @@ export const lobAbi = [
   },
   {
     type: 'function',
-    name: 'previewPlaceAggressiveOrder',
-    inputs: [
-      { name: 'isAsk', type: 'bool', internalType: 'bool' },
-      { name: 'price', type: 'uint72', internalType: 'uint72' },
-      { name: 'max_executable_shares', type: 'uint128', internalType: 'uint128' },
-      { name: 'max_executable_value', type: 'uint128', internalType: 'uint128' },
-    ],
-    outputs: [
-      { name: 'executed_shares', type: 'uint128', internalType: 'uint128' },
-      { name: 'executed_value', type: 'uint128', internalType: 'uint128' },
-      { name: 'fee', type: 'uint128', internalType: 'uint128' },
-    ],
-    stateMutability: 'view',
-  },
-  {
-    type: 'function',
     name: 'proxiableUUID',
     inputs: [],
     outputs: [{ name: '', type: 'bytes32', internalType: 'bytes32' }],
@@ -424,9 +385,11 @@ export const lobAbi = [
     name: 'OrderClaimed',
     inputs: [
       { name: 'order_id', type: 'uint64', indexed: false, internalType: 'uint64' },
+      { name: 'order_shares_remaining', type: 'uint128', indexed: false, internalType: 'uint128' },
       { name: 'token_x_sent', type: 'uint128', indexed: false, internalType: 'uint128' },
       { name: 'token_y_sent', type: 'uint128', indexed: false, internalType: 'uint128' },
       { name: 'passive_payout', type: 'uint128', indexed: false, internalType: 'uint128' },
+      { name: 'only_claim', type: 'bool', indexed: false, internalType: 'bool' },
     ],
     anonymous: false,
   },

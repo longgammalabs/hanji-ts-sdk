@@ -256,6 +256,7 @@ describe('Hanji Spot Client Contract API', () => {
     tx = await hanjiClient.spot.claimOrder({
       market,
       orderId: newOrder!.orderId,
+      onlyClaim: false,
     });
     expect(tx.hash).toMatch(transactionRegex);
 
@@ -378,6 +379,7 @@ describe('Hanji Spot Client Contract API', () => {
     tx = await hanjiClient.spot.claimOrder({
       market,
       orderId: newOrder!.orderId,
+      onlyClaim: false,
     });
     expect(tx.hash).toMatch(transactionRegex);
 

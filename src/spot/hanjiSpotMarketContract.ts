@@ -328,7 +328,7 @@ export class HanjiSpotMarketContract {
     const expires = getExpires();
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.claimOrder!(params.orderId, params.transferExecutedTokens ?? this.transferExecutedTokensEnabled, expires)
+      this.marketContract.claimOrder!(params.orderId, params.onlyClaim, params.transferExecutedTokens ?? this.transferExecutedTokensEnabled, expires)
     );
 
     return tx;
@@ -346,7 +346,7 @@ export class HanjiSpotMarketContract {
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.batchClaim!(addresses, orderIds, expires)
+      this.marketContract.batchClaim!(addresses, orderIds, params.onlyClaim, expires)
     );
 
     return tx;

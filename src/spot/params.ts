@@ -317,6 +317,13 @@ export interface ClaimOrderSpotParams {
   orderId: string;
 
   /**
+   * Keep order after claim or cancel.
+   *
+   * @type {boolean}
+   */
+  onlyClaim: boolean;
+
+  /**
    * Whether to transfer tokens to user automatically.
    *
    * @type {boolean}
@@ -331,6 +338,7 @@ export interface BatchClaimOrderSpotParams {
     orderId: string;
     address: string;
   }>;
+  onlyClaim: boolean;
 }
 
 /**
