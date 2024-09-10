@@ -171,5 +171,7 @@ export interface UserBalancesDto {
     tokenAddress: string;
     hold: number;
     total: number;
+    depositedTokenX: number;
+    depositedTokenY: number;
   }[];
 }
