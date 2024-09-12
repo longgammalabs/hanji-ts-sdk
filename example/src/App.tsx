@@ -14,6 +14,7 @@ import CandleUpdates from './CandleUpdates';
 import UserBalances from './UserBalances';
 import UserOrderHistoryUpdates from './UserOrderHistoryUpdates';
 import ClaimOrder from './ClaimOrder';
+import TradeUpdates from './TradeUpdates';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -59,6 +60,8 @@ function App() {
             <UserOrderHistoryUpdates />
             <Divider />
             <OrderbookUpdates />
+            <Divider />
+            <TradeUpdates />
             <Divider />
             <AllMarketsUpdates />
             <Divider />
