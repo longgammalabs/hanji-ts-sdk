@@ -54,6 +54,9 @@ export interface OrderHistoryDto {
 }
 
 export interface TradeDto {
+  market: {
+    id: string;
+  };
   tradeId: string;
   direction: Direction;
   price: string;

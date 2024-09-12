@@ -396,6 +396,20 @@ export interface Trade {
   tradeId: string;
 
   /**
+   * The market where the trade occurred.
+   *
+   * @type {Object}
+   */
+  market: {
+    /**
+     * The unique identifier of the market.
+     *
+     * @type {string}
+     */
+    id: string;
+  };
+
+  /**
    * The direction of the trade (buy or sell).
    *
    * @type {Direction}
