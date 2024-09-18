@@ -31,12 +31,14 @@ export type OrderStatus = 'open' | 'filled' | 'claimed' | 'cancelled';
 
 /**
  * Represents the resolution of a candle in the market.
+ * '1' indicates a 1-minute resolution,
+ * '5' indicates a 5-minute resolution,
  * '15' indicates a 15-minute resolution,
  * '60' indicates a 1-hour resolution,
  * '240' indicates a 4-hour resolution,
  * '1D' indicates a 1-day resolution.
  */
-export type CandleResolution = '15' | '60' | '240' | '1D';
+export type CandleResolution = '1' | '5' | '15' | '60' | '240' | '1D';
 
 /**
  * Represents a market in the trading system.
