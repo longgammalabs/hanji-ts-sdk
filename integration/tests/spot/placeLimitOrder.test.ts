@@ -1,10 +1,20 @@
 import BigNumber from 'bignumber.js';
 import { ethers, type ContractTransactionResponse, type Provider, type Wallet } from 'ethers';
 
-import { HanjiClient, PlaceOrderSpotParams, type Order, PlaceOrderWithPermitSpotParams } from '../../../src';
+import { HanjiClient, PlaceOrderSpotParams, type Order, PlaceOrderWithPermitSpotParams, OrderType, Side } from '../../../src';
 import { getTestConfig, type TestConfig } from '../../testConfig';
 import { expectOrder, transactionRegex, waitForOrder } from '../../testHelpers';
 import { erc20Abi } from '../../../src/abi';
+
+class LoggingProvider extends ethers.JsonRpcProvider {
+  async send(method: any, args: any): Promise<any> {
+    console.log('>>>', method, args);
+    return super.send(method, args).then(result => {
+      console.log('<<<', method, args, result);
+      return result;
+    });
+  }
+}
 
 describe('Hanji Spot Client Contract API', () => {
   let testConfig: TestConfig;
@@ -14,7 +24,7 @@ describe('Hanji Spot Client Contract API', () => {
 
   beforeAll(async () => {
     testConfig = getTestConfig();
-    provider = new ethers.JsonRpcProvider(testConfig.rpcUrl);
+    provider = new LoggingProvider(testConfig.rpcUrl);
     wallet = new ethers.Wallet(testConfig.accountPrivateKey, provider);
     // check if user has 1 unit of each token for interacting
     let contract = new ethers.Contract(testConfig.testMarkets.xtzUsd.baseToken.contractAddress, erc20Abi, provider);
@@ -27,7 +37,7 @@ describe('Hanji Spot Client Contract API', () => {
     if (balance < 1n * (10n ** BigInt(testConfig.testMarkets.xtzUsd.quoteToken.decimals))) {
       throw new Error('User does not have 1 unit of base token');
     }
-  }, 15_000);
+  }, 45_000);
 
   beforeEach(async () => {
     hanjiClient = new HanjiClient({
@@ -37,6 +47,60 @@ describe('Hanji Spot Client Contract API', () => {
       webSocketConnectImmediately: false,
     });
   });
+
+  test.only('check timing', async () => {
+    const { market, approveAmount, newOrderParams } = {
+      market: testConfig.testMarkets.xtzUsd.id,
+      approveAmount: new BigNumber(0.5),
+      newOrderParams: {
+        market: testConfig.testMarkets.xtzUsd.id,
+        type: 'limit' as OrderType,
+        side: 'ask' as Side,
+        price: new BigNumber(117),
+        size: new BigNumber(0.5),
+        useNativeToken: false,
+        maxCommission: new BigNumber(1),
+        quantityToSend: 0n,
+      },
+    };
+    let tx: ContractTransactionResponse;
+
+    const startTime = Date.now();
+    tx = await hanjiClient.spot.approveTokens({
+      market,
+      amount: approveAmount,
+      isBaseToken: newOrderParams.side === 'ask',
+    });
+    const endTime = Date.now();
+    console.log(`approveTokens execution time: ${endTime - startTime} ms`);
+    expect(tx.hash).toMatch(transactionRegex);
+
+    const startTime2 = Date.now();
+    tx = await hanjiClient.spot.placeOrder(newOrderParams);
+    const endTime2 = Date.now();
+    console.log(`placeOrder execution time: ${endTime2 - startTime2} ms`);
+    expect(tx.hash).toMatch(transactionRegex);
+    expect(tx.hash).toMatch(transactionRegex);
+
+    const newOrder = await waitForOrder(
+      () => hanjiClient.spot.getOrders({ market, user: wallet.address }),
+      o => o.txnHash === tx.hash
+    );
+    console.log('newOrder', newOrder?.txnHash);
+
+    tx = await hanjiClient.spot.claimOrder({
+      market,
+      orderId: newOrder!.orderId,
+      onlyClaim: false,
+    });
+    expect(tx.hash).toMatch(transactionRegex);
+
+    const canceledOrder = await waitForOrder(
+      () => hanjiClient.spot.getOrders({ market, user: wallet.address }),
+      o => o.orderId === newOrder!.orderId && o.status === 'cancelled'
+    );
+    console.log('canceledOrder', canceledOrder?.txnHash);
+  }, 30000);
 
   test.each(
     [

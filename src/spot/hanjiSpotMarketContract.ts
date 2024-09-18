@@ -406,10 +406,17 @@ export class HanjiSpotMarketContract {
 
   protected async processContractMethodCall(contract: Contract, methodCall: Promise<ContractTransactionResponse>): Promise<ContractTransactionResponse> {
     try {
+      const startTime2 = Date.now();
       const tx = await methodCall;
+      const endTime2 = Date.now();
+      console.log(`method call execution time: ${endTime2 - startTime2} ms`);
 
+      const startTime = Date.now();
       if (this.autoWaitTransaction)
         await tx.wait();
+
+      const endTime = Date.now();
+      console.log(`tx wait execution time: ${endTime - startTime} ms`);
 
       return tx;
     }
