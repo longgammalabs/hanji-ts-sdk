@@ -3,7 +3,7 @@ import type { Market } from '../src';
 
 const testMarkets = {
   btcUsd: {
-    id: '0x8b6D9Df7247C30711ADe97620DBb711b217c7338'.toLowerCase(),
+    id: '0x64c17b59999BA563e60eC72CcfaC47553287511f'.toLowerCase(),
     name: 'BTCUSDC',
     symbol: 'BTCUSDC',
     baseToken: {
@@ -24,7 +24,7 @@ const testMarkets = {
       roundingDecimals: 2,
       supportsPermit: false,
     },
-    orderbookAddress: '0x8b6D9Df7247C30711ADe97620DBb711b217c7338'.toLowerCase(),
+    orderbookAddress: '0x64c17b59999BA563e60eC72CcfaC47553287511f'.toLowerCase(),
     aggregations: expect.any(Array),
     rawLastPrice: expect.any(BigInt),
     lastPrice: expect.any(BigNumber),
@@ -49,7 +49,7 @@ const testMarkets = {
     isNativeTokenX: false,
   },
   xtzUsd: {
-    id: '0x8f7119da742cE3919999c106A102399036Cce570'.toLowerCase(),
+    id: '0x69Fa40D083d59517F83D628Addde5DCf4fc4F50b'.toLowerCase(),
     name: 'XTZUSDC',
     symbol: 'XTZUSDC',
     baseToken: {
@@ -70,7 +70,7 @@ const testMarkets = {
       roundingDecimals: 2,
       supportsPermit: false,
     },
-    orderbookAddress: '0x8f7119da742cE3919999c106A102399036Cce570'.toLowerCase(),
+    orderbookAddress: '0x69Fa40D083d59517F83D628Addde5DCf4fc4F50b'.toLowerCase(),
     aggregations: expect.any(Array),
     rawLastPrice: expect.any(BigInt),
     lastPrice: expect.any(BigNumber),
