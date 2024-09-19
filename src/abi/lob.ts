@@ -38,10 +38,11 @@ export const lobAbi = [
   },
   {
     type: 'function',
-    name: 'changeMarketMakerAddress',
+    name: 'changeMarketMaker',
     inputs: [
       { name: '_marketmaker', type: 'address', internalType: 'address' },
       { name: '_should_invoke_on_trade', type: 'bool', internalType: 'bool' },
+      { name: '_admin_commission_rate', type: 'uint64', internalType: 'uint64' },
     ],
     outputs: [],
     stateMutability: 'nonpayable',
