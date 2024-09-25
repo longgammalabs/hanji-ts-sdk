@@ -11,6 +11,7 @@ const CalculateOrderDetails: React.FC = () => {
   const [isMarket, setIsMarket] = useState(false);
   const [price, setPrice] = useState('');
   const [postOnly, setPostOnly] = useState(false);
+  const [useAutoSlippage, setUseAutoSlippage] = useState(false);
   const [result, setResult] = useState({});
   const hanjiClient = useContext(HanjiClientContext);
   const [isFetching, setIsFetching] = useState(false);
@@ -28,6 +29,7 @@ const CalculateOrderDetails: React.FC = () => {
           tokenXInput: inputTokenX,
           tokenYInput: inputTokenY,
           slippage: Number(slippage),
+          useAutoSlippage,
         },
       });
     }
@@ -121,6 +123,17 @@ const CalculateOrderDetails: React.FC = () => {
               />
             )}
             label="Post Only"
+          />
+        </div>
+        <div>
+          <FormControlLabel
+            control={(
+              <Checkbox
+                checked={useAutoSlippage}
+                onChange={e => setUseAutoSlippage(e.target.checked)}
+              />
+            )}
+            label="Auto Slippage"
           />
         </div>
         <Button type="submit" variant="contained" color="primary" disabled={isFetching}>

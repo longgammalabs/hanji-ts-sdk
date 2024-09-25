@@ -177,9 +177,11 @@ export class HanjiSpotService extends RemoteService {
     if (params.inputs.tokenYInput)
       queryParams.append('tokenYInput', params.inputs.tokenYInput);
     queryParams.append('slippage', params.inputs.slippage.toString());
+    if (params.inputs.useAutoSlippage)
+      queryParams.append('useAutoSlippage', params.inputs.useAutoSlippage.toString());
 
     const queryParamsString = decodeURIComponent(queryParams.toString());
-    const response = await this.fetch<MarketDetailsDto>(`calculate//market-details?${queryParamsString}`, 'json');
+    const response = await this.fetch<MarketDetailsDto>(`calculate/market-details?${queryParamsString}`, 'json');
 
     return response;
   }

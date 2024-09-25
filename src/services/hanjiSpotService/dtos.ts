@@ -135,6 +135,7 @@ export interface MarketDetailsDto {
     estPrice: number;
     estWorstPrice: number;
     estSlippage: number;
+    autoSlippage: number;
     tokenXReceive: number;
     estTokenXReceive: number;
     tokenYPay: number;
@@ -147,6 +148,7 @@ export interface MarketDetailsDto {
     estPrice: number;
     estWorstPrice: number;
     estSlippage: number;
+    autoSlippage: number;
     tokenXPay: number;
     estTokenXPay: number;
     tokenYReceive: number;
