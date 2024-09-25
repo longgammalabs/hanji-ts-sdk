@@ -630,6 +630,7 @@ export interface CalculateMarketDetailsParams {
     tokenXInput: string;
     tokenYInput: string;
     slippage: number;
+    useAutoSlippage?: boolean;
   };
 };
 
