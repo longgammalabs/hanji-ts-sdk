@@ -28,8 +28,8 @@ export interface HanjiSpotMarketContractOptions {
   transferExecutedTokensEnabled?: boolean;
   autoWaitTransaction?: boolean;
   fastWaitTransaction?: boolean;
-  fastWaitTransactionInterval?: number,
-  fastWaitTransactionTimeout?: number
+  fastWaitTransactionInterval?: number;
+  fastWaitTransactionTimeout?: number;
 }
 
 const getExpires = () => BigInt(Math.floor(Date.now() / 1000) + 5 * 60);
@@ -110,7 +110,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       ));
 
@@ -130,7 +130,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -162,7 +162,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -179,7 +179,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -216,7 +216,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -271,7 +271,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -306,7 +306,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -360,7 +360,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -396,7 +396,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -417,7 +417,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         })
     );
 
@@ -445,7 +445,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -473,7 +473,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -509,7 +509,7 @@ export class HanjiSpotMarketContract {
           gasLimit: params.gasLimit,
           nonce: params.nonce,
           maxFeePerGas: params.maxFeePerGas,
-          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas,
         }
       )
     );
@@ -534,7 +534,8 @@ export class HanjiSpotMarketContract {
             await wait(this.fastWaitTransactionInterval);
             receipt = await tx.provider.getTransactionReceipt(tx.hash);
           }
-        } else {
+        }
+        else {
           await tx.wait();
         }
       }
