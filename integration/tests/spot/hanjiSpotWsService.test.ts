@@ -1,6 +1,6 @@
 import { HanjiClient } from '../../../src';
+import { wait } from '../../../src/utils/delay';
 import { getTestConfig, type TestConfig } from '../../testConfig';
-import { wait } from '../../testHelpers';
 
 describe('Hanji Spot WebSocket Client', () => {
   let testConfig: TestConfig;

@@ -1,5 +1,5 @@
 import BigNumber from 'bignumber.js';
-import { Contract, type Signer, type ContractTransactionResponse, Signature } from 'ethers';
+import { Contract, type Signer, ContractTransactionResponse, Signature } from 'ethers';
 
 import { TransactionFailedError } from './errors';
 import type {
@@ -20,12 +20,16 @@ import type {
 import { erc20Abi, lobAbi, erc20PermitAbi } from '../abi';
 import type { Market, Token } from '../models';
 import { tokenUtils } from '../utils';
+import { wait } from '../utils/delay';
 
 export interface HanjiSpotMarketContractOptions {
   market: Market;
   signer: Signer;
   transferExecutedTokensEnabled?: boolean;
   autoWaitTransaction?: boolean;
+  fastWaitTransaction?: boolean;
+  fastWaitTransactionInterval?: number,
+  fastWaitTransactionTimeout?: number
 }
 
 const getExpires = () => BigInt(Math.floor(Date.now() / 1000) + 5 * 60);
@@ -36,10 +40,15 @@ type ReadonlyMarket = Readonly<Omit<Market, 'baseToken' | 'quoteToken'>>
 export class HanjiSpotMarketContract {
   static readonly defaultTransferExecutedTokensEnabled = true;
   static readonly defaultAutoWaitTransaction = true;
+  static readonly defaultFastWaitTransaction = false;
+  static readonly defaultFastWaitTransactionInterval = 100;
 
   readonly market: ReadonlyMarket;
   transferExecutedTokensEnabled: boolean;
   autoWaitTransaction: boolean;
+  fastWaitTransaction: boolean;
+  fastWaitTransactionInterval: number;
+  fastWaitTransactionTimeout?: number;
 
   protected readonly signer: Signer;
   protected readonly marketContract: Contract;
@@ -61,6 +70,9 @@ export class HanjiSpotMarketContract {
     this.signer = options.signer;
     this.transferExecutedTokensEnabled = options.transferExecutedTokensEnabled ?? HanjiSpotMarketContract.defaultTransferExecutedTokensEnabled;
     this.autoWaitTransaction = options.autoWaitTransaction ?? HanjiSpotMarketContract.defaultAutoWaitTransaction;
+    this.fastWaitTransaction = options.fastWaitTransaction ?? HanjiSpotMarketContract.defaultFastWaitTransaction;
+    this.fastWaitTransactionInterval = options.fastWaitTransactionInterval ?? HanjiSpotMarketContract.defaultFastWaitTransactionInterval;
+    this.fastWaitTransactionTimeout = options.fastWaitTransactionTimeout;
 
     this.marketContract = new Contract(this.market.orderbookAddress, lobAbi, options.signer);
     this.baseTokenContract = new Contract(
@@ -89,7 +101,18 @@ export class HanjiSpotMarketContract {
     }
 
     const amount = this.convertTokensAmountToRawAmountIfNeeded(params.amount, token.decimals);
-    const tx = await this.processContractMethodCall(tokenContract, tokenContract.approve!(params.market, amount));
+    const tx = await this.processContractMethodCall(
+      tokenContract,
+      tokenContract.approve!(
+        params.market,
+        amount,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
+      ));
 
     return tx;
   }
@@ -100,7 +123,16 @@ export class HanjiSpotMarketContract {
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.depositTokens!(baseTokenAmount, quoteTokenAmount)
+      this.marketContract.depositTokens!(
+        baseTokenAmount,
+        quoteTokenAmount,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
+      )
     );
 
     return tx;
@@ -122,7 +154,17 @@ export class HanjiSpotMarketContract {
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.withdrawTokens!(withdrawAll, baseTokenAmount, quoteTokenAmount)
+      this.marketContract.withdrawTokens!(
+        withdrawAll,
+        baseTokenAmount,
+        quoteTokenAmount,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
+      )
     );
 
     return tx;
@@ -131,7 +173,15 @@ export class HanjiSpotMarketContract {
   async setClaimableStatus(params: SetClaimableStatusParams): Promise<ContractTransactionResponse> {
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.setClaimableStatus!(params.status)
+      this.marketContract.setClaimableStatus!(
+        params.status,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
+      )
     );
 
     return tx;
@@ -161,7 +211,13 @@ export class HanjiSpotMarketContract {
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires,
-        { value }
+        {
+          value,
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -210,7 +266,13 @@ export class HanjiSpotMarketContract {
         expires,
         v,
         r,
-        s
+        s,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -239,7 +301,13 @@ export class HanjiSpotMarketContract {
         maxCommission,
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires,
-        { value }
+        {
+          value,
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -287,7 +355,13 @@ export class HanjiSpotMarketContract {
         expires,
         v,
         r,
-        s
+        s,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -317,7 +391,13 @@ export class HanjiSpotMarketContract {
         maxCommissionPerOrder,
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
-        expires
+        expires,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -328,7 +408,17 @@ export class HanjiSpotMarketContract {
     const expires = getExpires();
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.claimOrder!(params.orderId, params.onlyClaim, params.transferExecutedTokens ?? this.transferExecutedTokensEnabled, expires)
+      this.marketContract.claimOrder!(
+        params.orderId,
+        params.onlyClaim,
+        params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
+        expires,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        })
     );
 
     return tx;
@@ -346,7 +436,18 @@ export class HanjiSpotMarketContract {
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.batchClaim!(addresses, orderIds, params.onlyClaim, expires)
+      this.marketContract.batchClaim!(
+        addresses,
+        orderIds,
+        params.onlyClaim,
+        expires,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
+      )
     );
 
     return tx;
@@ -367,7 +468,13 @@ export class HanjiSpotMarketContract {
         maxCommission,
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
-        expires
+        expires,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -397,7 +504,13 @@ export class HanjiSpotMarketContract {
         maxCommissionPerOrder,
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
-        expires
+        expires,
+        {
+          gasLimit: params.gasLimit,
+          nonce: params.nonce,
+          maxFeePerGas: params.maxFeePerGas,
+          maxPriorityFeePerGas: params.maxPriorityFeePerGas
+        }
       )
     );
 
@@ -408,8 +521,23 @@ export class HanjiSpotMarketContract {
     try {
       const tx = await methodCall;
 
-      if (this.autoWaitTransaction)
-        await tx.wait();
+      if (this.autoWaitTransaction) {
+        if (this.fastWaitTransaction) {
+          const startingTime = Date.now();
+          let receipt = await tx.provider.getTransactionReceipt(tx.hash);
+
+          while (receipt == null) {
+            if (this.fastWaitTransactionTimeout && Date.now() - startingTime >= this.fastWaitTransactionTimeout) {
+              break; // timeout reached
+            }
+
+            await wait(this.fastWaitTransactionInterval);
+            receipt = await tx.provider.getTransactionReceipt(tx.hash);
+          }
+        } else {
+          await tx.wait();
+        }
+      }
 
       return tx;
     }

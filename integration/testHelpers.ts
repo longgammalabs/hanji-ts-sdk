@@ -1,5 +1,6 @@
 import BigNumber from 'bignumber.js';
 import type { Order } from '../src';
+import { wait } from '../src/utils/delay';
 
 export const addressRegex = /^0x[0-9a-fA-F]{40}$/;
 export const transactionRegex = /^0x[0-9a-f]{64}$/;
@@ -7,8 +8,6 @@ export const transactionRegex = /^0x[0-9a-f]{64}$/;
 const orderTypes = ['limit', 'limit_post_only', 'market'] as const satisfies Order['type'][];
 const orderSides = ['ask', 'bid'] as const satisfies Order['side'][];
 const orderStatus = ['open', 'filled', 'claimed', 'cancelled'] as const satisfies Order['status'][];
-
-export const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
 export const expectOrder = (order: Order | undefined | null, values?: Partial<Order>) => {
   expect(order).toBeDefined();

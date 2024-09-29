@@ -3,9 +3,59 @@ import BigNumber from 'bignumber.js';
 import { CandleResolution, OrderType, TokenType, Direction, type OrderStatus, type Side } from '../models';
 
 /**
- * Parameters for approving tokens for the token transfer.
+ * Transaction parameters.
+ *
+ * @interface TransactionParams
  */
-export interface ApproveSpotParams {
+interface TransactionParams {
+  /**
+   * Transaction gas limit.
+   * If not provided, the value obtained through an additional `eth_estimateGas` call is used.
+   *
+   * @type {BigNumber | bigint}
+   * @optional
+   */
+  gasLimit?: BigNumber | bigint;
+
+  /**
+   * The maximum fee per unit of gas willing to be paid for the transaction.
+   *
+   * `maxFeePerGas = baseFeePerGas + maxPriorityFeePerGas`.
+   *
+   * If not provided the value obtained through an additional `eth_maxPriorityFeePerGas` call is used.
+   *
+   * @type {BigNumber | bigint}
+   * @optional
+   */
+  maxFeePerGas?: BigNumber | bigint;
+
+  /**
+   * The maximum price of the consumed gas to be included as a tip to the validator.
+   *
+   * If not provided the value obtained through an additional `eth_maxPriorityFeePerGas` call is used.
+   *
+   * @type {BigNumber | bigint}
+   * @optional
+   */
+  maxPriorityFeePerGas?: BigNumber | bigint;
+
+  /**
+   * Transaction nonce (counter).
+   * If not provided, the value obtained through an additional `eth_getTransactionCount` call is used.
+   *
+   * @type {BigNumber | bigint}
+   * @optional
+   */
+  nonce?: BigNumber | bigint;
+}
+
+/**
+ * Parameters for approving tokens for the token transfer.
+ *
+ * @interface ApproveSpotParams
+ * @extends TransactionParams
+ */
+export interface ApproveSpotParams extends TransactionParams {
   /**
    * The market identifier.
    *
@@ -30,8 +80,11 @@ export interface ApproveSpotParams {
 
 /**
  * Parameters for depositing tokens into the spot market.
+ *
+ * @interface DepositSpotParams
+ * @extends TransactionParams
  */
-export interface DepositSpotParams {
+export interface DepositSpotParams extends TransactionParams {
   /**
    * Id of the requested market
    *
@@ -56,8 +109,10 @@ export interface DepositSpotParams {
 
 /**
  * Base parameters for withdrawing tokens from the spot market.
+ *
+ * @extends TransactionParams
  */
-interface WithdrawBaseSpotParams {
+interface WithdrawBaseSpotParams extends TransactionParams {
   /**
    * Id of the requested market
    *
@@ -132,7 +187,13 @@ export type WithdrawSpotParams =
   | WithdrawSpecificTokenAmountsSpotParams
   | WithdrawAllSpotParams;
 
-export interface SetClaimableStatusParams {
+/**
+ * Parameters for setting claimable status for the spot market.
+ *
+ * @interface SetClaimableStatusParams
+ * @extends TransactionParams
+ */
+export interface SetClaimableStatusParams extends TransactionParams {
   market: string;
   status: boolean;
 }
@@ -141,8 +202,9 @@ export interface SetClaimableStatusParams {
  * Parameters for placing an order on the spot market.
  *
  * @interface PlaceOrderSpotParams
+ * @extends TransactionParams
  */
-export interface PlaceOrderSpotParams {
+export interface PlaceOrderSpotParams extends TransactionParams {
   /**
    * The ID of the market where the order will be placed.
    *
@@ -217,9 +279,9 @@ export interface PlaceOrderSpotParams {
  * Parameters for placing an order with a permit on the spot market.
  *
  * @interface PlaceOrderWithPermitSpotParams
- * @extends PlaceOrderSpotParams
+ * @extends TransactionParams
  */
-export interface PlaceOrderWithPermitSpotParams {
+export interface PlaceOrderWithPermitSpotParams extends TransactionParams {
   /**
    * The ID of the market where the order will be placed.
    *
@@ -285,7 +347,13 @@ export type PlaceMarketOrderWithTargetValueParams = Omit<PlaceOrderSpotParams, '
 
 export type PlaceMarketOrderWithTargetValueWithPermitParams = Omit<PlaceOrderWithPermitSpotParams, 'type'>;
 
-export type BatchPlaceOrderSpotParams = {
+/**
+ * Parameters for batch placing orders on the Hanji spot market
+ *
+ * @interface BatchPlaceOrderSpotParams
+ * @extends TransactionParams
+ */
+export interface BatchPlaceOrderSpotParams extends TransactionParams {
   market: string;
   type: 'limit' | 'limit_post_only';
   orderParams: Array<{
@@ -300,8 +368,9 @@ export type BatchPlaceOrderSpotParams = {
  * Parameters for claiming an order on the Hanji Spot market.
  *
  * @interface ClaimOrderSpotParams
+ * @extends TransactionParams
  */
-export interface ClaimOrderSpotParams {
+export interface ClaimOrderSpotParams extends TransactionParams {
   /**
    * The market identifier where the order exists.
    *
@@ -332,7 +401,13 @@ export interface ClaimOrderSpotParams {
   transferExecutedTokens?: boolean;
 }
 
-export interface BatchClaimOrderSpotParams {
+/**
+ * Parameters for batch claiming orders on the Hanji spot market
+ *
+ * @interface BatchClaimOrderSpotParams
+ * @extends TransactionParams
+ */
+export interface BatchClaimOrderSpotParams extends TransactionParams {
   market: string;
   claimParams: Array<{
     orderId: string;
@@ -345,8 +420,9 @@ export interface BatchClaimOrderSpotParams {
  * Parameters for changing an existing order on the Hanji Spot market.
  *
  * @interface ChangeOrderSpotParams
+ * @extends TransactionParams
  */
-export interface ChangeOrderSpotParams {
+export interface ChangeOrderSpotParams extends TransactionParams {
   /**
    * The market identifier where the order exists.
    *
@@ -408,7 +484,13 @@ export interface ChangeOrderSpotParams {
   transferExecutedTokens?: boolean;
 }
 
-export interface BatchChangeOrderSpotParams {
+/**
+ * Parameters for batch changing orders on the Hanji spot market
+ *
+ * @interface BatchChangeOrderSpotParams
+ * @extends TransactionParams
+ */
+export interface BatchChangeOrderSpotParams extends TransactionParams {
   market: string;
   orderParams: Array<{
     orderId: string;
