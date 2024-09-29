@@ -103,6 +103,30 @@ export interface HanjiSpotOptions {
    * @optional
    */
   autoWaitTransaction?: boolean;
+
+  /**
+   * Whether to use a fast algorithm for waiting for transaction to be confirmed.
+   *
+   * @type {boolean}
+   * @optional
+   */
+  fastWaitTransaction?: boolean;
+
+  /**
+   * Interval between requests in milliseconds when using a fast algorithm for waiting for transaction confirmations.
+   *
+   * @type {number}
+   * @optional
+   */
+  fastWaitTransactionInterval?: number;
+
+  /**
+   * Timeout in milliseconds when using a fast algorithm for waiting for transaction confirmations.
+   *
+   * @type {number}
+   * @optional
+   */
+  fastWaitTransactionTimeout?: number;
 }
 
 /**
