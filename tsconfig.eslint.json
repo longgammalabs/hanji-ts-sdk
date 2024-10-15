@@ -5,6 +5,7 @@
     "tests",
     "integration",
     "example",
+    "jest.config.ts",
     "eslint.config.mjs"
   ],
   "exclude": [
