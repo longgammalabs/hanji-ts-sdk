@@ -57,6 +57,7 @@ export default [
     {
       files: [
         '**/jest.config.js',
+        '**/jest.config.ts',
         '**/jest.config.mjs',
         '**/tests/**/*.js',
         '**/tests/**/*.ts',

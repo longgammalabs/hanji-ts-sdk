@@ -54,13 +54,19 @@ describe('Hanji Spot Client Contract API', () => {
     expect(tx.hash).toMatch(transactionRegex);
 
     expect(info?.bestAsk).not.toBeNull();
-    tx = await hanjiClient.spot.placeMarketOrderWithTargetValueWithPermit({
+    tx = await hanjiClient.spot.approveTokens({
+      market,
+      amount: BigNumber(0.1),
+      isBaseToken: false,
+    });
+    expect(tx.hash).toMatch(transactionRegex);
+    tx = await hanjiClient.spot.placeMarketOrderWithTargetValue({
       market,
       side: 'bid',
       price: info!.bestAsk as BigNumber,
       maxCommission: BigNumber(1),
       size: BigNumber(0.1),
-      permit: BigNumber(0.1),
+      quantityToSend: 0n,
       transferExecutedTokens: true,
     });
     expect(tx.hash).toMatch(transactionRegex);
