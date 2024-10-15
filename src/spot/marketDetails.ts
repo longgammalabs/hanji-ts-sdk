@@ -1,10 +1,9 @@
 import BigNumber from 'bignumber.js';
-import { formatUnits } from 'ethers';
 import { MarketOrderDetails, OrderbookLevel } from '../models';
 import _ = require('lodash');
 import { CalculateMarketDetailsSyncParams } from './params';
 
-const defaultBuyMarketDetails: MarketOrderDetails['buy'] = {
+export const defaultBuyMarketDetails: MarketOrderDetails['buy'] = {
   fee: 0,
   estFee: 0,
   worstPrice: 0,
@@ -18,7 +17,7 @@ const defaultBuyMarketDetails: MarketOrderDetails['buy'] = {
   estTokenYPay: 0,
 };
 
-const defaultSellMarketDetails: MarketOrderDetails['sell'] = {
+export const defaultSellMarketDetails: MarketOrderDetails['sell'] = {
   fee: 0,
   estFee: 0,
   worstPrice: 0,
@@ -44,6 +43,10 @@ export const getMarketDetails = ({ market, orderbook, inputToken, inputs, direct
     return details;
   }
 
+  if (!Number(inputToken === 'base' ? tokenXInput : tokenYInput)) {
+    return details;
+  }
+
   const feeRate = market.aggressiveFee + market.passiveOrderPayout;
 
   if (direction === 'buy') {
@@ -52,7 +55,7 @@ export const getMarketDetails = ({ market, orderbook, inputToken, inputs, direct
         Number(tokenXInput),
         slippage,
         market.bestAsk.toNumber(),
-        orderbook.levels.asks,
+        orderbook.asks.sort((a, b) => Number(a.rawPrice - b.rawPrice)),
         market.tokenXScalingFactor,
         market.tokenYScalingFactor,
         market.priceScalingFactor,
@@ -65,7 +68,7 @@ export const getMarketDetails = ({ market, orderbook, inputToken, inputs, direct
         Number(tokenYInput),
         slippage,
         market.bestAsk.toNumber(),
-        orderbook.levels.asks,
+        orderbook.asks.sort((a, b) => Number(a.rawPrice - b.rawPrice)),
         market.tokenXScalingFactor,
         market.tokenYScalingFactor,
         market.priceScalingFactor,
@@ -80,7 +83,7 @@ export const getMarketDetails = ({ market, orderbook, inputToken, inputs, direct
         Number(tokenXInput),
         slippage,
         market.bestBid.toNumber(),
-        orderbook.levels.bids,
+        orderbook.bids.sort((a, b) => Number(b.rawPrice - a.rawPrice)),
         market.tokenXScalingFactor,
         market.tokenYScalingFactor,
         market.priceScalingFactor,
@@ -93,7 +96,7 @@ export const getMarketDetails = ({ market, orderbook, inputToken, inputs, direct
         Number(tokenYInput),
         slippage,
         market.bestBid.toNumber(),
-        orderbook.levels.bids,
+        orderbook.bids.sort((a, b) => Number(b.rawPrice - a.rawPrice)),
         market.tokenXScalingFactor,
         market.tokenYScalingFactor,
         market.priceScalingFactor,
@@ -125,7 +128,7 @@ export const calculateBuyMarketDetailsTokenXInput = (
   const { estPrice, estTokenYAmount, estWorstPrice, estSlippage } = calculateEstValuesFromTokenX(
     tokenXReceive.toNumber(),
     orderbookSide,
-    Number(formatUnits(bestAsk, priceScalingFactor))
+    bestAsk
   );
 
   if (useAutoSlippage) {
@@ -133,7 +136,7 @@ export const calculateBuyMarketDetailsTokenXInput = (
     slippage = autoSlippage;
   }
 
-  const worstPrice = new BigNumber(formatUnits(bestAsk, priceScalingFactor))
+  const worstPrice = new BigNumber(bestAsk)
     .times(new BigNumber(1).plus(new BigNumber(slippage).div(100)))
     .dp(priceScalingFactor, BigNumber.ROUND_CEIL);
   const tokenYPayWithoutFee = tokenXReceive.times(worstPrice).dp(tokenYScalingFactor, BigNumber.ROUND_CEIL);
@@ -182,7 +185,7 @@ export const calculateBuyMarketDetailsTokenYInput = (
   let slippage = maxSlippage;
 
   const tokenYPay = new BigNumber(tokenYInput).dp(tokenYScalingFactor, BigNumber.ROUND_FLOOR);
-  const [tokenYWithoutFee, fee] = calculateValueWithoutFee(
+  const [tokenYWithoutFee, fee] = calculateValueAfterFee(
     tokenYPay,
     feeRate,
     tokenXScalingFactor + priceScalingFactor,
@@ -192,7 +195,7 @@ export const calculateBuyMarketDetailsTokenYInput = (
   const { estPrice, estSlippage, estTokenXAmount, estWorstPrice } = calculateEstValuesFromTokenY(
     tokenYWithoutFee.toNumber(),
     orderbookSide,
-    Number(formatUnits(bestAsk, priceScalingFactor))
+    bestAsk
   );
 
   if (useAutoSlippage) {
@@ -200,7 +203,7 @@ export const calculateBuyMarketDetailsTokenYInput = (
     slippage = autoSlippage;
   }
 
-  const worstPrice = new BigNumber(formatUnits(bestAsk, priceScalingFactor))
+  const worstPrice = new BigNumber(bestAsk)
     .times(new BigNumber(1).plus(new BigNumber(slippage).div(100)))
     .dp(priceScalingFactor, BigNumber.ROUND_CEIL);
 
@@ -243,7 +246,7 @@ export const calculateSellMarketDetailsTokenXInput = (
   const { estPrice, estSlippage, estTokenYAmount, estWorstPrice } = calculateEstValuesFromTokenX(
     tokenXPay.toNumber(),
     orderbookSide,
-    Number(formatUnits(bestBid, priceScalingFactor))
+    bestBid
   );
 
   if (useAutoSlippage) {
@@ -251,18 +254,18 @@ export const calculateSellMarketDetailsTokenXInput = (
     slippage = autoSlippage;
   }
 
-  const worstPrice = new BigNumber(formatUnits(bestBid, priceScalingFactor))
+  const worstPrice = new BigNumber(bestBid)
     .times(new BigNumber(1).minus(new BigNumber(slippage).div(100)))
     .dp(priceScalingFactor, BigNumber.ROUND_FLOOR);
   const tokenYReceive = tokenXPay.times(worstPrice).dp(tokenYScalingFactor, BigNumber.ROUND_FLOOR);
-  const [tokenYReceiveWithoutFee, fee] = calculateValueWithoutFee(
+  const [tokenYReceiveWithoutFee, fee] = calculateValueAfterFee(
     tokenYReceive,
     feeRate,
     tokenXScalingFactor + priceScalingFactor,
     tokenYScalingFactor
   );
 
-  const [estTokenYReceiveWithoutFee, estFee] = calculateValueWithoutFee(
+  const [estTokenYReceiveWithoutFee, estFee] = calculateValueAfterFee(
     new BigNumber(estTokenYAmount),
     feeRate,
     tokenXScalingFactor + priceScalingFactor,
@@ -299,17 +302,19 @@ export const calculateSellMarketDetailsTokenYInput = (
   let autoSlippage = 0;
   let slippage = maxSlippage;
 
-  const [tokenYReceiveWithoutFee, fee] = calculateValueWithoutFee(
-    new BigNumber(tokenYInput),
+  const tokenYReceive = new BigNumber(tokenYInput).dp(tokenYScalingFactor, BigNumber.ROUND_FLOOR);
+
+  const [tokenYReceiveBeforeFee, fee] = calculateValueBeforeFee(
+    tokenYReceive,
     feeRate,
     tokenXScalingFactor + priceScalingFactor,
     tokenYScalingFactor
   );
 
   const { estPrice, estTokenXAmount, estSlippage, estWorstPrice } = calculateEstValuesFromTokenY(
-    tokenYReceiveWithoutFee.toNumber(),
+    tokenYReceiveBeforeFee.toNumber(),
     orderbookSide,
-    Number(formatUnits(bestBid, priceScalingFactor))
+    bestBid
   );
 
   if (useAutoSlippage) {
@@ -317,12 +322,12 @@ export const calculateSellMarketDetailsTokenYInput = (
     slippage = autoSlippage;
   }
 
-  const worstPrice = new BigNumber(formatUnits(bestBid, priceScalingFactor))
+  const worstPrice = new BigNumber(bestBid)
     .times(new BigNumber(1).minus(new BigNumber(slippage).div(100)))
     .dp(priceScalingFactor, BigNumber.ROUND_FLOOR);
 
-  const tokenXPay = tokenYReceiveWithoutFee.div(worstPrice).dp(tokenXScalingFactor, BigNumber.ROUND_CEIL);
-  const estTokenXPay = new BigNumber(estTokenXAmount).dp(tokenXScalingFactor, BigNumber.ROUND_FLOOR);
+  const tokenXPay = tokenYReceiveBeforeFee.div(worstPrice).dp(tokenXScalingFactor, BigNumber.ROUND_CEIL);
+  const estTokenXPay = new BigNumber(estTokenXAmount).dp(tokenXScalingFactor, BigNumber.ROUND_CEIL);
 
   return {
     fee: fee.toNumber(),
@@ -335,8 +340,8 @@ export const calculateSellMarketDetailsTokenYInput = (
 
     tokenXPay: tokenXPay.toNumber(),
     estTokenXPay: estTokenXPay.toNumber(),
-    tokenYReceive: tokenYReceiveWithoutFee.toNumber(),
-    estTokenYReceive: tokenYReceiveWithoutFee.toNumber(),
+    tokenYReceive: tokenYReceive.toNumber(),
+    estTokenYReceive: tokenYReceive.toNumber(),
   };
 };
 
@@ -407,15 +412,26 @@ export const calculateValueWithFee = (
   return [valueWithFee, fee];
 };
 
-export const calculateValueWithoutFee = (
+export const calculateValueAfterFee = (
   value: BigNumber,
   feeRate: number,
   feeDecimalPlaces: number,
   valueDecimalPlaces: number
 ): [BigNumber, BigNumber] => {
-  const valueWithoutFee = value.div(new BigNumber(1).plus(feeRate)).dp(valueDecimalPlaces, BigNumber.ROUND_FLOOR);
-  const fee = value.minus(valueWithoutFee).dp(feeDecimalPlaces, BigNumber.ROUND_CEIL);
-  return [valueWithoutFee, fee];
+  const fee = value.times(feeRate).dp(feeDecimalPlaces, BigNumber.ROUND_CEIL);
+  const valueAfterFee = value.minus(fee).dp(valueDecimalPlaces, BigNumber.ROUND_FLOOR);
+  return [valueAfterFee, fee];
+};
+
+export const calculateValueBeforeFee = (
+  value: BigNumber,
+  feeRate: number,
+  feeDecimalPlaces: number,
+  valueDecimalPlaces: number
+): [BigNumber, BigNumber] => {
+  const valueBeforeFee = value.div(new BigNumber(1).minus(feeRate)).dp(valueDecimalPlaces, BigNumber.ROUND_CEIL);
+  const fee = valueBeforeFee.minus(value).dp(feeDecimalPlaces, BigNumber.ROUND_CEIL);
+  return [valueBeforeFee, fee];
 };
 
 const calculateAutoSlippage = (estSlippage: number) => {

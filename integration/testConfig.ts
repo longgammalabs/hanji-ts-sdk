@@ -47,6 +47,9 @@ const testMarkets = {
     lastTouched: expect.any(BigInt),
     supportsNativeToken: false,
     isNativeTokenX: false,
+    aggressiveFee: 0.0003,
+    passiveFee: 0,
+    passiveOrderPayout: 0.00005,
   },
   xtzUsd: {
     id: '0x3f295daf44fb09bcdf61d7727b8a202e3393f9be'.toLowerCase(),
@@ -93,6 +96,9 @@ const testMarkets = {
     lastTouched: expect.any(Number),
     supportsNativeToken: true,
     isNativeTokenX: true,
+    aggressiveFee: 0.0003,
+    passiveFee: 0,
+    passiveOrderPayout: 0.00005,
   },
 } as const satisfies Record<string, Market>;
 

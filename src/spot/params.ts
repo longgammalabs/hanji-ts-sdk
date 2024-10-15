@@ -732,7 +732,7 @@ export interface CalculateMarketDetailsSyncParams {
   market: Market;
   direction: Direction;
   inputToken: TokenType;
-  orderbook: Orderbook;
+  orderbook: Orderbook['levels'];
   inputs: {
     tokenXInput: string;
     tokenYInput: string;
