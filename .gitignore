@@ -7,4 +7,4 @@ coverage/
 .eslintcache
 .env.local
 .DS_Store
-
+.env

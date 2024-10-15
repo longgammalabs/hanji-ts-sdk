@@ -186,6 +186,21 @@ export interface Market {
    * Indicates whether the native token is token X (base token).
    */
   isNativeTokenX: boolean;
+
+  /**
+   * Fee for placing aggressive orders.
+   */
+  aggressiveFee: number;
+
+  /**
+   * Fee for placing passive orders.
+   */
+  passiveFee: number;
+
+  /**
+   * Payout for placing passive orders.
+   */
+  passiveOrderPayout: number;
 }
 
 export type MarketUpdate = Market;

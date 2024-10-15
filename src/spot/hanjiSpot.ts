@@ -42,13 +42,17 @@ import type {
   PlaceMarketOrderWithTargetValueWithPermitParams,
   GetOrderHistoryParams,
   UnsubscribeFromUserOrderHistoryParams,
-  SubscribeToUserOrderHistoryParams
+  SubscribeToUserOrderHistoryParams,
+  CalculateLimitDetailsSyncParams,
+  CalculateMarketDetailsSyncParams
 } from './params';
 import { EventEmitter, type PublicEventEmitter, type ToEventEmitter } from '../common';
 import { getErrorLogMessage } from '../logging';
 import type { Market, FillUpdate, MarketUpdate, OrderUpdate, OrderbookUpdate, TradeUpdate, Orderbook, Order, Trade, Fill, Token, Candle, CandleUpdate, MarketOrderDetails, LimitOrderDetails, UserBalances, OrderHistoryUpdate, OrderHistory } from '../models';
 import { HanjiSpotService, HanjiSpotWebSocketService } from '../services';
 import { ALL_MARKETS_ID } from '../services/constants';
+import { getLimitDetails } from './limitDetails';
+import { getMarketDetails } from './marketDetails';
 
 /**
  * Options for configuring the HanjiSpot instance.
@@ -606,6 +610,16 @@ export class HanjiSpot implements Disposable {
   }
 
   /**
+   * Calculates the limit order details for a given token inputs without API request.
+   *
+   * @param {CalculateLimitDetailsSyncParams} params - The parameters for the limit details calculation.
+   * @returns {LimitOrderDetails} Limit order details data.
+   */
+  calculateLimitDetailsSync(params: CalculateLimitDetailsSyncParams): LimitOrderDetails {
+    return getLimitDetails(params);
+  }
+
+  /**
    * Calculates the market order details for a given token inputs.
    *
    * @param {CalculateMarketDetailsParams} params - The parameters for the market details calculation.
@@ -613,6 +627,16 @@ export class HanjiSpot implements Disposable {
    */
   async calculateMarketDetails(params: CalculateMarketDetailsParams): Promise<MarketOrderDetails> {
     return this.hanjiService.calculateMarketDetails(params);
+  }
+
+  /**
+   * Calculates the market order details for a given token inputs without API request.
+   *
+   * @param {CalculateMarketDetailsSyncParams} params - The parameters for the market details calculation.
+   * @returns {MarketOrderDetails} Market order details data.
+   */
+  calculateMarketDetailsSync(params: CalculateMarketDetailsSyncParams): MarketOrderDetails {
+    return getMarketDetails(params);
   }
 
   /**
