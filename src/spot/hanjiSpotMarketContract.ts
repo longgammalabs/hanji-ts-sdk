@@ -32,6 +32,9 @@ export interface HanjiSpotMarketContractOptions {
   fastWaitTransactionTimeout?: number;
 }
 
+const DEFAULT_MAX_COMMISSION = 340282366920938463463374607431768211455n; // 2^128 - 1
+const DEFAULT_ASK_MARKET_PRICE = 1n;
+const DEFAULT_BID_MARKET_PRICE = 999999000000000000000n;
 const getExpires = () => BigInt(Math.floor(Date.now() / 1000) + 5 * 60);
 
 type ReadonlyMarket = Readonly<Omit<Market, 'baseToken' | 'quoteToken'>>
@@ -188,17 +191,25 @@ export class HanjiSpotMarketContract {
   }
 
   async placeOrder(params: PlaceOrderSpotParams): Promise<ContractTransactionResponse> {
-    if (params.useNativeToken && this.market.supportsNativeToken
+    if (params.nativeTokenToSend !== undefined && this.market.supportsNativeToken
       && !((params.side === 'ask' && this.market.isNativeTokenX) || (params.side !== 'ask' && !this.market.isNativeTokenX))) {
       throw Error('Token to send is not native.');
     }
 
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenXScalingFactor);
-    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    let priceAmount;
+    if (params.type === 'market_execution') {
+      priceAmount = params.side === 'ask' ? DEFAULT_ASK_MARKET_PRICE : DEFAULT_BID_MARKET_PRICE;
+    }
+    else {
+      priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    }
     const expires = getExpires();
-    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
-    const value = this.convertTokensAmountToRawAmountIfNeeded(params.quantityToSend,
-      params.side === 'ask' ? this.market.baseToken.decimals : this.market.quoteToken.decimals);
+    const maxCommission = params.maxCommission === undefined ? DEFAULT_MAX_COMMISSION : this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
+    const value = params.nativeTokenToSend === undefined
+      ? 0n
+      : this.convertTokensAmountToRawAmountIfNeeded(params.nativeTokenToSend,
+        params.side === 'ask' ? this.market.baseToken.decimals : this.market.quoteToken.decimals);
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
@@ -207,7 +218,7 @@ export class HanjiSpotMarketContract {
         sizeAmount,
         priceAmount,
         maxCommission,
-        params.type === 'market',
+        params.type === 'ioc' || params.type === 'market_execution',
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires,
@@ -230,7 +241,13 @@ export class HanjiSpotMarketContract {
       throw Error('Token doesn\'t support permits');
     }
     const sizeAmount = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenXScalingFactor);
-    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    let priceAmount;
+    if (params.type === 'market_execution') {
+      priceAmount = params.side === 'ask' ? DEFAULT_ASK_MARKET_PRICE : DEFAULT_BID_MARKET_PRICE;
+    }
+    else {
+      priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    }
     let quantityToPermit, amountToPermit: bigint;
     if (params.side === 'ask') {
       amountToPermit = this.convertTokensAmountToRawAmountIfNeeded(
@@ -250,7 +267,7 @@ export class HanjiSpotMarketContract {
     }
 
     const expires = getExpires();
-    const maxCommission = this.calculateMaxCommission(sizeAmount, priceAmount);
+    const maxCommission = params.maxCommission === undefined ? DEFAULT_MAX_COMMISSION : this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
     const { v, r, s } = await this.signPermit(params.side === 'ask', quantityToPermit, expires);
     const tx = await this.processContractMethodCall(
       this.marketContract,
@@ -260,7 +277,7 @@ export class HanjiSpotMarketContract {
         priceAmount,
         maxCommission,
         amountToPermit,
-        params.type === 'market',
+        params.type === 'ioc' || params.type === 'market_execution',
         params.type === 'limit_post_only',
         params.transferExecutedTokens ?? this.transferExecutedTokensEnabled,
         expires,
@@ -280,17 +297,25 @@ export class HanjiSpotMarketContract {
   }
 
   async placeMarketOrderWithTargetValue(params: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse> {
-    if (params.useNativeToken && this.market.supportsNativeToken
+    if (params.nativeTokenToSend !== undefined && this.market.supportsNativeToken
       && !((params.side === 'ask' && this.market.isNativeTokenX) || (params.side !== 'ask' && !this.market.isNativeTokenX))) {
       throw Error('Token to send is not native.');
     }
 
     const targetTokenYValue = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenYScalingFactor);
-    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
-    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
+    let priceAmount;
+    if (params.type === 'market_execution') {
+      priceAmount = params.side === 'ask' ? DEFAULT_ASK_MARKET_PRICE : DEFAULT_BID_MARKET_PRICE;
+    }
+    else {
+      priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    }
+    const maxCommission = params.maxCommission === undefined ? DEFAULT_MAX_COMMISSION : this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
     const expires = getExpires();
-    const value = this.convertTokensAmountToRawAmountIfNeeded(params.quantityToSend,
-      params.side === 'ask' ? this.market.baseToken.decimals : this.market.quoteToken.decimals);
+    const value = params.nativeTokenToSend === undefined
+      ? 0n
+      : this.convertTokensAmountToRawAmountIfNeeded(params.nativeTokenToSend,
+        params.side === 'ask' ? this.market.baseToken.decimals : this.market.quoteToken.decimals);
 
     const tx = await this.processContractMethodCall(
       this.marketContract,
@@ -321,7 +346,13 @@ export class HanjiSpotMarketContract {
     }
 
     const targetTokenYValue = this.convertTokensAmountToRawAmountIfNeeded(params.size, this.market.tokenYScalingFactor);
-    const priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    let priceAmount;
+    if (params.type === 'market_execution') {
+      priceAmount = params.side === 'ask' ? DEFAULT_ASK_MARKET_PRICE : DEFAULT_BID_MARKET_PRICE;
+    }
+    else {
+      priceAmount = this.convertTokensAmountToRawAmountIfNeeded(params.price, this.market.priceScalingFactor);
+    }
     let quantityToPermit, amountToPermit: bigint;
     if (params.side === 'ask') {
       amountToPermit = this.convertTokensAmountToRawAmountIfNeeded(
@@ -339,7 +370,7 @@ export class HanjiSpotMarketContract {
       quantityToPermit = amountToPermit * 10n ** BigInt(
         this.market.quoteToken.decimals - this.market.tokenYScalingFactor);
     }
-    const maxCommission = this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
+    const maxCommission = params.maxCommission === undefined ? DEFAULT_MAX_COMMISSION : this.convertTokensAmountToRawAmountIfNeeded(params.maxCommission, this.market.tokenYScalingFactor);
     const expires = getExpires();
     const { v, r, s } = await this.signPermit(params.side === 'ask', quantityToPermit, expires);
 

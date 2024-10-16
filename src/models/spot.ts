@@ -15,10 +15,23 @@ export type Side = 'ask' | 'bid';
 export type Direction = 'buy' | 'sell';
 
 /**
- * Represents the type of an order in the market.
- * 'limit' indicates a limit order, 'limit_post_only' indicates a limit order that can only be executed after it is posted to the orderbook, and 'market' indicates a market order.
+ * Represents the behavior of order placement.
+ * 'limit' indicates a limit order,
+ * 'limit_post_only' indicates a limit order that can only be executed after it is posted to the orderbook,
+ * 'ioc' indicates market order that cancels unexecuted part of order
+ * and 'market_execution' indicates a market order that will be executed with market prices.
  */
-export type OrderType = 'limit' | 'limit_post_only' | 'market';
+export type OrderTypeParam = {
+  Limit: 'limit';
+  LimitPostOnly: 'limit_post_only';
+  Ioc: 'ioc';
+  MarketExecution: 'market_execution';
+};
+
+/**
+ * Represents the types of an order in the market.
+ */
+export type OrderType = 'limit' | 'market';
 
 /**
  * Represents the status of an order in the market.

@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-import { CandleResolution, OrderType, TokenType, Direction, type OrderStatus, type Side, Market, Orderbook } from '../models';
+import { CandleResolution, OrderTypeParam, TokenType, Direction, type OrderStatus, type Side, Market, Orderbook } from '../models';
 
 /**
  * Transaction parameters.
@@ -198,26 +198,13 @@ export interface SetClaimableStatusParams extends TransactionParams {
   status: boolean;
 }
 
-/**
- * Parameters for placing an order on the spot market.
- *
- * @interface PlaceOrderSpotParams
- * @extends TransactionParams
- */
-export interface PlaceOrderSpotParams extends TransactionParams {
+interface PlaceOrderBaseParams extends TransactionParams {
   /**
    * The ID of the market where the order will be placed.
    *
    * @type {string}
    */
   market: string;
-
-  /**
-   * The type of the order (e.g., limit, market).
-   *
-   * @type {OrderType}
-   */
-  type: OrderType;
 
   /**
    * The side of the order (buy or sell).
@@ -235,28 +222,23 @@ export interface PlaceOrderSpotParams extends TransactionParams {
   size: BigNumber | bigint;
 
   /**
-   * The price at which the order will be placed.
-   * No more than 6 significant digits.
-   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`
-   *
-   * @type {BigNumber | bigint}
-   */
-  price: BigNumber | bigint;
-
-  /**
    * The maximum commission for the order.
+   * If not set, transaction won't be canceled due to commission size.
    *
    * @type {BigNumber | bigint}
+   * @optional
    */
-  maxCommission: BigNumber | bigint;
+  maxCommission?: BigNumber | bigint;
 
   /**
    * The quantity of native tokens to send for the order.
    * This is the amount of tokens that will be transferred for the order.
+   * If it is set, a transaction operates with the native token.
    *
    * @type {BigNumber | bigint}
+   * @optional
    */
-  quantityToSend: BigNumber | bigint;
+  nativeTokenToSend?: BigNumber | bigint;
 
   /**
    * Whether to transfer executed tokens automatically.
@@ -265,87 +247,125 @@ export interface PlaceOrderSpotParams extends TransactionParams {
    * @optional
    */
   transferExecutedTokens?: boolean;
+}
+
+/**
+ * Parameters for placing a limit order on the spot market.
+ *
+ * @interface PlaceLimitOrderSpotParams
+ * @extends TransactionParams
+ */
+export type PlaceLimitOrderSpotParams = PlaceOrderBaseParams & {
+  /**
+   * The type of the limit order.
+   * limit - place in the lob or execute and place with the market price
+   * limit_post_only - place or cancel the order
+   *
+   * @type {OrderTypes['Limit'] | OrderTypes['LimitPostOnly'] }
+   */
+  type: OrderTypeParam['Limit'] | OrderTypeParam['LimitPostOnly'];
 
   /**
-   * Whether to use the native token for the transaction.
+   * The price at which the order will be placed.
+   * No more than 6 significant digits.
+   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`
    *
-   * @type {boolean}
-   * @optional
+   * @type {BigNumber | bigint}
    */
-  useNativeToken?: boolean;
-}
+  price: BigNumber | bigint;
+};
+
+/**
+ * Parameters for placing a market order with the price on the spot market.
+ *
+ * @interface PlaceMarketOrderWithPriceSpotParams
+ * @extends TransactionParams
+ */
+export type PlaceMarketOrderWithPriceSpotParams = PlaceOrderBaseParams & {
+  /**
+   * The type of the order.
+   * Executes with the price or better, the remainder is cancelled.
+   *
+   * @type {OrderTypes['Ioc']}
+   */
+  type: OrderTypeParam['Ioc'];
+
+  /**
+   * The worst price at which the order will be executed.
+   * No more than 6 significant digits.
+   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`
+   *
+   * @type {BigNumber | bigint}
+   */
+  price: BigNumber | bigint;
+};
+
+/**
+ * Parameters for placing a market order on the spot market.
+ *
+ * @interface PlaceMarketOrderSpotParams
+ * @extends TransactionParams
+ */
+export type PlaceMarketOrderSpotParams = PlaceOrderBaseParams & {
+  /**
+   * The type of the order.
+   * Executes the full order size.
+   *
+   * @type {OrderTypes['MarketExecution']}
+   */
+  type: OrderTypeParam['MarketExecution'];
+};
+
+/**
+ * Parameters for placing an order on the spot market.
+ *
+ * @interface PlaceOrderSpotParams
+ */
+export type PlaceOrderSpotParams = PlaceLimitOrderSpotParams | PlaceMarketOrderWithPriceSpotParams | PlaceMarketOrderSpotParams;
+
+/**
+ * The quantity of tokens to permit for the order.
+ */
+type PermitParam = {
+  permit: BigNumber | bigint;
+};
+
+/**
+ * Parameters for placing an order with a permit and a price on the spot market.
+ *
+ * @interface PlaceLimitOrderWithPermitSpotParams
+ */
+export type PlaceLimitOrderWithPermitSpotParams = Omit<PlaceLimitOrderSpotParams, 'nativeTokenToSend'> & PermitParam;
+
+/**
+ * Parameters for placing an order with a permit and without a price on the spot market.
+ *
+ * @interface PlaceMarketOrderWithPermitSpotParams
+ */
+export type PlaceMarketOrderWithPermitSpotParams = Omit<PlaceMarketOrderSpotParams, 'nativeTokenToSend'> & PermitParam;
+
+/**
+ * Parameters for placing an order with a permit and a price on the spot market.
+ *
+ * @interface PlaceMarketOrderWithPriceWithPermitSpotParams
+ */
+export type PlaceMarketOrderWithPriceWithPermitSpotParams = Omit<PlaceMarketOrderWithPriceSpotParams, 'nativeTokenToSend'> & PermitParam;
 
 /**
  * Parameters for placing an order with a permit on the spot market.
  *
  * @interface PlaceOrderWithPermitSpotParams
- * @extends TransactionParams
  */
-export interface PlaceOrderWithPermitSpotParams extends TransactionParams {
-  /**
-   * The ID of the market where the order will be placed.
-   *
-   * @type {string}
-   */
-  market: string;
+export type PlaceOrderWithPermitSpotParams = PlaceLimitOrderWithPermitSpotParams | PlaceMarketOrderWithPermitSpotParams | PlaceMarketOrderWithPriceWithPermitSpotParams;
 
-  /**
-   * The type of the order (e.g., limit, market).
-   *
-   * @type {OrderType}
-   */
-  type: OrderType;
-
-  /**
-   * The side of the order (buy or sell).
-   *
-   * @type {Side}
-   */
-  side: Side;
-
-  /**
-   * The size of the order. The amount of tokens to order divided by the scaling factor.
-   * This amount would be multiplied by the scaling factor inside the function
-   *
-   * @type {BigNumber | bigint}
-   */
-  size: BigNumber | bigint;
-
-  /**
-   * The price at which the order will be placed.
-   * No more than 6 significant digits.
-   * Calculated as `real_price * scaling_factor_token_x / scaling_factor_token_y`
-   *
-   * @type {BigNumber | bigint}
-   */
-  price: BigNumber | bigint;
-
-  /**
-   * The maximum commission for the order.
-   *
-   * @type {BigNumber | bigint}
-   */
-  maxCommission: BigNumber | bigint;
-
-  /**
-   * The quantity of tokens to permit for the order.
-   *
-   * @type {BigNumber | bigint}
-   */
-  permit: BigNumber | bigint;
-
-  /**
-   * Whether to transfer executed tokens automatically.
-   *
-   * @type {boolean}
-   * @optional
-   */
-  transferExecutedTokens?: boolean;
-}
-
-export type PlaceMarketOrderWithTargetValueParams = Omit<PlaceOrderSpotParams, 'type'>;
-
-export type PlaceMarketOrderWithTargetValueWithPermitParams = Omit<PlaceOrderWithPermitSpotParams, 'type'>;
+/**
+ * Parameters for placing a market order with the target value.
+ *
+ * @interface PlaceMarketOrderWithTargetValueParams
+ * @interface PlaceMarketOrderWithTargetValueWithPermitParams
+ */
+export type PlaceMarketOrderWithTargetValueParams = PlaceMarketOrderWithPriceSpotParams | PlaceMarketOrderSpotParams;
+export type PlaceMarketOrderWithTargetValueWithPermitParams = PlaceMarketOrderWithPermitSpotParams | PlaceMarketOrderWithPriceWithPermitSpotParams;
 
 /**
  * Parameters for batch placing orders on the Hanji spot market

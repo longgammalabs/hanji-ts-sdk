@@ -55,36 +55,45 @@ Sets the claimable status for the corresponding market contract.
 ## placeOrder
 
 ```typescript
-async placeOrder({ market, side, size, price, type, transferExecutedTokens, maxCommission, quantityToSend, useNativeToken }: PlaceOrderSpotParams): Promise<ContractTransactionResponse>
+async placeOrder({ market, type, side, size, price, transferExecutedTokens, maxCommission, nativeTokenToSend, useNativeToken }: PlaceOrderSpotParams): Promise<ContractTransactionResponse>
 ```
 
 Places a new order in the corresponding market contract.
 It can place limit or market order and use native token if market supports it.
 
 - `market`: The market identifier.
+- `type`: The type of the order (limit, limit_post_only, ioc or market_execution).
 - `side`: The order side (buy or sell).
 - `size`: The size of the order.
 - `price`: The price of the order.
-- `type`: The type of the order (e.g., limit, market).
 - `transferExecutedTokens`: Whether to transfer executed tokens automatically.
 - `maxCommission`:  The upper bound of commission to pay.
-- `quantityToSend`: The amount of native token to send.
+- `nativeTokenToSend`: The amount of native token to send.
 - `useNativeToken`: Use native token for the transaction instead of the wrapped token.
+
+### Type parameter value
+
+There are four types of order execution behavior:
+
+- `limit`: place in the order book or execute and place with the market price,
+- `limit_post_only`: place or cancel the order,
+- `ioc`: execute order with the indicated price or better, the remainder is cancelled,
+- `market_execution`: execute the full order size, price parameter is omitted.
 
 ## placeOrderWithPermit
 
 ```typescript
-async placeOrderWithPermit({ market, side, size, price, permit, type, transferExecutedTokens, maxCommission }: PlaceOrderWithPermitSpotParams): Promise<ContractTransactionResponse>
+async placeOrderWithPermit({ market, type, side, size, price, permit, transferExecutedTokens, maxCommission }: PlaceOrderWithPermitSpotParams): Promise<ContractTransactionResponse>
 ```
 
 Places a new order with a permit in the corresponding market contract if the token supports ERC20Permit interface.
 
 - `market`: The market identifier.
+- `type`: The type of the order (limit, limit_post_only, ioc or market_execution).
 - `side`: The order side (buy or sell).
 - `size`: The size of the order.
 - `price`: The price of the order.
 - `permit`: The quantity of tokens to permit for the order. Ussually the same value as the approve value.
-- `type`: The type of the order (e.g., limit, market).
 - `transferExecutedTokens`: Whether to transfer executed tokens automatically.
 - `maxCommission`: The upper bound of commission to pay.
 
@@ -93,30 +102,32 @@ This method allows placing an order with a permit, which is useful for tokens th
 ## placeMarketOrderWithTargetValue
 
 ```typescript
-async placeMarketOrderWithTargetValue({ market, side, price, size, targetValue, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse>
+async placeMarketOrderWithTargetValue({ market, type, side, price, size, targetValue, maxCommission, nativeTokenToSend }: PlaceMarketOrderWithTargetValueParams): Promise<ContractTransactionResponse>
 ```
 
 Places a market order with a target value of the quote token in the corresponding market contract.
 
 - `market`: The market identifier.
+- `type`: The type of the order (ioc or market_execution).
 - `side`: The order side (buy or sell).
 - `price`: The price of the order.
 - `size`: The quote token value to spend.
 - `targetValue`: The quote token value to spend.
 - `maxCommission`: The upper bound of commission to pay.
-- `useNativeToken`: Use native token for the transaction instead of the wrapped token.
+- `nativeTokenToSend`: The amount of native token to send. Use native token for the transaction instead of the wrapped token.
 
 This method allows placing a market order by specifying the target value of the quote token, which is useful for executing orders based on a specific value rather than base token quantity.
 
 ## placeMarketOrderWithTargetValueWithPermit
 
 ````typescript
-async placeMarketOrderWithTargetValueWithPermit({ market, side, price, size, permit, maxCommission, useNativeToken }: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse>
+async placeMarketOrderWithTargetValueWithPermit({ market, type, side, price, size, permit, maxCommission, transferExecutedTokens }: PlaceMarketOrderWithTargetValueWithPermitParams): Promise<ContractTransactionResponse>
 ````
 
 Places a market order with a target value of the quote token and a permit in the corresponding market contract.
 
 - `market`: The market identifier.
+- `type`: The type of the order (ioc or market_execution).
 - `side`: The order side (buy or sell).
 - `price`: The price of the order.
 - `size`: The quote token value to spend.
@@ -453,8 +464,7 @@ tx = await hanjiClient.spot.placeOrder({
   side: 'ask',
   size: new BigNumber(45.123),
   price: new BigNumber(1.17),
-  maxCommission: new bigNumber(0.1),
-  quantityToSend: 0n
+  maxCommission: new bigNumber(0.1)
 });
 console.log(tx.hash);
 
@@ -510,8 +520,7 @@ tx = await hanjiClient.spot.createOrder({
   side: 'ask',
   size: new BigNumber(45.123),
   price: new BigNumber(1.17)
-  maxCommission: new bigNumber(0.1),
-  quantityToSend: 0n
+  maxCommission: new bigNumber(0.1)
 });
 console.log(tx.hash);
 ```
