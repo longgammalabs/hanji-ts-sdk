@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { MarketOrderDetails, OrderbookLevel } from '../models';
-import _ = require('lodash');
 import { CalculateMarketDetailsSyncParams } from './params';
+import { ceil, floor } from 'lodash';
 
 export const defaultBuyMarketDetails: MarketOrderDetails['buy'] = {
   fee: 0,
@@ -158,8 +158,8 @@ export const calculateBuyMarketDetailsTokenXInput = (
     fee: fee.toNumber(),
     estFee: estFee.toNumber(),
     worstPrice: worstPrice.toNumber(),
-    estPrice: _.ceil(estPrice, priceScalingFactor),
-    estWorstPrice: _.ceil(estWorstPrice, priceScalingFactor),
+    estPrice: ceil(estPrice, priceScalingFactor),
+    estWorstPrice: ceil(estWorstPrice, priceScalingFactor),
     estSlippage,
     autoSlippage,
 
@@ -215,8 +215,8 @@ export const calculateBuyMarketDetailsTokenYInput = (
     fee: fee.toNumber(),
     estFee: fee.toNumber(),
     worstPrice: worstPrice.toNumber(),
-    estPrice: _.ceil(estPrice, priceScalingFactor),
-    estWorstPrice: _.ceil(estWorstPrice, priceScalingFactor),
+    estPrice: ceil(estPrice, priceScalingFactor),
+    estWorstPrice: ceil(estWorstPrice, priceScalingFactor),
     estSlippage,
     autoSlippage,
 
@@ -276,8 +276,8 @@ export const calculateSellMarketDetailsTokenXInput = (
     fee: fee.toNumber(),
     estFee: estFee.toNumber(),
     worstPrice: worstPrice.toNumber(),
-    estPrice: _.floor(estPrice, priceScalingFactor),
-    estWorstPrice: _.floor(estWorstPrice, priceScalingFactor),
+    estPrice: floor(estPrice, priceScalingFactor),
+    estWorstPrice: floor(estWorstPrice, priceScalingFactor),
     estSlippage,
     autoSlippage,
 
@@ -333,8 +333,8 @@ export const calculateSellMarketDetailsTokenYInput = (
     fee: fee.toNumber(),
     estFee: fee.toNumber(),
     worstPrice: worstPrice.toNumber(),
-    estPrice: _.floor(estPrice, priceScalingFactor),
-    estWorstPrice: _.floor(estWorstPrice, priceScalingFactor),
+    estPrice: floor(estPrice, priceScalingFactor),
+    estWorstPrice: floor(estWorstPrice, priceScalingFactor),
     estSlippage,
     autoSlippage,
 

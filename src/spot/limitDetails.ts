@@ -1,7 +1,7 @@
 import BigNumber from 'bignumber.js';
 import { LimitOrderDetails } from '../models';
 import { CalculateLimitDetailsSyncParams } from './params';
-import _ = require('lodash');
+import { max } from 'lodash';
 
 export const defaultBuyLimitDetails: LimitOrderDetails['buy'] = {
   maxFee: 0,
@@ -28,7 +28,7 @@ export const getLimitDetails = ({ market, direction, inputToken, inputs }: Calcu
   }
 
   const maxFeeRate
-    = _.max([
+    = max([
       market.aggressiveFee + market.passiveOrderPayout,
       market.passiveFee,
     ]) || 0;
