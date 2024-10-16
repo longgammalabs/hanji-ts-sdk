@@ -54,6 +54,9 @@ export const mapMarketDtoToMarket = (dto: MarketDto, priceFactor: number, sizeFa
     tradingVolume24h: dto.tradingVolume24h ? tokenUtils.convertTokensRawAmountToAmount(dto.tradingVolume24h, sizeFactor) : null,
     totalSupply: dto.totalSupply ? BigNumber(dto.totalSupply) : null,
     lastTouched: dto.lastTouched,
+    aggressiveFee: dto.aggressiveFee,
+    passiveFee: dto.passiveFee,
+    passiveOrderPayout: dto.passiveOrderPayout,
   };
 };
 
