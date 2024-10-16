@@ -115,9 +115,9 @@ export interface MarketDto {
   lastTouched: number;
   supportsNativeToken: boolean;
   isNativeTokenX: boolean;
-  aggressiveFee: number;
-  passiveFee: number;
-  passiveOrderPayout: number;
+  aggressiveFee: string;
+  passiveFee: string;
+  passiveOrderPayout: string;
 }
 
 export interface CandleDto {

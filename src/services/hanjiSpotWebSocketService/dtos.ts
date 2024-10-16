@@ -119,9 +119,9 @@ export interface MarketUpdateDto {
   quoteToken: TokenUpdateDto;
   supportsNativeToken: boolean;
   isNativeTokenX: boolean;
-  aggressiveFee: number;
-  passiveFee: number;
-  passiveOrderPayout: number;
+  aggressiveFee: string;
+  passiveFee: string;
+  passiveOrderPayout: string;
 }
 
 export interface TokenUpdateDto {
