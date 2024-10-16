@@ -11,6 +11,6 @@ const jestConfig: JestConfigWithTsJest = {
       },
     ],
   },
-  testPathIgnorePatterns: ['/src/helpers.test.ts']
+  testPathIgnorePatterns: ['/src/helpers.test.ts'],
 };
 export default jestConfig;

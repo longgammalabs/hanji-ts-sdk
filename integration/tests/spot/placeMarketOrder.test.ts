@@ -35,7 +35,7 @@ describe('Hanji Spot Client Contract API', () => {
     });
   }, 15_000);
 
-  test('Send market buy and sell orders', async () => {
+  test('Send ioc buy and sell orders', async () => {
     const market = testConfig.testMarkets.xtzUsd.id;
     let tx: ContractTransactionResponse;
 
@@ -44,11 +44,12 @@ describe('Hanji Spot Client Contract API', () => {
     expect(info?.bestBid).not.toBeNull();
     tx = await hanjiClient.spot.placeMarketOrderWithTargetValue({
       market,
+      type: 'ioc',
       side: 'ask',
       price: info!.bestBid as BigNumber,
       maxCommission: BigNumber(1),
       size: BigNumber(0.1),
-      quantityToSend: BigNumber(1),
+      nativeTokenToSend: BigNumber(1),
       transferExecutedTokens: true,
     });
     expect(tx.hash).toMatch(transactionRegex);
@@ -62,11 +63,43 @@ describe('Hanji Spot Client Contract API', () => {
     expect(tx.hash).toMatch(transactionRegex);
     tx = await hanjiClient.spot.placeMarketOrderWithTargetValue({
       market,
+      type: 'ioc',
       side: 'bid',
       price: info!.bestAsk as BigNumber,
       maxCommission: BigNumber(1),
       size: BigNumber(0.1),
-      quantityToSend: 0n,
+      transferExecutedTokens: true,
+    });
+    expect(tx.hash).toMatch(transactionRegex);
+  }, 30_000);
+
+  test('Send market execution buy and sell orders', async () => {
+    const market = testConfig.testMarkets.xtzUsd.id;
+    let tx: ContractTransactionResponse;
+
+    tx = await hanjiClient.spot.placeMarketOrderWithTargetValue({
+      market,
+      type: 'market_execution',
+      side: 'ask',
+      maxCommission: BigNumber(1),
+      size: BigNumber(0.1),
+      nativeTokenToSend: BigNumber(1),
+      transferExecutedTokens: true,
+    });
+    expect(tx.hash).toMatch(transactionRegex);
+
+    tx = await hanjiClient.spot.approveTokens({
+      market,
+      amount: BigNumber(0.1),
+      isBaseToken: false,
+    });
+    expect(tx.hash).toMatch(transactionRegex);
+    tx = await hanjiClient.spot.placeMarketOrderWithTargetValue({
+      market,
+      type: 'market_execution',
+      side: 'bid',
+      maxCommission: BigNumber(1),
+      size: BigNumber(0.1),
       transferExecutedTokens: true,
     });
     expect(tx.hash).toMatch(transactionRegex);

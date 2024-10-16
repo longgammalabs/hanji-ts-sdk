@@ -54,13 +54,12 @@ export const PlaceOrder: React.FC = () => {
       const maxCommission = await fetchMaxCommission(hanjiClient, isMarket, isAsk, size, price);
       const response = await hanjiClient.spot.placeOrder({
         market: MARKET_ADDRESS,
-        type: isMarket ? 'market' : 'limit',
+        type: isMarket ? 'ioc' : 'limit',
         side: isAsk ? 'ask' : 'bid',
         size: BigNumber(size),
         price: BigNumber(price),
         maxCommission,
-        useNativeToken,
-        quantityToSend: isAsk && useNativeToken ? BigNumber(size) : 0n,
+        nativeTokenToSend: isAsk && useNativeToken ? BigNumber(size) : undefined,
       });
       console.log('Order placed', response);
     }
@@ -80,7 +79,7 @@ export const PlaceOrder: React.FC = () => {
       const maxCommission = await fetchMaxCommission(hanjiClient, isMarket, isAsk, size, price);
       const response = await hanjiClient.spot.placeOrderWithPermit({
         market: MARKET_ADDRESS,
-        type: isMarket ? 'market' : 'limit',
+        type: isMarket ? 'ioc' : 'limit',
         side: isAsk ? 'ask' : 'bid',
         size: BigNumber(size),
         price: BigNumber(price),

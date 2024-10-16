@@ -1,4 +1,5 @@
 import BigNumber from 'bignumber.js';
+import { ethers, Signer } from 'ethers';
 import { Orderbook } from './models';
 
 export const testMarket = {
@@ -63,3 +64,10 @@ export const testOrderbook: Orderbook['levels'] = {
     { rawPrice: 6938n, price: new BigNumber(0.6938), rawSize: 10000000n, size: new BigNumber(100) },
   ],
 };
+
+const provider = new ethers.JsonRpcProvider('https://node.ghostnet.etherlink.com');
+export const testAddress = '0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266'; // from hardhat-ethers
+export const testPrivateKey = '0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80';
+const wallet = new ethers.Wallet(testPrivateKey, provider);
+
+export const testSigner: Signer = wallet;

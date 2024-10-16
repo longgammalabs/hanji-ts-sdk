@@ -43,6 +43,7 @@ export type {
   Side,
   Direction,
   OrderStatus,
+  OrderTypeParam,
   OrderType,
   CandleResolution,
 

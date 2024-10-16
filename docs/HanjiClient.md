@@ -51,5 +51,5 @@ const hanjiClient = new HanjiClient(options);
 
 // If you need to use user-oriented methods, set a signer or provider:
 // newSigner = new ethers.Wallet(<yourPrivateKey>, <provider>);
-hanjiClient.setSignerOrProvider(newSigner);
+hanjiClient.setSigner(newSigner);
 ```
