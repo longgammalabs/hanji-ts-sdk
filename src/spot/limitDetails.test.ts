@@ -1,6 +1,6 @@
 import { expect } from '@jest/globals';
 import { defaultBuyLimitDetails, defaultSellLimitDetails, getLimitDetails } from './limitDetails';
-import { testMarket } from '../testHelpers';
+import { testMarket } from '../helpers.test';
 import { CalculateLimitDetailsSyncParams } from './params';
 
 describe('Calculate limit details without inputs', () => {

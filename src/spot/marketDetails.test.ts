@@ -1,5 +1,5 @@
 import { expect } from '@jest/globals';
-import { testMarket, testOrderbook } from '../testHelpers';
+import { testMarket, testOrderbook } from '../helpers.test';
 import { CalculateMarketDetailsSyncParams } from './params';
 import { defaultBuyMarketDetails, defaultSellMarketDetails, getMarketDetails } from './marketDetails';
 
