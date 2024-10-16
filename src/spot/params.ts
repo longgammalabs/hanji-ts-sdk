@@ -1,6 +1,6 @@
 import BigNumber from 'bignumber.js';
 
-import { CandleResolution, OrderType, TokenType, Direction, type OrderStatus, type Side } from '../models';
+import { CandleResolution, OrderType, TokenType, Direction, type OrderStatus, type Side, Market, Orderbook } from '../models';
 
 /**
  * Transaction parameters.
@@ -704,10 +704,35 @@ export interface CalculateLimitDetailsParams {
   };
 };
 
+export interface CalculateLimitDetailsSyncParams {
+  market: Market;
+  direction: Direction;
+  inputToken: TokenType;
+  inputs: {
+    priceInput: string;
+    tokenXInput: string;
+    tokenYInput: string;
+    postOnly: boolean;
+  };
+};
+
 export interface CalculateMarketDetailsParams {
   market: string;
   direction: Direction;
   inputToken: TokenType;
+  inputs: {
+    tokenXInput: string;
+    tokenYInput: string;
+    slippage: number;
+    useAutoSlippage?: boolean;
+  };
+};
+
+export interface CalculateMarketDetailsSyncParams {
+  market: Market;
+  direction: Direction;
+  inputToken: TokenType;
+  orderbook: Orderbook['levels'];
   inputs: {
     tokenXInput: string;
     tokenYInput: string;
