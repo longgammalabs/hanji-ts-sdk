@@ -75,7 +75,7 @@ It can place limit or market order and use native token if market supports it.
 
 There are four types of order execution behavior:
 
-- `limit`: place in the order book or execute and place with the market price,
+- `limit`: place in the order book or execute and place with the specified price,
 - `limit_post_only`: place or cancel the order,
 - `ioc`: execute order with the indicated price or better, the remainder is cancelled,
 - `market_execution`: execute the full order size, price parameter is omitted.
