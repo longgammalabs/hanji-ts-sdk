@@ -132,4 +132,6 @@ export interface TokenUpdateDto {
   decimals: number;
   roundingDecimals: number;
   supportsPermit: boolean;
+  iconUrl: string | null;
+  fromOg: boolean;
 }

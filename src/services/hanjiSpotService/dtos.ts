@@ -90,6 +90,8 @@ export interface TokenDto {
   decimals: number;
   roundingDecimals: number;
   supportsPermit: boolean;
+  iconUrl: string | null;
+  fromOg: boolean;
 }
 
 export interface MarketDto {
