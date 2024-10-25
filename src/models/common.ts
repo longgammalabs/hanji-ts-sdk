@@ -36,6 +36,16 @@ export interface Token {
    * Indicates whether the token is ERC20Permit compatible.
    */
   supportsPermit: boolean;
+
+  /**
+   * Image url for icon
+   */
+  iconUrl: string | null;
+
+  /**
+   * Indicates if token is mem-token from Organic Growth
+   */
+  fromOg: boolean;
 }
 
 export type TokenUpdate = Token;

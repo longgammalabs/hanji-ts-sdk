@@ -14,6 +14,8 @@ export const testMarket = {
     decimals: 18,
     roundingDecimals: 6,
     supportsPermit: false,
+    iconUrl: null,
+    fromOg: false,
   },
   quoteToken: {
     id: 'USDC',
@@ -23,6 +25,8 @@ export const testMarket = {
     decimals: 18,
     roundingDecimals: 6,
     supportsPermit: false,
+    iconUrl: null,
+    fromOg: false,
   },
   orderbookAddress: '0x3f295daf44fb09bcdf61d7727b8a202e3393f9be'.toLowerCase(),
   aggregations: expect.any(Array),
