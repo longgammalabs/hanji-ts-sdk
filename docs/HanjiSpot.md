@@ -440,9 +440,9 @@ import { HanjiClient } from 'hanji-ts-sdk';
 
 // wallet = new ethers.Wallet(<yourPrivateKey>, <provider>);
 
-const client = new HanjiClient({
+const hanjiClient = new HanjiClient({
   apiBaseUrl: 'https://api-dev.hanji.io',
-  webSocketApiBaseUrl: 'wss://api-dev.hanji.io',
+  webSocketApiBaseUrl: 'wss://sockets-dev.hanji.io',
   signerOrProvider: wallet,
 });
 
@@ -485,25 +485,32 @@ import { HanjiClient } from 'hanji-ts-sdk';
 
 // wallet = new ethers.Wallet(<yourPrivateKey>, <provider>);
 
-const client = new HanjiClient({
+const hanjiClient = new HanjiClient({
   apiBaseUrl: 'https://api-dev.hanji.io',
-  webSocketApiBaseUrl: 'wss://api-dev.hanji.io',
-  signerOrProvider: wallet,
+  webSocketApiBaseUrl: 'wss://sockets-dev.hanji.io',
+  signer: wallet,
 });
 
 const market = '<orderbookAddress>';
 let tx: ContractTransactionResponse | undefined;
+const user = wallet.address;
+
+async function waitTx(): Promise<void> {
+  while (!tx) {
+    await new Promise(resolve => setTimeout(resolve, 100));
+  }
+}
 
 // Subscribe to orders
-hanjiClient.spot.events.ordersUpdated.addListener((orders) => {
-  if (!tx)
-    return;
+client.spot.events.userOrdersUpdated.addListener(async (_, __, orders) => {
+  await waitTx();
 
-  const newOrder = orders.find(o => o.txnHash === tx.hash);
-  if (newOrder)
+  const newOrder = orders.find(o => o.txnHash === tx!.hash);
+  if (newOrder) {
     console.log(newOrder);
-})
-hanjiClient.spot.subscribeToOrders({ market });
+  }
+});
+client.spot.subscribeToUserOrders({ market, user });
 
 // Approve tokens for the future order
 tx = await hanjiClient.spot.approveTokens({
@@ -514,7 +521,7 @@ tx = await hanjiClient.spot.approveTokens({
 console.log(tx.hash);
 
 // Create a new order
-tx = await hanjiClient.spot.createOrder({
+tx = await hanjiClient.spot.placeOrder({
   market,
   type: 'limit',
   side: 'ask',

@@ -5,6 +5,7 @@
     "tests",
     "integration",
     "example",
+    "node_example",
     "jest.config.ts",
     "eslint.config.mjs"
   ],

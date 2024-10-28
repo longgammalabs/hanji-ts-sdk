@@ -26,6 +26,27 @@ The Hanji TypeScript SDK is a library that simplifies the interaction with the H
 
 You can find example usage in the `example` folder.
 
+### Run web example
+
+```sh
+npm i
+npm run build && npm run build:types
+cd example
+npm i
+npm run dev
+```
+
+### Run node example
+
+```sh
+npm i
+npm run build && npm run build:types
+cd node_example
+npm i
+echo "ACCOUNT_PRIVATE_KEY=<YOUR_TESTNET_PRIVATE_KEY>" > .env
+npm run timetx
+```
+
 ## Contributing
 
 First, install all necessary dependencies:

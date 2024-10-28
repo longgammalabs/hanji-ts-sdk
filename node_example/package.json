@@ -1,0 +1,23 @@
+{
+  "name": "node_example",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "timetx": "ts-node --require=dotenv-flow/config src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ethers": "^6.13.2",
+    "hanji-ts-sdk": "file:../",
+    "ws": "^8.18.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.8.1",
+    "dotenv-flow": "^4.1.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
