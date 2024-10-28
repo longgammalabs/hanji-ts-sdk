@@ -25,7 +25,7 @@ describe('Hanji Spot Client Contract API', () => {
     contract = new ethers.Contract(testConfig.testMarkets.xtzUsd.quoteToken.contractAddress, erc20Abi, provider);
     balance = await contract.balanceOf!(wallet.address);
     if (balance < 1n * (10n ** BigInt(testConfig.testMarkets.xtzUsd.quoteToken.decimals))) {
-      throw new Error('User does not have 1 unit of base token');
+      throw new Error('User does not have 1 unit of quote token');
     }
     hanjiClient = new HanjiClient({
       apiBaseUrl: testConfig.hanjiApiBaseUrl,
