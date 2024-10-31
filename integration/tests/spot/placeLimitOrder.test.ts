@@ -6,7 +6,7 @@ import { getTestConfig, type TestConfig } from '../../testConfig';
 import { expectOrder, transactionRegex, waitForOrder } from '../../testHelpers';
 import { erc20Abi } from '../../../src/abi';
 
-describe('Hanji Spot Client Contract API', () => {
+describe('Hanji Spot Place Limit Order API', () => {
   let testConfig: TestConfig;
   let provider: Provider;
   let wallet: Wallet;

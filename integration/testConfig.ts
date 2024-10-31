@@ -7,7 +7,7 @@ const testMarkets = {
     name: 'BTCUSDC',
     symbol: 'BTCUSDC',
     baseToken: {
-      id: 'BTC',
+      id: '0x6bDE94725379334b469449f4CF49bCfc85ebFb27'.toLowerCase(),
       name: 'Bitcoin',
       symbol: 'BTC',
       contractAddress: '0x6bDE94725379334b469449f4CF49bCfc85ebFb27'.toLowerCase(),
@@ -18,7 +18,7 @@ const testMarkets = {
       fromOg: false,
     },
     quoteToken: {
-      id: 'USDC',
+      id: '0xa7c9092a5d2c3663b7c5f714dba806d02d62b58a'.toLowerCase(),
       name: 'USD Coin',
       symbol: 'USDC',
       contractAddress: '0xa7c9092A5D2C3663B7C5F714dbA806d02d62B58a'.toLowerCase(),
@@ -60,7 +60,7 @@ const testMarkets = {
     name: 'XTZUSDC',
     symbol: 'XTZUSDC',
     baseToken: {
-      id: 'XTZ',
+      id: 'xtz',
       name: 'XTZ',
       symbol: 'XTZ',
       contractAddress: '0xB1Ea698633d57705e93b0E40c1077d46CD6A51d8'.toLowerCase(),
@@ -71,7 +71,7 @@ const testMarkets = {
       fromOg: false,
     },
     quoteToken: {
-      id: 'USDC',
+      id: '0xa7c9092a5d2c3663b7c5f714dba806d02d62b58a',
       name: 'USD Coin',
       symbol: 'USDC',
       contractAddress: '0xa7c9092A5D2C3663B7C5F714dbA806d02d62B58a'.toLowerCase(),

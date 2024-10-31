@@ -36,6 +36,7 @@ export const expectOrder = (order: Order | undefined | null, values?: Partial<Or
     txnHash: expect.stringMatching(transactionRegex),
     status: expect.any(String),
     isPostOnly: expect.any(Boolean),
+    logIndex: expect.any(Number),
     ...values,
   });
 };
@@ -49,6 +50,24 @@ export const waitForOrder = async (
     const order = orders.find(predicate);
     if (order)
       return order;
+
+    await wait(1000);
+  }
+};
+
+export const waitAtLeastNOrders = async (
+  ordersGetter: () => Promise<readonly Order[]>,
+  predicate: (value: Order, index: number, obj: readonly Order[]) => boolean,
+  expectedOrderCount: number
+): Promise<Order[] | undefined> => {
+  let foundOrders: Order[] = [];
+  for (let i = 0; i < 3; i++) {
+    const orders = await ordersGetter();
+    const ordersFiltered = orders.filter(predicate);
+    foundOrders = foundOrders.concat(ordersFiltered);
+
+    if (foundOrders.length >= expectedOrderCount)
+      return foundOrders;
 
     await wait(1000);
   }

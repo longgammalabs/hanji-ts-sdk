@@ -489,13 +489,6 @@ export interface ChangeOrderSpotParams extends TransactionParams {
   maxCommission: BigNumber | bigint;
 
   /**
-   * The quantity of tokens to send for the order.
-   * This is the amount of tokens that will be transferred for the order.
-   *
-   * @type {BigNumber | bigint}
-   */
-  quantityToSend: BigNumber | bigint;
-  /**
    * Whether to transfer executed tokens automatically.
    *
    * @type {boolean}

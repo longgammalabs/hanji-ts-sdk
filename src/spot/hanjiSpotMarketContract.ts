@@ -400,23 +400,21 @@ export class HanjiSpotMarketContract {
   }
 
   async batchPlaceOrder(params: BatchPlaceOrderSpotParams): Promise<ContractTransactionResponse> {
-    const directions: boolean[] = [];
+    const idsAsDirections: bigint[] = [];
     const sizeAmounts: bigint[] = [];
     const priceAmounts: bigint[] = [];
     const expires = getExpires();
 
     for (const orderParams of params.orderParams) {
-      directions.push(orderParams.side === 'ask');
+      idsAsDirections.push(orderParams.side === 'ask' ? 1n : 0n);
       sizeAmounts.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.size, this.market.tokenXScalingFactor));
       priceAmounts.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.price, this.market.priceScalingFactor));
     }
-
     const maxCommissionPerOrder = this.calculateMaxCommissionPerOrder(sizeAmounts, priceAmounts);
-
     const tx = await this.processContractMethodCall(
       this.marketContract,
-      this.marketContract.batchPlaceOrder!(
-        directions,
+      this.marketContract.batchChangeOrder!(
+        idsAsDirections,
         sizeAmounts,
         priceAmounts,
         maxCommissionPerOrder,
@@ -523,7 +521,6 @@ export class HanjiSpotMarketContract {
       newSizes.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.newSize, this.market.tokenXScalingFactor));
       newPrices.push(this.convertTokensAmountToRawAmountIfNeeded(orderParams.newPrice, this.market.priceScalingFactor));
     }
-
     const maxCommissionPerOrder = this.calculateMaxCommissionPerOrder(newSizes, newPrices);
 
     const tx = await this.processContractMethodCall(
@@ -575,9 +572,15 @@ export class HanjiSpotMarketContract {
     }
     catch (error) {
       if ((error as any).data) {
-        const decodedError = contract.interface.parseError((error as any).data);
-
-        throw new TransactionFailedError((error as any).data, decodedError, { cause: error });
+        try {
+          const decodedError = contract.interface.parseError((error as any).data);
+          throw new TransactionFailedError((error as any).data, decodedError, { cause: error });
+        }
+        catch (parseError) {
+          // If error parsing fails, throw the original error
+          console.error('Failed to parse contract error:', parseError);
+          throw error;
+        }
       }
 
       throw error;

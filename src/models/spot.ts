@@ -408,6 +408,12 @@ export interface Order {
    * @type {boolean}
    */
   isPostOnly: boolean;
+
+  /**
+   * Indicated the order of orders in one batch transaction.
+   * Sparse ascending index.
+   */
+  logIndex: number;
 }
 
 export type OrderUpdate = Order;
