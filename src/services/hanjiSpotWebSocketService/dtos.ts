@@ -32,6 +32,7 @@ export interface OrderUpdateDto {
   txnHash: string;
   status: OrderStatus;
   isPostOnly: boolean;
+  logIndex: number;
 }
 
 export interface OrderHistoryUpdateDto {
