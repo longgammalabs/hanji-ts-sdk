@@ -4,6 +4,15 @@
 
 The `HanjiSpot` class is designed for interacting with the Hanji Spot API. It provides methods for retrieving market information, subscribing to market updates, placing orders, managing user orders and fills, and more.
 
+## Common contract transaction parameters
+
+The following parameters are common across contract transaction methods:
+
+- `gasLimit`: (optional) Transaction gas limit. If not provided, the value is estimated via `eth_estimateGas` call.
+- `maxFeePerGas`: (optional) The maximum fee per unit of gas willing to be paid for the transaction. Calculated as `baseFeePerGas + maxPriorityFeePerGas`. If not provided, obtained via `eth_maxPriorityFeePerGas` call.
+- `maxPriorityFeePerGas`: (optional) The maximum price of the consumed gas to be included as a tip to the validator. If not provided, obtained via `eth_maxPriorityFeePerGas` call.
+- `nonce`: (optional) Transaction nonce (counter). If not provided, obtained via `eth_getTransactionCount` call.
+
 ## approveTokens
 
 ```typescript
@@ -31,7 +40,7 @@ Deposits the specified amount of tokens to the corresponding market contract.
 ## withdrawTokens
 
 ```typescript
-async withdrawTokens({ bmarket, aseTokenAmount, quoteTokenAmount, withdrawAll }: WithdrawSpotParams): Promise<ContractTransactionResponse>
+async withdrawTokens({ market, aseTokenAmount, quoteTokenAmount, withdrawAll }: WithdrawSpotParams): Promise<ContractTransactionResponse>
 ```
 
 Withdraws the specified amount of tokens or all tokens from the corresponding market contract.
@@ -164,6 +173,56 @@ Changes an existing order in the corresponding market contract.
 - `type`: The type of the order (e.g., limit, limit_post_only).
 - `transferExecutedTokens`: Whether to transfer executed tokens automatically.
 - `maxCommission`: The upper bound of commission to pay.
+
+## batchPlaceOrder
+
+```typescript
+async batchPlaceOrder({ market, type, orderParams: Array<{ side, size, price}>, transferExecutedTokens }: ChangeOrderSpotParams): Promise<ContractTransactionResponse>
+```
+
+Places multiple orders in the corresponding market contract.
+
+- `market`: The market identifier.
+- `type`: The type of the orders (limit, limit_post_only).
+- `orderParams`: Orders to place:
+    - `side`: the side of the order (ask or bid).
+    - `size`: the size of the order.
+    - `price`: the price of the order.
+- `transferExecutedTokens`: Whether to transfer executed tokens automatically.
+
+This method does not support sending native token. Approve the wrapped token that is specified in the market object.
+
+## batchClaim
+
+```typescript
+async batchClaim({ market, claimParams: Array<{ orderId, address }>, onlyClaim }: ChangeOrderSpotParams): Promise<ContractTransactionResponse>
+```
+
+Claims or cancels specified orders.
+
+- `market`: The market identifier.
+- `orderParams`: Orders to place:
+    - `orderId`: the id of the order to claim or cancel.
+    - `address`: the owner of the order.
+- `onlyClaim`: Whether to claim or cancel orders (`true` to claim).
+
+## batchChangeOrder
+
+```typescript
+async batchChangeOrder({ market, type, orderParams: Array<{ newSize, newPrice}>, transferExecutedTokens }: ChangeOrderSpotParams): Promise<ContractTransactionResponse>
+```
+
+Changes multiple orders in the corresponding market contract.
+
+- `market`: The market identifier.
+- `type`: The type of the orders (limit, limit_post_only).
+- `orderParams`: Orders to change:
+    - `orderId`: the id of the order.
+    - `newSize`: the new size of the order.
+    - `newPrice`: the new price of the order.
+- `transferExecutedTokens`: Whether to transfer executed tokens automatically.
+
+This method cancels existing orders and places new ones. The new orders will each have new order ids.
 
 ## getMarket
 

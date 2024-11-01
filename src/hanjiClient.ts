@@ -48,7 +48,7 @@ export interface HanjiClientOptions {
   autoWaitTransaction?: boolean;
 
   /**
-   * Whether to use a fast algorithm for waiting for transaction to be confirmed.
+   * Whether to use a fast algorithm for waiting for transactions to be confirmed.
    *
    * @type {boolean}
    * @optional
