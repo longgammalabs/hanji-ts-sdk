@@ -18,6 +18,10 @@ Creates a new instance of the `HanjiClient`.
 | `webSocketApiBaseUrl`       | `string`                      | The base URL for the Hanji WebSocket API.                                   |
 | `signer`                    | `Signer \| null`              | The ethers signer used for signing transactions.                            |
 | `webSocketConnectImmediately?` | `boolean`                 | Whether to connect to the WebSocket immediately after creating the `HanjiClient` (default is true). |
+| `autoWaitTransaction?` | `boolean` | Whether to automatically wait for transactions to be confirmed. |
+| `fastWaitTransaction?` | `boolean` | Whether to use a fast algorithm for waiting for transactions to be confirmed. |
+| `fastWaitTransactionInterval?` | `number` | Interval between requests in milliseconds when using a fast algorithm for waiting for transaction confirmations. |
+| `fastWaitTransactionTimeout?` | `number` | Timeout in milliseconds when using a fast algorithm for waiting for transaction confirmations. |
 
 ## Properties
 
