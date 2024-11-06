@@ -21,7 +21,7 @@ if (!privateKey) {
   console.log('Set ACCOUNT_PRIVATE_KEY environment variable');
   process.exit(1);
 }
-const network = new Network('testnet', BigInt('128123'));
+const network = new Network('testnet', 128123n);
 const provider = new JsonRpcProvider(
   'https://node.ghostnet.etherlink.com',
   network,
@@ -32,7 +32,6 @@ hanjiClient.setSigner(newSigner);
 
 const market = '0x3f295daf44fb09bcdf61d7727b8a202e3393f9be'.toLowerCase();
 const user = newSigner.address;
-let nonce: bigint;
 let tx: ContractTransactionResponse | undefined;
 let placeOrderDate: number, responseDate: number, eventDate: number;
 
@@ -55,7 +54,9 @@ hanjiClient.spot.events.userOrdersUpdated.addListener(async (_, __, orders) => {
 hanjiClient.spot.subscribeToUserOrders({ market, user });
 
 async function transaction() {
-  // const info = await hanjiClient.spot.getMarket({ market });
+  // cache markets once, fetch nonce, make a transaction
+  await hanjiClient.spot.getCachedMarkets();
+  const nonce = BigInt(await provider.getTransactionCount(user));
   placeOrderDate = Date.now();
   tx = (await hanjiClient.spot.placeOrder({
     market: market,
@@ -75,7 +76,4 @@ async function transaction() {
   console.log(`Place order tx response took ${responseDate - placeOrderDate} milliseconds`);
 }
 
-provider.getTransactionCount(user).then(value => {
-  nonce = BigInt(value);
-  transaction().catch(error => console.error('Error in transaction():', error));
-}).catch(error => console.error('Error in provider.getTransactionCount():', error));
+transaction().catch(error => console.error('Error in transaction():', error));
