@@ -3,7 +3,7 @@ import { ethers, Signer } from 'ethers';
 import { Orderbook } from './models';
 
 export const testMarket = {
-  id: '0x3f295daf44fb09bcdf61d7727b8a202e3393f9be'.toLowerCase(),
+  id: '0xA86F0AD9b353BF0De47DC6F367fdEc669D92F6fB'.toLowerCase(),
   name: 'XTZUSDC',
   symbol: 'XTZUSDC',
   baseToken: {
@@ -28,7 +28,7 @@ export const testMarket = {
     iconUrl: null,
     fromOg: false,
   },
-  orderbookAddress: '0x3f295daf44fb09bcdf61d7727b8a202e3393f9be'.toLowerCase(),
+  orderbookAddress: '0xA86F0AD9b353BF0De47DC6F367fdEc669D92F6fB'.toLowerCase(),
   aggregations: expect.any(Array),
   rawLastPrice: expect.any(BigInt),
   lastPrice: expect.any(BigNumber),

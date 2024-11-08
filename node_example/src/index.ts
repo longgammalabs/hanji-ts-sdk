@@ -30,7 +30,7 @@ const provider = new JsonRpcProvider(
 const newSigner = new Wallet(privateKey, provider);
 hanjiClient.setSigner(newSigner);
 
-const market = '0x3f295daf44fb09bcdf61d7727b8a202e3393f9be'.toLowerCase();
+const market = '0xA86F0AD9b353BF0De47DC6F367fdEc669D92F6fB'.toLowerCase();
 const user = newSigner.address;
 let tx: ContractTransactionResponse | undefined;
 let placeOrderDate: number, responseDate: number, eventDate: number;
