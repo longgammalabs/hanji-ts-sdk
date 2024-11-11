@@ -7,6 +7,7 @@ export const defaultHanjiClient = new HanjiClient({
   webSocketApiBaseUrl: HANJI_WEBSOCKET_BASE_URL,
   signer: null,
   webSocketConnectImmediately: false,
+  autoWaitTransaction: false,
 });
 export const HanjiClientContext = createContext<HanjiClient>(defaultHanjiClient);
 export const ClientAddressContext = createContext<string | null>(null);

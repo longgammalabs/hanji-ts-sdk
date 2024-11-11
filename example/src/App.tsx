@@ -15,6 +15,7 @@ import UserBalances from './UserBalances';
 import UserOrderHistoryUpdates from './UserOrderHistoryUpdates';
 import ClaimOrder from './ClaimOrder';
 import TradeUpdates from './TradeUpdates';
+import Timetx from './Timetx';
 
 function App() {
   const [address, setAddress] = useState<string>('');
@@ -31,6 +32,8 @@ function App() {
               address !== ''
                 ? (
                   <>
+                    <Timetx />
+                    <Divider />
                     <ApproveToken />
                     <Divider />
                     <PlaceOrder />
